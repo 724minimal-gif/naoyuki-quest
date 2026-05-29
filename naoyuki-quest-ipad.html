@@ -244,6 +244,11 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     </div>
   </div>
 
+  <!-- STAGE IMAGE -->
+  <div id="stageImageWrap" style="display:none;margin-bottom:10px;">
+    <img id="stageImg" src="" alt="ステージ画像" style="width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:12px;border:2px solid var(--border);">
+  </div>
+
   <!-- STATS -->
   <div class="stats-row">
     <div class="stat-card fire"><div class="stat-icon">🔥</div><div class="stat-num fire" id="statStreak">0</div><div class="stat-desc">日連続</div></div>
@@ -362,6 +367,12 @@ const REWARDS_DEFAULT = [
   { id:'r4', label:'外食で何食べるか決めていい', icon:'🍣', cost:1000 },
 ];
 
+const STAGE_IMAGES = {
+  1: 'images/chapter1.png',
+  2: 'images/chapter2.png',
+  3: 'images/chapter3.png',
+};
+
 const STAGES = [
   { stage:1, name:'旅の始まり',         min:0,    max:299,      color:'#94a3b8' },
   { stage:2, name:'森の守護者',         min:300,  max:599,      color:'#22c55e' },
@@ -390,9 +401,9 @@ const ALLY_MONSTERS = [
 
 const BOSS_MONSTERS = [
   { id:'shadowwolf',    name:'シャドウ・ウルフ',    attr:'👿 第2章',  img:'images/shadowwolf.PNG',    unlockPt:450,  h:'2m', w:'150kg', hp:32, atk:35, def:25, spd:28, desc:'黒い炎に覆われた狼のモンスター。赤く光る目は怒りと絶望の表現。ヤミノ王に操られていた。' },
-  { id:'captaindowaru', name:'キャプテン・ドワル',  attr:'💀 第3章',  img:'images/captaindowaru.PNG', unlockPt:800,  h:'1.8m', w:'90kg', hp:38, atk:36, def:28, spd:22, desc:'大柄な海賊。目が闇の靄に覆われていた。本来は腕利きの航海士で、操られていただけ。' },
-  { id:'yaminoou1',     name:'ヤミノ王 第1形態',    attr:'👹 第7章',  img:'images/Yaminoou1.jpeg',    unlockPt:3530, h:'1.7m', w:'70kg', hp:50, atk:40, def:30, spd:26, desc:'黒い外套に長い黒髪。古びた悲しげな表情で黒いオーラを放つ。本来は勇者ライだった。' },
-  { id:'yaminoou2',     name:'ヤミノ王 第2形態',    attr:'👹 最終形態', img:'images/Yaminoou2.png',   unlockPt:3620, h:'3.5m', w:'500kg', hp:60, atk:48, def:35, spd:32, desc:'巨大な闇の翼と光のひびが入った黒い鎧。最終ボス形態。継続を失った者の成れの果て。' },
+  { id:'captaindowaru', name:'キャプテン・ドワル',  attr:'💀 第3章',  img:'images/captain.png',    unlockPt:800,  h:'1.8m', w:'90kg', hp:38, atk:36, def:28, spd:22, desc:'大柄な海賊。目が闇の靄に覆われていた。本来は腕利きの航海士で、操られていただけ。' },
+  { id:'yaminoou1',     name:'ヤミノ王 第1形態',    attr:'👹 第7章',  img:'images/yaminoou1.png',  unlockPt:3530, h:'1.7m', w:'70kg', hp:50, atk:40, def:30, spd:26, desc:'黒い外套に長い黒髪。古びた悲しげな表情で黒いオーラを放つ。本来は勇者ライだった。' },
+  { id:'yaminoou2',     name:'ヤミノ王 第2形態',    attr:'👹 最終形態', img:'images/yaminoou2.png', unlockPt:3620, h:'3.5m', w:'500kg', hp:60, atk:48, def:35, spd:32, desc:'巨大な闇の翼と光のひびが入った黒い鎧。最終ボス形態。継続を失った者の成れの果て。' },
 ];
 
 const STORY_DATA = [
@@ -631,6 +642,16 @@ function render(){
   document.getElementById('statRewards').textContent=state.rewards.length;
 
   document.getElementById('allDoneBanner').style.display=tasks.every(t=>done.includes(t.id))?'block':'none';
+
+  // STAGE IMAGE
+  const stageImgWrap=document.getElementById('stageImageWrap');
+  const stageImgEl=document.getElementById('stageImg');
+  if(STAGE_IMAGES[stage.stage]){
+    stageImgEl.src=STAGE_IMAGES[stage.stage];
+    stageImgWrap.style.display='block';
+  } else {
+    stageImgWrap.style.display='none';
+  }
 
   // TODAY
   const todayPanel=document.getElementById('panelToday');
