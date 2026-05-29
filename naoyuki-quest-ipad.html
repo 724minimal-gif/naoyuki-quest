@@ -283,6 +283,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   <div id="panelLog" style="display:none">
     <div id="parentSection" style="display:none">
       <div class="parent-badge">👑 親モード：設定・レポート・承認ができます</div>
+      <div class="section-title">🎮 ゲームタイトル</div>
+      <div class="settings-card" id="titleSettings"></div>
+      <div class="section-title">⚙️ タスク設定</div>
+      <div id="taskSettings"></div>
+      <div class="section-title">⚙️ ご褒美設定</div>
+      <div id="rewardSettings"></div>
       <div class="section-title">↩ 今日の取り消し</div>
       <div id="todayUndoList"></div>
       <div class="section-title">📊 週間レポート</div>
@@ -651,7 +657,7 @@ function render(){
   });
 
   document.getElementById('parentSection').style.display=parentMode?'block':'none';
-  if(parentMode){ renderTodayUndo(); renderWeeklyReport(); renderPtSettings(); renderPending(); renderRewardLog(); }
+  if(parentMode){ renderTitleSettings(); renderTaskSettings(); renderRewardSettings(); renderTodayUndo(); renderWeeklyReport(); renderPtSettings(); renderPending(); renderRewardLog(); }
 
   // History
   const histList=document.getElementById('historyList');
@@ -799,6 +805,90 @@ function showMonDetail(id, type){
   `;
   modal.appendChild(box);
   document.body.appendChild(modal);
+}
+
+function renderTitleSettings(){
+  const panel=document.getElementById('titleSettings');
+  panel.innerHTML=`
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">ゲーム名</div>
+      <input type="text" id="gameTitle" style="background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--gold);font-family:'Bangers','M PLUS Rounded 1c';font-size:16px;font-weight:900;padding:8px 10px;outline:none;width:100%;box-sizing:border-box" value="${state.gameTitle||'直幸QUEST'}">
+      <div style="font-size:10px;color:var(--muted);margin-top:6px">※ この名前はホーム画面のタイトルに反映されます</div>
+    </div>
+    <button onclick="saveGameTitle()" style="width:100%;background:var(--purple);border:none;color:#0a0a0f;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;margin-top:8px">保存</button>
+  `;
+}
+
+function saveGameTitle(){
+  const input=document.getElementById('gameTitle');
+  if(input) state.gameTitle=input.value.trim()||'直幸QUEST';
+  save(state);
+  document.querySelector('.logo').innerHTML=`${state.gameTitle.split('QUEST')[0]}<span>QUEST</span>`;
+  showBoom('✓ 保存完了');
+}
+
+function renderTaskSettings(){
+  const tasks=getTasks();
+  let html='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">☝️ 上下ボタンで順番を変更できます</div>';
+  tasks.forEach((t,i)=>{
+    const isFirst=i===0, isLast=i===tasks.length-1;
+    html+=`<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="flex:1;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">${t.icon}</span>
+        <div>
+          <div style="font-weight:900;color:var(--text)">${t.label}</div>
+          <div style="font-size:10px;color:var(--muted)">${t.pts}pt / ${t.time}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button onclick="moveTask(${i},-1)" style="background:${isFirst?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isFirst?'default':'pointer'};font-size:12px" ${isFirst?'disabled':''}>▲</button>
+        <button onclick="moveTask(${i},1)" style="background:${isLast?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isLast?'default':'pointer'};font-size:12px" ${isLast?'disabled':''}>▼</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('taskSettings').innerHTML=html;
+}
+
+function renderRewardSettings(){
+  const rewards=getRewards();
+  let html='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">☝️ 上下ボタンで順番を変更できます</div>';
+  rewards.forEach((r,i)=>{
+    const isFirst=i===0, isLast=i===rewards.length-1;
+    html+=`<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="flex:1;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">${r.icon}</span>
+        <div>
+          <div style="font-weight:900;color:var(--text)">${r.label}</div>
+          <div style="font-size:10px;color:var(--muted)">${r.cost}pt で交換</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button onclick="moveReward(${i},-1)" style="background:${isFirst?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isFirst?'default':'pointer'};font-size:12px" ${isFirst?'disabled':''}>▲</button>
+        <button onclick="moveReward(${i},1)" style="background:${isLast?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isLast?'default':'pointer'};font-size:12px" ${isLast?'disabled':''}>▼</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('rewardSettings').innerHTML=html;
+}
+
+function moveTask(idx,dir){
+  const tasks=state.tasks;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=tasks.length) return;
+  [tasks[idx],tasks[newIdx]]=[tasks[newIdx],tasks[idx]];
+  save(state);
+  render();
+  renderTaskSettings();
+}
+
+function moveReward(idx,dir){
+  const rewards=state.rewardList;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=rewards.length) return;
+  [rewards[idx],rewards[newIdx]]=[rewards[newIdx],rewards[idx]];
+  save(state);
+  render();
+  renderRewardSettings();
 }
 
 function renderWeeklyReport(){

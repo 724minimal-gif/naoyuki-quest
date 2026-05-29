@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>直幸QUEST</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --fire:#ff4d00; --gold:#ffd700; --elec:#ffe600;
+  --dark:#0a0a0f; --panel:#12121e; --panel2:#1a1a2e; --border:#2a2a4a;
+  --text:#f0f0ff; --muted:#6666aa; --green:#00e676; --blue:#00b4ff; --purple:#cc44ff;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--dark);color:var(--text);font-family:'M PLUS Rounded 1c',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 40% at 50% 0%,rgba(255,77,0,.12) 0%,transparent 70%),
+  radial-gradient(ellipse 60% 30% at 20% 100%,rgba(0,180,255,.08) 0%,transparent 60%),
+  repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,.012) 60px,rgba(255,255,255,.012) 61px),
+  repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,.012) 60px,rgba(255,255,255,.012) 61px)}
+.wrap{max-width:480px;margin:0 auto;padding:0 12px 100px;position:relative;z-index:1}
+
+/* HEADER */
+.header{padding:16px 0 12px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:30px;letter-spacing:2px;line-height:1;color:var(--gold);text-shadow:3px 3px 0 #7a3c00,0 0 30px rgba(255,215,0,.5)}
+.logo span{color:var(--fire);text-shadow:3px 3px 0 #5a1000,0 0 30px rgba(255,77,0,.6)}
+.parent-btn{background:var(--panel2);border:2px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;color:var(--muted);font-size:12px;font-family:'M PLUS Rounded 1c',sans-serif;font-weight:700;transition:all .2s}
+.parent-btn.active{border-color:var(--purple);color:var(--purple)}
+
+/* FIGHTER CARD */
+.fighter-card{background:linear-gradient(135deg,#1a1a2e,#12121e);border:2px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden}
+.fighter-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--fire),var(--gold),var(--elec))}
+.fighter-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.rank-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.rank-name{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:22px;letter-spacing:1px;text-shadow:2px 2px 0 rgba(0,0,0,.5)}
+.pts-row{display:flex;gap:16px}
+.pts-box{text-align:right}
+.pts-label{font-size:9px;color:var(--muted);letter-spacing:1px}
+.pts-val{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:26px;letter-spacing:1px;line-height:1}
+.pts-val.gold{color:var(--gold);text-shadow:0 0 15px rgba(255,215,0,.4)}
+.pts-val.purple{color:var(--purple);text-shadow:0 0 15px rgba(204,68,255,.4)}
+.xp-labels{display:flex;justify-content:space-between;margin-bottom:4px}
+.xp-label{font-size:10px;color:var(--muted)}
+.xp-next{font-size:10px;color:var(--gold)}
+.hp-bar-bg{background:#1a1a1a;border-radius:4px;overflow:hidden;height:14px;border:1px solid rgba(255,255,255,.1)}
+.hp-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--fire) 0%,var(--gold) 60%,var(--elec) 100%);transition:width .8s cubic-bezier(.34,1.56,.64,1);position:relative}
+.hp-bar-fill::after{content:'';position:absolute;inset:2px 0;background:linear-gradient(180deg,rgba(255,255,255,.3) 0%,transparent 100%);border-radius:2px}
+.hp-pct{font-size:10px;color:var(--gold);text-align:right;margin-top:2px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.stat-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.stat-card.fire::after{background:var(--fire);box-shadow:0 0 8px var(--fire)}
+.stat-card.green::after{background:var(--green);box-shadow:0 0 8px var(--green)}
+.stat-card.purple::after{background:var(--purple);box-shadow:0 0 8px var(--purple)}
+.stat-icon{font-size:22px;margin-bottom:2px}
+.stat-num{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:24px;line-height:1}
+.stat-num.fire{color:var(--fire)}
+.stat-num.green{color:var(--green)}
+.stat-num.purple{color:var(--purple)}
+.stat-desc{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* ALL DONE */
+.all-done{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,77,0,.1));border:2px solid var(--gold);border-radius:12px;padding:12px;text-align:center;margin-bottom:10px;animation:flamePulse 1.5s infinite}
+@keyframes flamePulse{0%,100%{box-shadow:0 0 20px rgba(255,215,0,.2)}50%{box-shadow:0 0 40px rgba(255,215,0,.5),0 0 80px rgba(255,77,0,.2)}}
+.all-done-text{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:20px;color:var(--gold);letter-spacing:1px;text-shadow:2px 2px 0 #7a3c00}
+
+/* TABS — 5タブ */
+.tabs{display:flex;gap:3px;margin-bottom:10px;background:var(--panel);border-radius:12px;padding:4px;border:2px solid var(--border)}
+.tab{flex:1;padding:9px 2px;border:none;border-radius:8px;cursor:pointer;font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:11px;letter-spacing:.5px;transition:all .2s;background:transparent;color:var(--muted);white-space:nowrap}
+.tab.active{background:linear-gradient(135deg,rgba(255,77,0,.25),rgba(255,215,0,.1));color:var(--gold);border:1px solid rgba(255,215,0,.3);text-shadow:0 0 10px rgba(255,215,0,.4)}
+
+/* TASKS */
+.task-list{display:flex;flex-direction:column;gap:8px}
+.task-btn{width:100%;padding:14px 16px;background:var(--panel2);border:2px solid var(--border);border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;transition:all .18s;text-align:left}
+.task-btn:not(.done):active{transform:scale(.97)}
+.task-btn:not(.done):hover{border-color:var(--fire);box-shadow:0 0 20px rgba(255,77,0,.2),inset 0 0 20px rgba(255,77,0,.05);transform:translateX(4px)}
+.task-btn.done{background:rgba(0,230,118,.06);border-color:rgba(0,230,118,.3);cursor:default}
+.task-btn.done::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green);box-shadow:0 0 10px var(--green);border-radius:0 2px 2px 0}
+.task-icon{font-size:32px;line-height:1;flex-shrink:0}
+.task-info{flex:1}
+.task-name{font-size:17px;font-weight:900}
+.task-name.done{color:var(--green)}
+.task-time{font-size:11px;color:var(--muted);margin-top:1px}
+.task-pts{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:20px;color:var(--gold);text-shadow:0 0 10px rgba(255,215,0,.5);white-space:nowrap}
+.task-check{font-size:24px;color:var(--green)}
+
+/* REWARDS */
+.reward-balance{font-size:13px;color:var(--muted);text-align:center;margin-bottom:10px}
+.reward-balance span{color:var(--purple);font-weight:900;font-size:18px}
+.reward-list{display:flex;flex-direction:column;gap:8px}
+.reward-card{background:var(--panel2);border:2px solid rgba(204,68,255,.2);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:all .18s}
+.reward-card.clickable{cursor:pointer}
+.reward-card.clickable:hover{border-color:var(--purple);box-shadow:0 0 20px rgba(204,68,255,.25);transform:translateY(-2px)}
+.reward-card.clickable:active{transform:scale(.97)}
+.reward-card.cant{opacity:.35;cursor:not-allowed}
+.reward-icon{font-size:32px}
+.reward-info{flex:1}
+.reward-name{font-size:16px;font-weight:900}
+.reward-cost{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:16px;color:var(--purple);margin-top:2px}
+.reward-get{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:14px;letter-spacing:1px;color:var(--purple);border:2px solid var(--purple);border-radius:8px;padding:4px 10px;white-space:nowrap}
+.reward-pending{font-size:11px;color:var(--gold);background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);border-radius:6px;padding:3px 8px;white-space:nowrap}
+
+/* HISTORY */
+.history-list{display:flex;flex-direction:column;gap:8px}
+.history-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:12px 14px}
+.history-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.history-date{font-size:12px;color:var(--muted)}
+.history-pts{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:16px;color:var(--gold)}
+.history-icons{display:flex;gap:8px}
+.history-ico{font-size:22px}
+.history-ico.off{opacity:.2;filter:grayscale(1)}
+.parent-badge{background:rgba(204,68,255,.1);border:2px solid rgba(204,68,255,.3);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:13px;color:#cc88ff}
+.section-title{font-size:11px;color:var(--muted);letter-spacing:2px;margin:14px 0 6px;text-transform:uppercase}
+.reward-log-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(204,68,255,.06);border-radius:8px;margin-bottom:4px;font-size:13px}
+.reward-log-date{font-size:10px;color:var(--muted)}
+.confirm-btn{font-size:11px;font-weight:700;color:#0a0a0f;background:var(--green);border:none;border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap}
+.confirmed-badge{font-size:11px;color:var(--green);opacity:.6}
+
+/* WEEKLY REPORT */
+.report-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px}
+.report-title{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:18px;color:var(--gold);margin-bottom:10px;letter-spacing:1px}
+.report-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}
+.report-row:last-child{border-bottom:none}
+.report-val{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:16px;color:var(--gold)}
+.week-bar-wrap{margin-top:10px}
+.week-bar-label{font-size:10px;color:var(--muted);margin-bottom:4px}
+.week-bars{display:flex;gap:4px;align-items:flex-end;height:60px}
+.week-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.week-bar-inner{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--gold),var(--fire));min-height:2px;transition:height .6s cubic-bezier(.34,1.56,.64,1)}
+.week-bar-day{font-size:9px;color:var(--muted)}
+.week-bar-pt{font-size:8px;color:var(--gold)}
+.task-complete-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.task-complete-row:last-child{border-bottom:none}
+.mini-bar-bg{width:80px;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+.mini-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--fire),var(--gold))}
+
+/* PARENT SETTINGS */
+.settings-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:14px}
+.pts-input{width:70px;background:#0a0a1a;border:2px solid var(--border);border-radius:8px;color:var(--gold);font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:18px;text-align:center;padding:4px 8px;outline:none}
+.pts-input:focus{border-color:var(--gold)}
+.save-pts-btn{font-size:12px;font-weight:700;color:#0a0a0f;background:var(--gold);border:none;border-radius:8px;padding:6px 14px;cursor:pointer}
+.save-pts-btn:active{transform:scale(.96)}
+
+/* PASSCODE OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:900;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.passcode-box{background:linear-gradient(135deg,#1a1a2e,#12121e);border:2px solid var(--purple);border-radius:20px;padding:28px 24px;width:300px;text-align:center;box-shadow:0 0 60px rgba(204,68,255,.3)}
+.passcode-title{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:24px;color:var(--purple);letter-spacing:1px;margin-bottom:6px}
+.passcode-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.passcode-dots{display:flex;justify-content:center;gap:10px;margin-bottom:16px}
+.passcode-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid var(--border);transition:all .2s}
+.passcode-dot.filled{background:var(--purple);border-color:var(--purple);box-shadow:0 0 8px var(--purple)}
+.passcode-dot.error{background:var(--fire);border-color:var(--fire);box-shadow:0 0 8px var(--fire)}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.numpad-btn{background:rgba(255,255,255,.05);border:2px solid var(--border);border-radius:12px;color:var(--text);font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:22px;padding:14px;cursor:pointer;transition:all .15s}
+.numpad-btn:active{background:rgba(204,68,255,.2);border-color:var(--purple);transform:scale(.94)}
+.numpad-del{font-size:16px;color:var(--muted)}
+.passcode-cancel{margin-top:12px;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif;font-weight:700}
+
+/* BOOM */
+#boom{position:fixed;top:35%;left:50%;transform:translateX(-50%);font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:40px;letter-spacing:2px;color:var(--gold);text-shadow:3px 3px 0 var(--fire),0 0 30px var(--gold);pointer-events:none;z-index:999;animation:boomUp 1.2s ease-out forwards}
+@keyframes boomUp{0%{opacity:0;transform:translateX(-50%) scale(.4) rotate(-10deg)}20%{opacity:1;transform:translateX(-50%) scale(1.4) rotate(5deg)}60%{opacity:1;transform:translateX(-50%) scale(1.1) rotate(-2deg) translateY(-30px)}100%{opacity:0;transform:translateX(-50%) scale(.9) translateY(-90px)}}
+
+/* REWARD POPUP */
+#reward-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#1a0a30,#0a0a1e);border:3px solid var(--purple);border-radius:20px;padding:28px 36px;z-index:999;text-align:center;box-shadow:0 0 60px rgba(204,68,255,.5);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{0%{transform:translate(-50%,-50%) scale(.3) rotate(-5deg);opacity:0}100%{transform:translate(-50%,-50%) scale(1) rotate(0deg);opacity:1}}
+.popup-ico{font-size:48px}
+.popup-title{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:26px;color:var(--purple);letter-spacing:1px;margin:8px 0 4px;text-shadow:0 0 20px rgba(204,68,255,.6)}
+.popup-sub{font-size:13px;color:var(--muted)}
+
+.empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px;line-height:2}
+
+/* STORY */
+.story-chapter{margin-bottom:20px}
+.chapter-header{background:linear-gradient(135deg,rgba(255,77,0,.12),rgba(255,215,0,.06));border:2px solid rgba(255,215,0,.2);border-radius:12px;padding:12px 16px;margin-bottom:8px}
+.chapter-title{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:15px;color:var(--gold);letter-spacing:1px}
+.chapter-range{font-size:10px;color:var(--muted);margin-top:2px}
+.scene-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px}
+.scene-num{font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px}
+.scene-monster{text-align:center;margin:10px 0}
+.scene-monster img{width:120px;height:120px;object-fit:contain;border-radius:10px;background:rgba(255,255,255,.04)}
+.scene-monster-name{font-size:11px;color:var(--gold);margin-top:6px;font-weight:900}
+.scene-text{font-size:13px;line-height:1.9;color:#c8c8e8}
+.scene-locked{background:rgba(255,255,255,.02);border:2px dashed rgba(255,255,255,.08);border-radius:12px;padding:14px;margin-bottom:8px;text-align:center}
+.scene-locked-text{font-size:13px;color:var(--muted)}
+.scene-locked-pt{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:14px;color:rgba(255,215,0,.4);margin-top:4px}
+
+/* MONSTER BOOK */
+.monbook-section{margin-bottom:20px}
+.monbook-section-label{font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase}
+.monbook-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.monbook-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center}
+.monbook-card.unlocked{border-color:rgba(255,215,0,.2)}
+.monbook-card.boss-unlocked{border-color:rgba(255,77,0,.3)}
+.monbook-card.locked-card{opacity:.4}
+.monbook-img{width:72px;height:72px;object-fit:contain;border-radius:8px;background:rgba(255,255,255,.03);margin-bottom:6px}
+.monbook-placeholder{width:72px;height:72px;border-radius:8px;background:rgba(255,255,255,.04);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:28px;filter:grayscale(1) brightness(.4)}
+.monbook-name{font-size:11px;font-weight:900;color:var(--gold);margin-bottom:2px}
+.monbook-attr{font-size:9px;color:var(--muted)}
+.monbook-locked-name{font-size:11px;font-weight:900;color:var(--muted)}
+.monbook-unlock-pt{font-size:9px;color:rgba(255,215,0,.4);margin-top:2px}
+.monbook-count{font-size:12px;color:var(--muted);margin-bottom:10px}
+.monbook-count span{color:var(--gold);font-weight:900}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">直幸<span>QUEST</span></div>
+    <button class="parent-btn" id="parentBtn" onclick="requestParent()">👑 親モード</button>
+  </div>
+
+  <!-- FIGHTER CARD -->
+  <div class="fighter-card">
+    <div class="fighter-top">
+      <div>
+        <div class="rank-label">STAGE</div>
+        <div class="rank-name" id="rankName">旅の始まり</div>
+      </div>
+      <div class="pts-row">
+        <div class="pts-box">
+          <div class="pts-label">TOTAL</div>
+          <div class="pts-val gold" id="totalPts">0</div>
+          <div style="font-size:9px;color:var(--muted)">pt</div>
+        </div>
+        <div class="pts-box">
+          <div class="pts-label">交換可能</div>
+          <div class="pts-val purple" id="exchPts">0</div>
+          <div style="font-size:9px;color:var(--muted)">pt</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="xp-labels">
+        <span class="xp-label">EXP</span>
+        <span class="xp-next" id="xpNext"></span>
+      </div>
+      <div class="hp-bar-bg"><div class="hp-bar-fill" id="xpBar" style="width:0%"></div></div>
+      <div class="hp-pct" id="xpPct">0%</div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card fire"><div class="stat-icon">🔥</div><div class="stat-num fire" id="statStreak">0</div><div class="stat-desc">日連続</div></div>
+    <div class="stat-card green"><div class="stat-icon">⚔️</div><div class="stat-num green" id="statToday">0</div><div class="stat-desc">今日完了</div></div>
+    <div class="stat-card purple"><div class="stat-icon">🏆</div><div class="stat-num purple" id="statRewards">0</div><div class="stat-desc">交換済み</div></div>
+  </div>
+
+  <!-- ALL DONE -->
+  <div class="all-done" id="allDoneBanner" style="display:none">
+    <div style="font-size:28px">🏆⚡🏆</div>
+    <div class="all-done-text">今日のクエスト全クリア！最強！</div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" id="tabToday"   onclick="switchTab('today')">⚔️ TODAY</button>
+    <button class="tab"        id="tabRewards" onclick="switchTab('rewards')">🎁 GET</button>
+    <button class="tab"        id="tabStory"   onclick="switchTab('story')">📖 STORY</button>
+    <button class="tab"        id="tabMonbook" onclick="switchTab('monbook')">📚 図鑑</button>
+    <button class="tab"        id="tabLog"     onclick="switchTab('log')">📋 LOG</button>
+  </div>
+
+  <!-- TODAY -->
+  <div id="panelToday" class="task-list"></div>
+
+  <!-- REWARDS -->
+  <div id="panelRewards" style="display:none">
+    <div class="reward-balance">交換できるポイント：<span id="exchPts2">0</span>pt</div>
+    <div class="reward-list" id="rewardList"></div>
+  </div>
+
+  <!-- STORY -->
+  <div id="panelStory" style="display:none"></div>
+
+  <!-- MONSTER BOOK -->
+  <div id="panelMonbook" style="display:none"></div>
+
+  <!-- LOG -->
+  <div id="panelLog" style="display:none">
+    <div id="parentSection" style="display:none">
+      <div class="parent-badge">👑 親モード：設定・レポート・承認ができます</div>
+      <div class="section-title">🎮 ゲームタイトル</div>
+      <div class="settings-card" id="titleSettings"></div>
+      <div class="section-title">⚙️ タスク設定</div>
+      <div id="taskSettings"></div>
+      <div class="section-title">⚙️ ご褒美設定</div>
+      <div id="rewardSettings"></div>
+      <div class="section-title">↩ 今日の取り消し</div>
+      <div id="todayUndoList"></div>
+      <div class="section-title">📊 週間レポート</div>
+      <div class="report-card" id="weeklyReport"></div>
+      <div class="section-title">⚙️ ポイント設定</div>
+      <div class="settings-card" id="ptSettings"></div>
+      <div id="pendingSection">
+        <div class="section-title">✅ 承認待ちの特典</div>
+        <div id="pendingList"></div>
+      </div>
+      <div class="section-title">🎁 交換ずみ特典</div>
+      <div id="rewardLogList"></div>
+    </div>
+    <div class="section-title">📅 これまでの記録</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</div>
+
+<!-- PASSCODE OVERLAY -->
+<div class="overlay" id="passcodeOverlay" style="display:none">
+  <div class="passcode-box">
+    <div class="passcode-title">🔒 親モード</div>
+    <div class="passcode-sub">パスコードを入力してね</div>
+    <div class="passcode-dots" id="passcodeDots">
+      <div class="passcode-dot" id="dot0"></div><div class="passcode-dot" id="dot1"></div>
+      <div class="passcode-dot" id="dot2"></div><div class="passcode-dot" id="dot3"></div>
+      <div class="passcode-dot" id="dot4"></div><div class="passcode-dot" id="dot5"></div>
+      <div class="passcode-dot" id="dot6"></div><div class="passcode-dot" id="dot7"></div>
+      <div class="passcode-dot" id="dot8"></div><div class="passcode-dot" id="dot9"></div>
+    </div>
+    <div class="numpad">
+      <button class="numpad-btn" onclick="numInput('1')">1</button>
+      <button class="numpad-btn" onclick="numInput('2')">2</button>
+      <button class="numpad-btn" onclick="numInput('3')">3</button>
+      <button class="numpad-btn" onclick="numInput('4')">4</button>
+      <button class="numpad-btn" onclick="numInput('5')">5</button>
+      <button class="numpad-btn" onclick="numInput('6')">6</button>
+      <button class="numpad-btn" onclick="numInput('7')">7</button>
+      <button class="numpad-btn" onclick="numInput('8')">8</button>
+      <button class="numpad-btn" onclick="numInput('9')">9</button>
+      <button class="numpad-btn" style="opacity:.3" disabled></button>
+      <button class="numpad-btn" onclick="numInput('0')">0</button>
+      <button class="numpad-btn numpad-del" onclick="numDel()">⌫</button>
+    </div>
+    <button class="passcode-cancel" onclick="closePasscode()">キャンセル</button>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ──
+const PASSCODE = '1986072453';
+
+const TASKS_DEFAULT = [
+  { id:'z_kai',    label:'Z会',         icon:'📚', pts:40, time:'朝' },
+  { id:'homework', label:'宿題',         icon:'✏️', pts:20, time:'帰宅後' },
+  { id:'piano',    label:'ピアノ練習',  icon:'🎹', pts:5,  time:'夕食後' },
+  { id:'bath',     label:'お風呂',       icon:'🛁', pts:5,  time:'夜' },
+  { id:'teeth',    label:'歯みがき',     icon:'🦷', pts:5,  time:'夜' },
+  { id:'duolingo', label:'デュオリンゴ', icon:'🦉', pts:10, time:'夜' },
+];
+
+const REWARDS_DEFAULT = [
+  { id:'r1', label:'ゲーム30分のびる',         icon:'🎮', cost:350  },
+  { id:'r2', label:'好きなおやつ',               icon:'🍩', cost:250  },
+  { id:'r3', label:'映画1本みられる',            icon:'🎬', cost:350  },
+  { id:'r4', label:'外食で何食べるか決めていい', icon:'🍣', cost:1000 },
+];
+
+const STAGES = [
+  { stage:1, name:'旅の始まり',         min:0,    max:299,      color:'#94a3b8' },
+  { stage:2, name:'森の守護者',         min:300,  max:599,      color:'#22c55e' },
+  { stage:3, name:'海の勇者',           min:600,  max:999,      color:'#06b6d4' },
+  { stage:4, name:'空の騎士',           min:1000, max:1499,     color:'#ffd700' },
+  { stage:5, name:'闇の探索者',         min:1500, max:2099,     color:'#8b5cf6' },
+  { stage:6, name:'伝説の使い手',       min:2100, max:2899,     color:'#f97316' },
+  { stage:7, name:'決戦の勇者',         min:2900, max:3799,     color:'#ef4444' },
+  { stage:8, name:'伝説のチャンピオン', min:3800, max:Infinity, color:'#cc44ff' },
+];
+
+const ALLY_MONSTERS = [
+  { id:'himera',       name:'ヒメラ',        attr:'🔥 炎',   img:'images/himera.PNG',       unlockPt:30,   h:'15cm', w:'0.5kg', hp:18, atk:25, def:12, spd:23, desc:'子猫ほどの大きさで、しっぽの先が常に炎。好奇心旺盛で誰とでも仲良しになれる。' },
+  { id:'mizura',       name:'ミズラ',        attr:'💧 水',   img:'images/mizura.PNG',       unlockPt:90,   h:'10cm', w:'0.3kg', hp:16, atk:14, def:20, spd:12, desc:'透明な水色のゼリー体で、常に揺れている。水の流れと同じく、柔軟で穏やか。' },
+  { id:'fuwarin',      name:'フワリン',      attr:'💨 風',   img:'images/fuwarin.PNG',      unlockPt:150,  h:'12cm', w:'0.2kg', hp:14, atk:22, def:10, spd:28, desc:'綿あめのような白い体。いたずら好きで風を自在に操る。素早く予測不可能な動き。' },
+  { id:'morio',        name:'モリオ',        attr:'🌿 草',   img:'images/morio.PNG',        unlockPt:330,  h:'20cm', w:'0.8kg', hp:22, atk:16, def:18, spd:14, desc:'緑の体に葉っぱの耳。野菜や木の実が好物。森の友達。素朴でみんなのお姉さん的存在。' },
+  { id:'ganta',        name:'ガンタ',        attr:'🪨 岩',   img:'images/ganta.PNG',        unlockPt:420,  h:'35cm', w:'12kg', hp:35, atk:18, def:28, spd:8, desc:'灰色の岩でできた大きな体。無口だが優しい目をしている。皆のプロテクター。' },
+  { id:'pikarin',      name:'ピカリン',      attr:'⚡ 電気', img:'images/pikarin.PNG',      unlockPt:640,  h:'13cm', w:'0.4kg', hp:17, atk:24, def:13, spd:26, desc:'黄色い体に稲妻の模様。好奇心が強く、新しい場所や仲間が大好き。電撃はかなり強力。' },
+  { id:'namiko',       name:'ナミコ',        attr:'🌊 海',   img:'images/namiko.PNG',       unlockPt:760,  h:'18cm', w:'1kg', hp:19, atk:15, def:17, spd:16, desc:'波のように形が変わる青白い体。静かで穏やかな性格。海の全ての生き物と会話できる。' },
+  { id:'kaminarin',    name:'カミナリン',    attr:'⚡ 雷',   img:'images/kaminarin.PNG',    unlockPt:1050, h:'28cm', w:'4kg', hp:26, atk:28, def:22, spd:25, desc:'黄金色の体に電撃の翼。重厚で威厳ある番人の風格。言葉は少ないが信念は強い。' },
+  { id:'shadow',       name:'シャドウ',      attr:'🌑 闇',   img:'images/shadow.PNG',       unlockPt:1560, h:'25cm', w:'不可', hp:20, atk:19, def:19, spd:27, desc:'体全体が影でできている。目だけ白く光る。光を吸収するが、実は闇に支配されていない。' },
+  { id:'dragonfrea',   name:'ドラゴフレア',  attr:'🔥 炎龍', img:'images/dragonfrea.PNG',   unlockPt:2420, h:'12m', w:'850kg', hp:45, atk:42, def:35, spd:32, desc:'赤と金の鱗の伝説の龍。全長10m超。翼を広げると周囲が炎色に染まる。継続の力で燃える。' },
+  { id:'greisia',      name:'グレイシア',    attr:'❄️ 氷龍', img:'images/greisia.PNG',      unlockPt:2580, h:'11m', w:'780kg', hp:44, atk:38, def:40, spd:30, desc:'白銀の鱗の伝説の龍。翼が氷の板。呼気が氷の結晶。冷静で揺るがない意志を持つ。' },
+  { id:'thunrderrex',  name:'サンダーレックス', attr:'⚡ 雷龍', img:'images/thunrderrex.PNG', unlockPt:2760, h:'11.5m', w:'820kg', hp:43, atk:44, def:33, spd:42, desc:'青紫の鱗の伝説の龍。常に雷雲を纏う。目が雷のように鋭い。最速の仲間。' },
+];
+
+const BOSS_MONSTERS = [
+  { id:'shadowwolf',    name:'シャドウ・ウルフ',    attr:'👿 第2章',  img:'images/shadowwolf.PNG',    unlockPt:450,  h:'2m', w:'150kg', hp:32, atk:35, def:25, spd:28, desc:'黒い炎に覆われた狼のモンスター。赤く光る目は怒りと絶望の表現。ヤミノ王に操られていた。' },
+  { id:'captaindowaru', name:'キャプテン・ドワル',  attr:'💀 第3章',  img:'images/captaindowaru.PNG', unlockPt:800,  h:'1.8m', w:'90kg', hp:38, atk:36, def:28, spd:22, desc:'大柄な海賊。目が闇の靄に覆われていた。本来は腕利きの航海士で、操られていただけ。' },
+  { id:'yaminoou1',     name:'ヤミノ王 第1形態',    attr:'👹 第7章',  img:'images/Yaminoou1.jpeg',    unlockPt:3530, h:'1.7m', w:'70kg', hp:50, atk:40, def:30, spd:26, desc:'黒い外套に長い黒髪。古びた悲しげな表情で黒いオーラを放つ。本来は勇者ライだった。' },
+  { id:'yaminoou2',     name:'ヤミノ王 第2形態',    attr:'👹 最終形態', img:'images/Yaminoou2.png',   unlockPt:3620, h:'3.5m', w:'500kg', hp:60, atk:48, def:35, spd:32, desc:'巨大な闇の翼と光のひびが入った黒い鎧。最終ボス形態。継続を失った者の成れの果て。' },
+];
+
+const STORY_DATA = [
+  {
+    chapter:1, title:'第1章「はじまりの村・ハジマリ村」', stageMin:0, stageMax:299,
+    scenes:[
+      { pt:0,   monster:null,       monsterImg:null,               text:'ハジマリ村の朝は静かだった。主人公ナオは、村はずれの丘の上で空を見上げていた。「また同じ一日が始まる…」そうつぶやいた瞬間、村の長老・ガルドじいさんが現れた。「ナオよ、これを受け取れ」差し出されたのは、古びた革表紙の「クエストの書」。「毎日の小さな積み重ねが、やがて世界を動かす力になる。さあ、今日から君の冒険が始まるぞ」ナオは書を受け取り、なぜかその重さに胸が熱くなった。' },
+      { pt:30,  monster:'ヒメラ',   monsterImg:'images/himera.PNG',text:'クエストの書に導かれ、ナオは村はずれの草むらへ足を踏み入れた。葉っぱの陰から、小さなオレンジ色の炎がぽっと灯った。「ヒ…ヒメラ！」それは伝説の炎モンスター「ヒメラ」だった。体は子猫ほどの大きさで、しっぽの先がつねに揺れる炎になっている。クエストを積み重ねた証として、ヒメラはナオの仲間になった。「ヒメ！」と短く鳴き、ナオの肩に乗る。小さな炎が、ナオの心も温めてくれた。' },
+      { pt:60,  monster:null,       monsterImg:null,               text:'村の広場で子どもたちがナオを囲んだ。「ねえナオ、最近ね、森のほうから変な声がするんだ」「草むらのモンスターが増えてる気がする」子どもたちの目には不安の色があった。ナオはヒメラをそっと抱き、空を見渡した。遠くの山並みに、うっすらと黒い雲がかかっているのが見えた。「…行かなくちゃ」ナオは静かに決意した。この村を、大切な人たちを守るために、外の世界へ旅に出よう。今日、ナオの冒険が本当に始まった。' },
+      { pt:90,  monster:'ミズラ',   monsterImg:'images/mizura.PNG',text:'村の古い井戸のそばを通りかかると、水面がキラキラと不思議に輝いていた。そっと覗き込むと、透き通った水色の小さなモンスターが水の中を泳いでいた。「ミズラ…！」水モンスター「ミズラ」は丸くてやわらかな体を持ち、体全体がぷるぷると揺れる。クエストをこなす中で出会ったこの出会いは偶然ではないとナオは感じた。ミズラはナオの手のひらにそっと乗り、水の玉を一つプレゼントした。「これが君の証だよ」と言うように。' },
+      { pt:120, monster:null,       monsterImg:null,               text:'クエストの書に新しい地図が浮かび上がった。村の東にある「はじまりの道」が光って見えた。草を掻き分けて進むと、道の入口に大きな石の門があった。だが、その先は白い霧でぎっしりと埋め尽くされていて、何も見えない。「この霧は、弱い心の持ち主には消せない」と石板に刻まれていた。ナオはじっとその霧を見つめた。怖くないわけじゃない。でも、ヒメラとミズラが隣にいた。「一緒に進もう」そう言うと、二匹が頷いた。' },
+      { pt:150, monster:'フワリン', monsterImg:'images/fuwarin.PNG',text:'霧の中をゆっくり進んでいると、風がふわりと体を包んだ。「フワ〜ッ」と間の抜けた鳴き声とともに、白くふわふわした羽を持つモンスターが現れた。風モンスター「フワリン」だ。体は綿あめのような白色で、常に小さな竜巻を纏っている。フワリンはいたずら好きで、ナオの帽子を吹き飛ばして笑っていたが、クエストを積んだナオの心の強さを感じ、素直に仲間になった。これで三匹。ナオのパーティが少しずつ形になってきた。' },
+      { pt:180, monster:null,       monsterImg:null,               text:'ガルドじいさんが霧の入口まで追いかけてきた。「ナオ、一つ教えておこう。この世界の霧は、人の迷いや怠けから生まれる。クエストをこなし続けることで、その霧は少しずつ晴れていくんじゃ」ナオは振り返って頷いた。「じゃあ、僕がサボったら霧が濃くなるってこと？」「そういうことじゃ。君の毎日の積み重ねが、この世界の光になる」ナオはクエストの書をぎゅっと握りしめた。今日も明日も、やり続けよう。それがすべての始まりだ。' },
+      { pt:210, monster:null,       monsterImg:null,               text:'霧の中に、苔むした古い石碑を発見した。表面には見慣れない文字が刻まれていたが、クエストの書をかざすと言葉が浮かんだ。「真の勇者は、劇的な才能ではなく、毎日の小さな積み重ねによって生まれる。一日サボれば一歩後退、一日続ければ二歩前進。それが冒険の真理なり」ナオは声に出して読んだ。隣でヒメラがぽっと炎を灯し、フワリンがふわりと頷き、ミズラがぷるぷると震えた。三匹が、この言葉に共鳴しているようだった。' },
+      { pt:240, monster:null,       monsterImg:null,               text:'霧がうっすらと薄くなってきた。その隙間から、遠くに暖かなオレンジ色の灯りが見えた。「あれが…モリノ町？」クエストの書の地図と照らし合わせると、確かにそこが次の目的地だった。ヒメラが嬉しそうにしっぽの炎を揺らし、フワリンが風を起こして霧をさらに吹き払おうとする。ミズラも水色の体を輝かせて前を向いている。「みんな、ありがとう」ナオは小さくつぶやいた。一人じゃなかった。それがこんなにも心強いとは思わなかった。' },
+      { pt:280, monster:null,       monsterImg:null,               text:'出発の朝、村人たちが全員で広場に集まっていた。お母さんが握ったおにぎり、子どもたちの描いた似顔絵、長老ガルドじいさんからの小さなお守り。「ナオ、行ってらっしゃい！」「絶対帰ってきてね！」「モンスターに負けるなよ！」声援がナオの背中を押した。ナオは深呼吸して振り返り、「行ってきます！」と叫んだ。ヒメラ、フワリン、ミズラが一緒に鳴く。ハジマリ村の朝日が、旅立つ四人組を黄金色に照らしていた。第1章・完。' },
+    ]
+  },
+  {
+    chapter:2, title:'第2章「モリノ町の謎」', stageMin:300, stageMax:599,
+    scenes:[
+      { pt:300, monster:null,     monsterImg:null,             text:'モリノ町は深い森に抱かれた、木造の建物が並ぶ温かな町だった。しかし町の中央広場に足を踏み入れたナオは思わず立ち止まった。そこには直径十メートルはあろうかという巨大なトゲの木が生えており、黒いオーラを放ちながら町を圧迫していた。「いつの間にかあの木が生えてきてね…」と老婆が嘆く。「作物が育たなくなったんだ」と農家の男性が俯く。ナオはトゲの木を見上げた。「絶対に何とかする」その言葉に、仲間たちが頷いた。' },
+      { pt:330, monster:'モリオ', monsterImg:'images/morio.PNG',text:'森の入口に踏み込んだ瞬間、草むらがガサッと揺れた。緑色の体に丸い葉っぱの耳を持つモンスター「モリオ」が飛び出してきた。草モンスターのモリオは木の実を食べて生きており、体全体から植物の香りがする。最初は警戒してナオたちに葉っぱを投げつけてきたが、ヒメラが穏やかに炎を灯すと、不思議と落ち着いた。クエストの積み重ねが生む信頼の力か、モリオはやがてナオの前に歩み寄り、頭を差し出した。四匹目の仲間、誕生。' },
+      { pt:360, monster:null,     monsterImg:null,             text:'森の中に建つ研究小屋を訪ねると、メガネをかけた白衣の学者・ハカセが出迎えた。「よく来た、待っていたぞ！あのトゲの木の根っこにね、"闇の種"というものが埋められているんだ」と興奮気味に話す。「闇の種は強い負のエネルギーを吸って育つ。つまり、人々の不安や悲しみが肥料になっているんだよ」ナオはぐっと唇を噛んだ。「じゃあ、僕たちが前向きでいることも大事ってこと？」「その通り！クエストの力こそが、闇の種への最大の対抗手段だ！」' },
+      { pt:390, monster:null,     monsterImg:null,             text:'森の奥へ進むと、茂みの陰から泣き声が聞こえた。迷子になった幼い女の子・ルナが木の根元で膝を抱えていた。「おうちに帰れない…」モリオが草の道を作り、フワリンが風で道案内をし、ミズラが水の光で足元を照らした。みんなで力を合わせてルナを安全な道へ送り届けると、「ありがとう、お兄ちゃん！」と飛びついてきた。ナオは笑った。モンスターたちもそれぞれに嬉しそうだった。強くなるとは、誰かを助けられることだ、とナオは感じた。' },
+      { pt:420, monster:'ガンタ', monsterImg:'images/ganta.PNG',text:'森の最深部、巨大な岩が積み重なった場所に、ゆっくりと動く岩の塊がいた。「ガンタ…！」岩モンスター「ガンタ」は体全体が灰色の岩でできており、動くたびにドシンドシンと地面が揺れる。無口で表情が変わらないが、純粋で心の優しいモンスターだ。ナオが真剣な目で「一緒に闇の種を倒してほしい」と頼むと、ガンタは長い沈黙の後、ゆっくりと頷いた。その重厚な頷きは、百の言葉より頼もしかった。五匹目の仲間が加わった。' },
+      { pt:450, monster:null,     monsterImg:null,             text:'闇の種のある場所へ近づいたとき、黒い霧の中から「シャドウ・ウルフ」が現れた。全身が影のような黒い炎で覆われた狼のモンスターだ。ガンタが前に出て体を張り、ヒメラの炎が闇を照らし、ミズラの水が黒い炎を抑えた。フワリンが風でシャドウ・ウルフの動きを封じ、モリオが根っこで足元を絡めとった。はじめての本格的な連携バトル。「みんな、すごい…！」ナオは叫んだ。クエストで積み上げた力が、仲間たちを強くしていた。' },
+      { pt:480, monster:null,     monsterImg:null,             text:'シャドウ・ウルフを撃退し、ナオはついに「闇の種」の前に立った。それは黒く脈打つ、こぶし大の種だった。クエストの書が光り、ナオの手のひらに温かなエネルギーが集まってきた。「これが…クエストの力？」そのエネルギーを闇の種に注ぎ込むと、種はびりびりと震え、ひびが入り、やがてぽろぽろと砂のように崩れた。ドシン、と音を立てて、トゲの木が根から倒れた。広場の人々の歓声が、森の奥まで響いてきた。' },
+      { pt:510, monster:null,     monsterImg:null,             text:'モリノ町に戻ると、人々が広場に集まって待っていた。子どもたちが花を投げ、お年寄りが涙を拭き、農家の人々が笑顔になっていた。倒れたトゲの木の跡地から、小さな緑の芽が顔を出している。生命力の象徴だった。町長がナオの前に進み出て、緑の宝石がはまったバッジを差し出した。「モリノ町の名においてこれを君に。"森の守護バッジ"だ。どうかこれを胸に、旅を続けてほしい」ナオは深々と頭を下げ、バッジを受け取った。' },
+      { pt:550, monster:null,     monsterImg:null,             text:'夕方、ハカセの小屋で翌日の準備をしていると、ハカセが難しい顔で地図を広げた。「ナオ、次に向かうウミノ街のことだが…最近、海賊の出没が相次いでいてね。しかもその海賊たちが持つ力は、普通じゃない。闇の力に近いものを感じる」地図上のウミノ街の周辺に、いくつもの赤い印がついていた。「気をつけなさい。君のクエストの力は確実に育っているが、まだ強敵がいる」ナオはモンスターたちを見渡した。「大丈夫。みんなが一緒だから」' },
+      { pt:590, monster:null,     monsterImg:null,             text:'モリノ町を出発する朝、不思議なことが起きた。森の動物たちが道の両側に並び、ナオたちを見送っていた。リス、ウサギ、小鳥、そして名もないたくさんのモンスターたち。誰かが教えたわけでもないのに、自然と集まってきていた。モリオが嬉しそうに仲間たちに手を振る。「また帰ってきてね！」とルナが手を振る声が後ろから聞こえた。ナオは歩き続けた。前を向いて、まっすぐに。海の向こうに、次の冒険が待っている。第2章・完。' },
+    ]
+  },
+  {
+    chapter:3, title:'第3章「ウミノ街の海賊」', stageMin:600, stageMax:999,
+    scenes:[
+      { pt:600, monster:null,       monsterImg:null,                text:'ウミノ街は潮の香りがする、カラフルな港町だった。虹色の帆をつけた船が並び、魚市場は活気に満ちていた。だが町の人々の顔には疲れと恐怖の影があった。「また昨夜も海賊にやられた」「荷物を根こそぎ持っていかれた」怒りとため息が交互に聞こえてくる。海賊の名は「キャプテン・ドワル」。近頃急に現れた謎の海賊で、その目的は金品ではなく「古代の海図」を探し回ることだと、老漁師が教えてくれた。ナオは海を見つめた。「古代の海図…？」' },
+      { pt:640, monster:'ピカリン', monsterImg:'images/pikarin.PNG',text:'港の突堤を歩いていると、海面がパチパチと光った。黄色い体に稲妻の模様が走る、小さなモンスターが海面からぴょんと跳ねた。電気モンスター「ピカリン」だ。ピカリンは好奇心旺盛で、見知らぬものを見るとすぐに近づいてくる性格。ナオのクエストの書に興味を持ったのか、ぴたりと横に来て離れなくなった。「一緒に来るか？」とナオが手を差し伸べると、ピカリンは稲妻を小さく放ってから、その手に乗った。バチッ、と少しだけ痺れた。六匹目。' },
+      { pt:680, monster:null,       monsterImg:null,                text:'老漁師の話をさらに詳しく聞くと、「古代の海図」の正体が少しずつわかってきた。それは百年以上前に描かれた地図で、「空の城」への唯一の航路が記されているという。「その地図さえあれば、空の城に行けるということか」ナオが呟くと、クエストの書の地図部分がぼんやりと光った。「空の城…ということは、キャプテン・ドワルも空の城を目指しているのか？」老漁師は難しい顔で頷いた。「何かよからぬものを求めているんだろう。気をつけなさい、若いの」' },
+      { pt:720, monster:null,       monsterImg:null,                text:'老漁師・シオジイから小さな木造の船を借りた。「嵐が来る前に戻るんじゃぞ」という言葉を背に、ナオとモンスターたちは海へ漕ぎ出した。波は穏やかで、ピカリンが嬉しそうに海面を飛び跳ねながら先導した。フワリンが帆に風を送り込み、船はぐんぐん進んだ。水平線を眺めながら、ナオは考えた。キャプテン・ドワルはどんな人物なのか。なぜ古代の海図を求めるのか。海の向こうに、答えがある気がした。' },
+      { pt:760, monster:'ナミコ',   monsterImg:'images/namiko.PNG', text:'海の真ん中に、地図に載っていない小さな光る島があった。「秘密の島…？」上陸すると、島全体が温かな光を放ち、透明な水の流れる小川があった。川のほとりに、波の形をした青白いモンスターが眠っていた。海モンスター「ナミコ」だ。ナミコの体は波のように絶えず形が変わり、触れると海の温度がする。静かで穏やかな性格で、海の生き物全てと話せるという。目を覚ましたナミコはナオをじっと見つめ、静かに頷いた。七匹目の仲間。' },
+      { pt:800, monster:null,       monsterImg:null,                text:'夜、ドワルの海賊船が港を襲っているとピカリンが稲妻を放って知らせた。ナオたちは急いで船へ。海賊船は真っ黒な木材で作られており、帆には骸骨の紋章。甲板に乗り込むと、手下の海賊たちが取り囲んできた。ガンタが前に出て盾となり、ピカリンの電撃が次々と海賊を無力化した。ミズラの水圧攻撃、モリオの蔦攻撃、フワリンの突風が連携して働いた。「仲間がいればどんな敵でも怖くない！」ナオは甲板を駆け抜けた。' },
+      { pt:840, monster:null,       monsterImg:null,                text:'海賊船の船室の奥に、大きな錠前のついた箱を発見した。ヒメラの炎で錠前を溶かすと、中から丁寧に巻かれた一枚の古い地図が現れた。「古代の海図だ…！」地図を開くと、精巧に描かれた海と空の地形図に、一本の点線が引かれていた。その先を指でたどると、地図の端に「空の城・雲上宮」と書かれていた。「やっぱり本当にあるんだ…」ナオの心に、期待と不安が混ざり合った。大事にクエストの書に挟み込んだ。' },
+      { pt:870, monster:null,       monsterImg:null,                text:'「何者だ！」船室の扉が破られ、キャプテン・ドワルが現れた。大柄で、目が黒い靄に覆われていた。「その地図を渡せ。命が惜しければな」怒鳴り声とともに、黒い炎が迸る。「あの目…闇の力だ」ナオは気づいた。ドワルは自分の意思で動いているのではなく、何かに操られている。ナオは叫んだ。「あなた本来の姿に戻って！」モンスターたちの力を全て合わせ、黒い靄に光を浴びせ続けた。やがてドワルの目から靄が薄れていった。' },
+      { pt:930, monster:null,       monsterImg:null,                text:'靄が晴れたドワルは、しばらく呆然とした後、静かに膝をついた。「私は…何をしていたんだ」本来のドワルはかつて腕利きの航海士で、古代の海図を守る役目を担っていた。だが「ヤミノ王」の力に魅入られ、操られてしまったのだという。「その海図の先に、ヤミノ王の手下がいる。奴の本拠地はヤミノ山の奥深くだ。気をつけろ、若い勇者よ」ドワルはしゃがれた声で言い、ナオの肩をぽんと叩いた。「頼んだぞ」その目に、確かな信頼があった。' },
+      { pt:980, monster:null,       monsterImg:null,                text:'ウミノ街に戻ると、人々は歓声で迎えた。港に光が戻り、船は再び穏やかな海に浮かんだ。シオジイが目に涙を浮かべて「ありがとうよ」と言った。ドワルも港の人々に頭を下げ、かつての仲間たちと再会した。夕焼けが海を赤く染める中、ナオは水平線の向こうを見た。空の城へ。そしてその先にあるヤミノ王へ。「怖いけど、行かなきゃ。みんながいるから大丈夫」ピカリンがバチッと稲妻を放った。まるで「行くぞ！」と言うように。第3章・完。' },
+    ]
+  },
+  {
+    chapter:4, title:'第4章「ソラの城と雷の試練」', stageMin:1000, stageMax:1499,
+    scenes:[
+      { pt:1000, monster:null,        monsterImg:null,                  text:'古代の海図に従って高い山の頂上に辿り着くと、目の前に信じられない光景が広がっていた。白い雲の上に、巨大な城が浮かんでいたのだ。「ソラの城…！」城の周囲は常に雷が走り、黄金と白の壁が遠くからでも輝いて見えた。だが城への唯一の橋は、絶え間ない雷の嵐に遮られていた。「あの雷の中を進めというのか…」ナオは唇を引き結んだ。ここまで来たら引き返せない。モンスターたちが前に並んだ。「一緒に行こう」その背中が、全てを語っていた。' },
+      { pt:1050, monster:'カミナリン', monsterImg:'images/kaminarin.PNG',text:'雷の橋の袂で、黄金色の体に電撃の翼を持つモンスターが待ち構えていた。雷モンスター「カミナリン」だ。最初は番人として立ちはだかり、ピカリンとの電撃バトルが始まった。しかしナオが「僕たちは城を救いに来た！」と叫ぶと、カミナリンはぴたりと動きを止めた。長い沈黙の後、カミナリンの翼が静かに折りたたまれた。「…通れ。そしてその先も進めるなら、お前についていこう」重厚な声でそう言い、カミナリンは仲間になった。八匹目。' },
+      { pt:1100, monster:null,        monsterImg:null,                  text:'ソラの城の門をくぐると、中は不思議な空間だった。外の轟音が嘘のように静まり返り、時間が止まったかのように空気が澄んでいた。白い廊下に等間隔で水晶の柱が並び、その一つひとつにナオのこれまでの旅の記憶が映し出されていた。ハジマリ村の出発、モリノ町のトゲの木、ウミノ街の海賊船。「これは…僕の旅？」ナオは思わず足を止めた。クエストの書が温かく光った。積み重ねてきた全てが、ここに記録されていた。' },
+      { pt:1150, monster:null,        monsterImg:null,                  text:'城の奥の間で、ガラスの檻に閉じ込められた光の精霊を発見した。「助けて…ずっと待っていたの」細い声だった。光の精霊「ルミナ」は、ソラの城の守り神だった。しかし闇の力によって閉じ込められ、城中の力が奪われていたのだという。「試練を三つ超えれば、この檻は開く。でもその試練は、本物の強さを持つ者にしかクリアできない」ルミナの言葉に、ナオはしっかりと頷いた。モンスターたちが一列に並ぶ。試練よ、来い。' },
+      { pt:1200, monster:null,        monsterImg:null,                  text:'第一の試練「記憶の間」。部屋に入ると、壁一面にナオのこれまでの毎日が映し出された。眠い朝にこなしたZ会、疲れた日の宿題、練習したくない日のピアノ。サボりたくて手が止まりかけた瞬間も、全部映っていた。しかしその先には、続けた自分の姿もあった。「君には誰にも見せていない努力がある」ルミナの声が響いた。ナオの目から一粒、涙がこぼれた。恥ずかしくなかった。自分の積み重ねが、本物だと証明された瞬間だった。' },
+      { pt:1250, monster:null,        monsterImg:null,                  text:'第二の試練「勇気の橋」。霧の中の細い一本橋。下は何も見えない深い谷。橋は一人で渡らなければならない。ナオは一歩踏み出した。ぎしり、と橋が鳴る。「怖い」正直そう思った。でも足は前に動いた。毎日クエストをこなしてきた自分は、確かに前に進み続けてきた。その事実が、足元を支えてくれた。一歩、また一歩。振り返らず、ただ前へ。橋を渡り切ったとき、後ろでモンスターたちが一斉に鳴いた。「やったぞ、ナオ！」' },
+      { pt:1300, monster:null,        monsterImg:null,                  text:'第三の試練「強さの証明」はバトルだった。カミナリンが相手に選ばれた。「私の全力を受け止めてみせろ」電撃の嵐の中、ナオはモンスターたちと連携し、全ての力を出し切った。終わった後、カミナリンは静かに言った。「合格だ。お前は本物だ」ガラスの檻にひびが入り、ルミナが解放された。輝く光が城中に広がり、止まっていた時間が動き始めた。ルミナは感謝の証に、黄金の剣「光の剣」をナオに授けた。「これであなたの旅を切り開きなさい」' },
+      { pt:1350, monster:null,        monsterImg:null,                  text:'城の最上階で、「ストーム・キング」が待ち構えていた。巨大な雷雲を纏った王で、城を支配し続けた張本人だ。光の剣を手にしたナオは、全モンスターとともに挑んだ。ガンタの岩盾、ヒメラの炎、ミズラの水流、フワリンの暴風、モリオの拘束、ピカリンの電撃、ナミコの水波、カミナリンの反撃。全員の力が光の剣に集まり、一撃を放った。雷雲が晴れ、ストーム・キングが膝をついた。「強く…なったな…」かすれた声で言い、静かに崩れた。' },
+      { pt:1420, monster:null,        monsterImg:null,                  text:'倒れたストーム・キングの目から、黒い靄が消えた。「私も…操られていたのか」苦しそうに目を開いたストーム・キングは言った。「ヤミノ王は…北の山の奥深く、ヤミノ山に潜んでいる。奴は強い。だが奴の弱点は一つ。"継続の力"だ。諦めない者の積み重ねだけが、奴を倒せる」それだけ言うと、ストーム・キングは光の粒になって消えた。ナオはその言葉を、心に深く刻み込んだ。諦めない。それが最強の武器だ。' },
+      { pt:1480, monster:null,        monsterImg:null,                  text:'ストーム・キングが消えると同時に、城全体が金色の光に包まれた。曇っていた空が晴れ、城の窓から見渡す限りの大地に陽光が差し込んだ。「きれい…」ルミナが隣でほほえんだ。モンスターたちがそれぞれ嬉しそうに鳴いた。遠くの町や村にも、その光が届いているはずだ。しかしナオは知っている。これはまだ途中だ。ヤミノ山へ。真の敵のいる場所へ。「みんな、次に行こう」ナオは光の剣を腰に差し、北の空を見上げた。第4章・完。' },
+    ]
+  },
+  {
+    chapter:5, title:'第5章「ヤミノ山の影」', stageMin:1500, stageMax:2099,
+    scenes:[
+      { pt:1500, monster:null,      monsterImg:null,              text:'北へ向かうにつれ、景色が変わっていった。草が枯れ、空が灰色になり、鳥の声が消えた。やがて目の前に現れたのは、黒い雲に覆われた巨大な山「ヤミノ山」だった。山の周囲には霧が立ち込め、ところどころから黒い煙が上がっている。「生き物の気配がない…」ナオはつぶやいた。クエストの書が震えるように光った。まるで「危険だ」と警告しているようだった。それでも足は止まらなかった。ここを超えなければ、世界は闇に沈む。' },
+      { pt:1560, monster:'シャドウ', monsterImg:'images/shadow.PNG',text:'山の麓の暗い草むらで、影のような黒いモンスターがじっとナオたちを見ていた。闇モンスター「シャドウ」。体は夜の闇そのものでできており、光を吸い込む性質を持つ。最初は敵対的で、ヒメラの炎を吸い込もうとしてきた。だがナオが「君も、誰かに操られているんじゃないか？」と静かに話しかけると、シャドウは動きを止めた。長い沈黙。やがてシャドウはゆっくりとナオに近づき、その影に溶け込むように寄り添った。九匹目の仲間。' },
+      { pt:1620, monster:null,      monsterImg:null,              text:'山道を進んでいると、朽ちた小屋の中に日記帳が落ちていた。表紙に「勇者ライの記録」と書かれている。めくると、百年前のある勇者の旅が記されていた。「私も同じ山を目指した。仲間がいた。でも途中でクエストをサボり始め、力が落ちた。仲間が去り、私一人になった。そしてヤミノ王の誘いに負けてしまった」読み終えたナオは目を閉じた。「勇者ライ…もしかしてヤミノ王って…」まだ確信はない。でも、胸に重い予感が広がった。' },
+      { pt:1680, monster:null,      monsterImg:null,              text:'山の中腹に巨大な石の門「闇の門」を発見した。門には古い文字で「五つの証を持つ者のみ、通過を許す」と刻まれていた。証の名が五つ並んでいる。炎の証、水の証、風の証、岩の証、そして「継続の証」。「最初の四つは、仲間のモンスターたちが持っているはず。でも最後の証だけが…」クエストの書を開くと、最後のページが白く輝いていた。「継続の証は、旅の最後に現れる」そう書かれていた。ナオは深く息を吸った。まだ足りない。でも進むしかない。' },
+      { pt:1740, monster:null,      monsterImg:null,              text:'「炎の証」はヒメラの胸に輝く赤い石に宿っていた。「水の証」はミズラの体の中心で脈打つ青い光だった。二つの証が門に触れると、石板の一部が光り、古い文字が現れた。「炎と水、相反する力が共に在るとき、道は拓ける」ヒメラとミズラが顔を見合わせた。いつも正反対の属性で、時にぶつかることもあった二匹。でも今は、肩を並べて光っている。「君たちが仲間でいてくれてよかった」ナオが言うと、二匹が同時に鳴いた。' },
+      { pt:1800, monster:null,      monsterImg:null,              text:'「風の証」はフワリンの竜巻の中心に宿り、「岩の証」はガンタの背中の岩に刻まれていた。二つが加わり、門の石板がさらに光る。「ここまでの旅を思えば、嘘じゃない。全部本物だった」ナオは立ち止まり、これまでの旅を振り返った。ハジマリ村の朝、モリノ町の巨木、ウミノ街の海戦、ソラの城の試練。仲間が増えるたびに、自分が変わっていくのを感じた。「成長している実感ってこういうことか」ナオはそっと笑った。' },
+      { pt:1860, monster:null,      monsterImg:null,              text:'最後の「継続の証」を求めて、ナオはクエストの書の白いページを開いた。するとその日のクエスト記録が全て流れ、毎日続けてきたナオの軌跡が光の文字で刻まれていった。「これが継続の証だ。誰かに与えられるものではない。自分で積み重ねるものだ」クエストの書から光が溢れ出し、五番目の石板が輝いた。「継続の証」だけは、どこかに落ちているものではなかった。毎日を積み重ねてきた自分自身が、その証だったのだ。' },
+      { pt:1920, monster:null,      monsterImg:null,              text:'五つの証が揃い、「闇の門」がゆっくりと開いた。中は完全な暗闇だった。ヒメラの炎だけが頼りだったが、その炎もすぐに弱まっていく。「光を失う場所か…」するとシャドウが前に出た。闇の中を自在に動けるシャドウが、ナオの足元を導く。モリオが木の葉で足場を作り、ミズラが水で霧を払い、フワリンが風で前を確認した。それぞれの力が闇の中で輝いた。「誰一人、要らない仲間なんていない」ナオは確信した。' },
+      { pt:1980, monster:null,      monsterImg:null,              text:'闇の奥で、巨大な存在が待ち構えていた。「ダーク・ガーディアン」、ヤミノ山の番人だ。全身が黒い鎧に覆われ、目だけが赤く光っている。「引き返せ。ここから先に人間の来る場所はない」重く、地鳴りのような声だった。ナオは答えた。「引き返さない。世界を取り戻すために来た」九匹のモンスターたちが一斉に前を向いた。光の剣が輝き、全員の力が一つに束ねられた。最長のバトルが始まった。' },
+      { pt:2050, monster:null,      monsterImg:null,              text:'激しい戦いの末、ダーク・ガーディアンが砕け散った。暗闇の向こうに、ぼんやりとした出口の光が見えた。ガンタがナオの背中をそっと押した。前に進め、という意味だと分かった。出口の向こうから、風が吹いてきた。冷たくて澄んだ、山の向こうの風だ。「ヤミノ王が近い」ナオは感じた。クエストの書に新しい文字が浮かんだ。「次の戦いのために、さらなる力を手に入れよ。伝説のモンスターたちを探せ」第5章・完。' },
+    ]
+  },
+  {
+    chapter:6, title:'第6章「伝説のモンスターを探して」', stageMin:2100, stageMax:2899,
+    scenes:[
+      { pt:2100, monster:null,             monsterImg:null,                   text:'ヤミノ山を抜けたナオを迎えたのは、世界中を旅してきたという老賢者・セイジだった。「ナオよ、お前のクエストの力は本物だ。だが今のままではヤミノ王には勝てない」セイジは三枚の古い羊皮紙を広げた。そこには三体の伝説のモンスターの姿が描かれていた。炎龍、氷龍、雷龍。「三体が揃えば、ヤミノ王の闇を打ち破る光が生まれる。だがどの龍も、並大抵の努力では仲間にならない」ナオは羊皮紙を一枚一枚、しっかりと見つめた。' },
+      { pt:2180, monster:null,             monsterImg:null,                   text:'「炎の山・エンカ山」への道は険しかった。溶岩が流れる岩の道を、ヒメラが炎で照らしながら進んだ。山頂近くの洞窟の壁に、巨大な爪跡が残っていた。「ドラゴフレアが近い」ヒメラがぴりっと反応した。洞窟の奥から低い唸り声が響き、地面が微かに揺れた。その声は怒りではなく、静かな試練の予告のようだった。ナオは光の剣を握り直した。「いる。ここにいる」岩肌から炎が吹き上がり、巨大な影が動き始めた。' },
+      { pt:2260, monster:null,             monsterImg:null,                   text:'洞窟の最奥に、伝説の炎龍「ドラゴフレア」がいた。全長十メートルを超える赤と金の龍で、翼を広げると洞窟全体が炎色に染まった。「また人間が来た。同じように諦めて帰るのだろう」低い声で言い、興味なさそうに目を細める。ナオは答えた。「僕は今まで続けてきた。これからも続ける。あなたの試練を受ける」ドラゴフレアの目が細くなった。「その言葉…久しぶりに聞いた。では証明してみせろ」洞窟が揺れた。試練が始まった。' },
+      { pt:2340, monster:null,             monsterImg:null,                   text:'ドラゴフレアの試練は「三日連続のクエスト完全達成」だった。山の洞窟で、ドラゴフレアに見守られながら、ナオは一日も欠かさずクエストをこなし続けた。眠い夜も、疲れた朝も、仲間たちとともに。ドラゴフレアはその様子を黙って見ていた。三日目の夜、ナオがクエストの書の最後のページを閉じると、洞窟に静寂が訪れた。「…人間がこれほど続けるとは」ドラゴフレアの目から、かすかな光が滲んだ。' },
+      { pt:2420, monster:'ドラゴフレア',   monsterImg:'images/dragonfrea.PNG', text:'「わかった。お前の努力を認めよう」ドラゴフレアが大きな頭を垂れた。その瞬間、洞窟全体が金色の炎で満たされた。「伝説のモンスターが仲間に！」ドラゴフレアの小指ほどの光の粒がクエストの書に宿り、呼べばいつでも力を貸してくれるようになった。「俺の炎は、継続する者にだけ燃える。忘れるな」その声は洞窟中に響き、山全体が一瞬輝いた。ナオは笑った。「絶対忘れない。ありがとう、ドラゴフレア」十匹目の仲間。' },
+      { pt:2500, monster:null,             monsterImg:null,                   text:'次は「氷の洞窟・コオリ洞」。南の雪山の奥深くにある氷の宮殿に、伝説の氷龍「グレイシア」は棲んでいた。洞窟に入った瞬間、体が凍りつくような寒さに包まれた。「来るな。お前たちに私の試練は耐えられない」グレイシアの声は冷たく、鋭かった。白銀の鱗が輝き、呼気が氷の結晶になって落ちる。「寒い。でも前に進む」ナオは歯を食いしばった。ミズラが体を温め、ガンタが風を防いだ。仲間がいなければ絶対に無理だった場所だ。' },
+      { pt:2580, monster:'グレイシア',     monsterImg:'images/greisia.PNG',   text:'グレイシアの試練は「どんな状況でもクエストをこなすこと」だった。吹雪の中でも、氷の床でも、震えながらもナオはクエストをこなし続けた。グレイシアはその様子を一切表情を変えずに見ていた。最後の日、ナオが「やり遂げた」と言うと、グレイシアは初めて目を細めた。「揺らがない心…それが本物の強さ」白銀の光がナオに降り注ぎ、グレイシアの力がクエストの書に宿った。「いつでも呼べ。私はお前の意志を信じる」十一匹目。' },
+      { pt:2660, monster:null,             monsterImg:null,                   text:'最後の伝説モンスター「サンダーレックス」は、嵐の中心に棲む雷龍だった。常に雷雲を纏い、轟音とともに空を駆け巡る。その棲み処に辿り着いたナオを、サンダーレックスは鋭い目で見下ろした。「弱い人間が来たな。証明してみせろ。本当に強いのなら、私の嵐の中でもクエストをこなせるはずだ」雷が近くに落ちた。カミナリンとピカリンが電撃を制御しながら、ナオのそばを守った。嵐の中でも、ナオは書を開いた。' },
+      { pt:2760, monster:'サンダーレックス', monsterImg:'images/thunrderrex.PNG',text:'嵐の中でこなした日々のクエスト。雷が轟き、風が吹き荒れる中でも、ナオは一つひとつをクリアし続けた。サンダーレックスはその姿を空から見下ろし続けた。嵐が収まった朝、サンダーレックスが降りてきた。「お前は強い。技ではなく、心が。雷のように速く、岩のように揺るがない。そういう人間を待っていた」轟音とともに、サンダーレックスの力がクエストの書に宿った。十二匹目。三体の伝説が揃った。' },
+      { pt:2860, monster:null,             monsterImg:null,                   text:'セイジの元に戻ると、老賢者は満足そうに頷いた。「三体の伝説が揃ったか。いよいよだな」夕暮れの中、ナオはモンスターたち全員と並んで北の空を見た。ヤミノ山の方角、遠くに黒い城の影が見えた気がした。「怖いか」とセイジが聞いた。「怖い」とナオは正直に答えた。「だが行くか」「行きます」間髪入れずに答えた。セイジは笑った。「それでいい。恐れを知りながら進む者が、真の勇者だ」第6章・完。' },
+    ]
+  },
+  {
+    chapter:7, title:'第7章「ヤミノ王との決戦」', stageMin:2900, stageMax:3799,
+    scenes:[
+      { pt:2900, monster:null, monsterImg:null, text:'ヤミノ王の城「ダーク・フォートレス」は、ヤミノ山の頂上に聳え立つ漆黒の要塞だった。近づくにつれ空が暗くなり、周囲の音が消えていった。草も木も生えていない。風は重く、息苦しかった。「こんな場所で暮らしてきたのか…」ナオは城を見上げた。城の壁には無数の傷跡があり、かつて誰かが戦ったことを示していた。「百年前の勇者ライも、ここまで来たのかな」クエストの書の古いページがぱらぱらとめくれた。答えるように。' },
+      { pt:2990, monster:null, monsterImg:null, text:'城の門の前に、四体の「闇の四天王」が並んで待ち構えていた。それぞれが黒い鎧を身に纏い、目が赤く光っていた。「ここから先は通さない」その声は四体で揃っており、城の周囲に反響した。ナオはモンスターたちを見渡した。「それぞれのペアで戦おう。力を分散させる」ドラゴフレア、グレイシア、サンダーレックスの三体の伝説が翼を広げた。その圧倒的な存在感に、四天王の一体がわずかに怯んだ。「行くぞ、みんな！」' },
+      { pt:3080, monster:null, monsterImg:null, text:'四天王の一体目・「炎の番人インフェル」との戦い。ドラゴフレアの真の炎がインフェルを包み、闇の炎を燃やし尽くした。二体目・「氷の番人フロスト」はグレイシアが相手だった。氷と氷のぶつかり合いは激しかったが、グレイシアの「揺るがない意志」が最後に勝った。二体を倒したとき、城の壁の一部にひびが入った。光がほんの少し、闇の城に差し込んだ。「まだ半分。でも確実に進んでいる」ナオは拳を握った。' },
+      { pt:3170, monster:null, monsterImg:null, text:'三体目・「雷の番人サンボルト」にはサンダーレックスが挑んだ。嵐のような雷撃が城を揺らしたが、サンダーレックスの一撃は全てを超えた。四体目・「影の番人シャドーン」は最も手強かった。シャドウが前に出た。「お前の闇は本物じゃない。操られた偽物だ」シャドウの言葉がシャドーンの動きを止めた。その隙にヒメラの炎が貫いた。四天王全滅。城の門が開いた。奥から重い足音が聞こえてきた。いよいよだ。' },
+      { pt:3260, monster:null, monsterImg:null, text:'城の最上階への長い階段を上りながら、壁に描かれた絵画が目に入った。幼い少年が仲間と笑い、旅をし、モンスターと遊ぶ姿。しかしその絵は途中から変わり、少年が一人になり、暗い部屋に閉じこもる場面になっていた。「この少年は…」クエストの書が光り、あのページが開いた。勇者ライの日記。絵の少年とライの描写が一致する。「ヤミノ王は…かつての勇者ライなのか」ナオは静かに、しかし確実にその答えに辿り着いた。' },
+      { pt:3350, monster:null, monsterImg:null, text:'最上階の扉を開くと、そこに一人の男が背を向けて立っていた。黒い外套を纏い、長い黒髪が垂れ、声は低く静かだった。「来たか、小僧」ヤミノ王が振り返った。その顔は老いているようで若く、目の奥に深い疲労があった。「毎日続けることなど…意味がない。私はそれを諦めた。楽になった。だから強くなれた」声に、かつて積み重ねることを諦めた者の悲しみが滲んでいた。ナオはその目を真っ直ぐに見た。逃げずに。' },
+      { pt:3440, monster:null, monsterImg:null, text:'「諦めた方が楽だったかもしれない。僕にもそう思った日があった」ナオは言った。「でも続けた。眠くても、疲れても、サボりたくても。小さな一歩を、ずっと積み重ねてきた。その結果がここにある。あなたが本当に手に入れたかったものは、力じゃなかったんじゃないか。ずっと続けられた自分への、誇りじゃなかったか」ヤミノ王の目が揺れた。黒い外套の奥で、かすかな光が瞬いた。「…うるさい」でもその声は、もう怒りではなかった。' },
+      { pt:3530, monster:null, monsterImg:null, text:'「言葉は不要だ。力で証明しろ」ヤミノ王が黒いオーラを解放した。第一形態の戦いが始まった。城全体が揺れ、黒い波動が押し寄せる。ナオは叫んだ。「全員、行くぞ！」ドラゴフレアが空を覆い、グレイシアが大地を凍らせ、サンダーレックスが雷を放った。ヒメラ、ミズラ、フワリン、モリオ、ガンタ、ピカリン、ナミコ、カミナリン、シャドウが一斉に力を解放した。十二体の仲間が、一人の少年のために戦った。' },
+      { pt:3620, monster:null, monsterImg:null, text:'ヤミノ王が第二形態に変わった。黒い外套が砕け、巨大な闇の翼が広がった。「まだだ。まだ終わらない！」その力は圧倒的で、モンスターたちが次々と吹き飛ばされた。「立って！みんな！」ナオの叫びに、倒れた仲間たちが一頭また一頭と立ち上がった。「お前の積み重ねが、私には眩しすぎる…」ヤミノ王がつぶやいた。ナオは光の剣を両手で握り、全モンスターの力を一点に集めた。「これが、続けてきた僕の全力だ！」' },
+      { pt:3720, monster:null, monsterImg:null, text:'光の剣と全モンスターのエネルギーが一つになり、巨大な光の柱がヤミノ王を包んだ。「ぐ…うわあああ！」黒い翼がひびわれ、闇のオーラが剥がれ落ち、ヤミノ王が崩れた。城が震え、壁が崩れ、黒い空に光が差し込んだ。塵の中に、一人の少年の姿があった。白い服を着た、疲れ果てた顔の少年。本来の姿に戻った、かつての勇者ライだった。「終わった…本当に終わったのか」ライは呆然と手を見つめた。第7章・完。' },
+    ]
+  },
+  {
+    chapter:8, title:'第8章「新しい世界へ」', stageMin:3800, stageMax:Infinity,
+    scenes:[
+      { pt:3800, monster:null, monsterImg:null, text:'ダーク・フォートレスが崩れ落ち、世界中の空が晴れていった。枯れた草原に緑が戻り、灰色だった空が青くなった。遠くの村から、誰かの歓声が風に乗って聞こえた。ナオは崩れた城の跡地に立ち、その変化をただ感じていた。モンスターたちがそれぞれに喜びの声を上げた。ドラゴフレアが大きく翼を広げ、金色の炎を空高く放った。世界が変わった。自分の積み重ねが、本当に世界を変えたのだと、ナオはその瞬間、確かに感じた。' },
+      { pt:3900, monster:null, monsterImg:null, text:'ハジマリ村への帰還。村が見えた瞬間、ナオの目に涙が浮かんだ。長老ガルドじいさんが丘の上で待っていた。「よく戻った、ナオ」それだけ言って、力強く抱きしめてくれた。子どもたちが走ってきて、「すごい！」「かっこいい！」と飛びついた。お母さんが泣きながら笑っていた。モンスターたちも村中を走り回り、村人たちと再会を喜んだ。「ここから始まったんだな、全部」ナオは丘の上から村を見渡した。始まりの場所が、一番温かかった。' },
+      { pt:4000, monster:null, monsterImg:null, text:'夜、村の広場で盛大なパーティが開かれた。篝火の周りに村人とモンスターたち全員が集まった。ヒメラが炎芸を披露し、フワリンが風で花びらを舞わせ、ピカリンが星のように電光を散らした。モリオが踊り、ガンタが笑い、ミズラが水の玉で泡のような光を作った。ナミコが静かに歌い、カミナリンが天に向けて祝砲を打った。シャドウでさえ、楽しそうに陰からはしゃいでいた。そして伝説の三体が、夜空に大きな光の弧を描いた。' },
+      { pt:4100, monster:null, monsterImg:null, text:'翌朝、パーティの片付けをしていると、村の入口に一人の少年が立っていた。ライだった。白い服に、恥ずかしそうな顔で、小さく頭を下げた。「迷惑をかけた。本当にすまなかった」ナオはしばらく見つめた後、歩み寄って手を差し伸べた。「一緒に、また始めよう」ライは目を見開いた。涙がこぼれた。「…クエストを、またやり直せるか？」「もちろん。毎日少しずつでいい。それだけで、絶対に変われるから」ライはナオの手を握った。' },
+      { pt:4200, monster:null, monsterImg:null, text:'ライを迎え入れた翌日から、世界中に不思議なことが起き始めた。各地に、見たことのない新しいモンスターたちが現れ始めたのだ。ヤミノ王の闇に隠れていたモンスターたちが、闇が晴れたことで姿を現したのだという。「まだ見ぬ仲間が、世界中にいる」ナオはクエストの書の新しいページを開いた。そこには地図が広がり、各地に光る点が散らばっていた。「まだ旅は続くんだ」その言葉は不安ではなく、純粋な喜びだった。' },
+      { pt:4300, monster:null, monsterImg:null, text:'賢者セイジから一通の手紙が届いた。「ナオへ。おめでとう。しかし世界はまだ広い。南の大陸に、かつて誰も踏み込んだことのない未知の土地がある。新しいクエストの書を授けよう。次の冒険が待っている。でも焦らずに、一日一日を積み重ねることを忘れるな。それが全ての力の源だ」同封されていたのは、新しい革表紙のクエストの書だった。まだ何も書かれていない、真っ白なページ。ナオの胸が高鳴った。' },
+      { pt:4400, monster:null, monsterImg:null, text:'夕暮れの丘に一人で上がり、ナオは空を見上げた。旅を振り返った。怠けたくなった日もあった。しんどかった日もあった。でも毎日少しずつ続けた。その積み重ねが、仲間を増やし、敵を倒し、世界を救った。「才能じゃなかった。運でもなかった。ただ、続けたんだ」ナオはそう確信した。「明日も、クエストをやろう。昨日より少し強くなるために。明後日も、その次も。それが僕の冒険だ」夕陽が沈み、星が一つ、また一つと灯った。' },
+      { pt:4500, monster:null, monsterImg:null, text:'翌朝、クエストの書に新しい地図が現れた。南の海の向こうに、これまでの地図にはなかった大きな大陸が描かれていた。「新大陸…！」ナオは目を輝かせた。ライが隣に来た。「俺も行っていいか」「もちろん」モンスターたちも集まってきた。ドラゴフレア、グレイシア、サンダーレックスが翼を広げた。全員の顔が前を向いていた。長老ガルドじいさんが言った。「行ってらっしゃい。また帰ってきなさい」ナオは深呼吸した。「行ってきます！」' },
+      { pt:4600, monster:null, monsterImg:null, text:'大きな船に全員で乗り込んだ。フワリンが帆に風を送り、ミズラが海路を調べ、ナミコが海の生き物たちに道を聞いた。ピカリンが嬉しそうに帆柱を登り、モリオが甲板で踊った。シャドウがシャドウなりに、船の影でくつろいでいた。ガンタがどっしりと船底に座り、ヒメラが篝火を灯した。カミナリンが空高く昇り、前方の天気を確認した。伝説の三体が大空を舞った。ハジマリ村の岸が、どんどん遠ざかっていった。' },
+      { pt:4700, monster:null, monsterImg:null, text:'水平線の向こうに、見たことのない大陸の影が浮かび上がってきた。「あそこだ！」ナオは叫んだ。全員が船べりに集まり、前を向いた。波が輝き、風が背中を押した。クエストの書が光った。新しいページに、最初の一文字が書き込まれた。「旅はまだ終わらない。ナオの冒険は、今日も続いている」空に虹がかかった。モンスターたちが一斉に鳴いた。勇者ライが笑った。ナオは、心の底から笑った。明日もクエストをやろう。それだけで、世界は変わる。' },
+    ]
+  },
+];
+
+// ── STATE ──
+function today(){
+  const d=new Date();
+  const jst=new Date(d.getTime()+9*60*60*1000);
+  return jst.toISOString().split('T')[0];
+}
+function newId(){ return 'c'+Date.now()+Math.floor(Math.random()*1000); }
+function load(){
+  try{ const s=localStorage.getItem('naoyuki_battle3'); return s?JSON.parse(s):null; }catch(e){return null;}
+}
+function save(s){ try{localStorage.setItem('naoyuki_battle3',JSON.stringify(s));}catch(e){} }
+
+const DEFAULT_STATE = {
+  total:0, exch:0, history:{}, rewards:[], pendingRewards:[],
+  tasks: TASKS_DEFAULT.map(t=>({...t})),
+  rewardList: REWARDS_DEFAULT.map(r=>({...r})),
+};
+let state = load() || JSON.parse(JSON.stringify(DEFAULT_STATE));
+if(!state.tasks)          state.tasks          = TASKS_DEFAULT.map(t=>({...t}));
+if(!state.rewardList)     state.rewardList     = REWARDS_DEFAULT.map(r=>({...r}));
+if(!state.pendingRewards) state.pendingRewards = [];
+
+let parentMode = false;
+let currentTab = 'today';
+
+function getTasks()  { return state.tasks; }
+function getRewards(){ return state.rewardList; }
+
+// ── STAGE HELPERS ──
+function getStage(pts){ return STAGES.find(s=>pts>=s.min&&pts<=s.max)||STAGES[0]; }
+function getNextStage(pts){ const i=STAGES.findIndex(s=>pts>=s.min&&pts<=s.max); return STAGES[i+1]||null; }
+
+function calcStreak(){
+  let count=0;
+  const d=new Date();
+  const jst=new Date(d.getTime()+9*60*60*1000);
+  const tk=today();
+  for(let i=0;i<365;i++){
+    const x=new Date(jst);
+    x.setDate(jst.getDate()-i);
+    const key=x.toISOString().split('T')[0];
+    const done=state.history[key]||[];
+    if(done.length===0&&key!==tk) break;
+    if(done.length>0) count++;
+  }
+  return count;
+}
+
+// ── WEEKLY DATA ──
+function getWeekDates(){
+  const dates=[];
+  const d=new Date();
+  const jst=new Date(d.getTime()+9*60*60*1000);
+  for(let i=6;i>=0;i--){
+    const x=new Date(jst);
+    x.setDate(jst.getDate()-i);
+    dates.push(x.toISOString().split('T')[0]);
+  }
+  return dates;
+}
+function getWeekStats(){
+  const tasks=getTasks();
+  const dates=getWeekDates();
+  let totalPts=0, totalDone=0, totalPossible=0;
+  const dailyPts=[];
+  const taskCounts={};
+  tasks.forEach(t=>{ taskCounts[t.id]=0; });
+  dates.forEach(date=>{
+    const done=state.history[date]||[];
+    let dp=0;
+    tasks.forEach(t=>{
+      totalPossible+=t.pts;
+      if(done.includes(t.id)){ dp+=t.pts; totalDone++; taskCounts[t.id]=(taskCounts[t.id]||0)+1; }
+    });
+    totalPts+=dp;
+    dailyPts.push({date,pts:dp});
+  });
+  return {totalPts,totalDone,totalPossible,dailyPts,taskCounts,dates};
+}
+
+// ── RENDER ──
+function render(){
+  save(state);
+  const tasks=getTasks();
+  const tk=today();
+  const done=state.history[tk]||[];
+  const stage=getStage(state.total);
+  const next=getNextStage(state.total);
+  const pct=next?Math.round((state.total-stage.min)/(next.min-stage.min)*100):100;
+
+  document.getElementById('rankName').textContent=stage.name;
+  document.getElementById('rankName').style.color=stage.color;
+  document.getElementById('rankName').style.textShadow=`2px 2px 0 rgba(0,0,0,.5),0 0 20px ${stage.color}`;
+  document.getElementById('totalPts').textContent=state.total.toLocaleString();
+  document.getElementById('exchPts').textContent=state.exch.toLocaleString();
+  document.getElementById('exchPts2').textContent=state.exch.toLocaleString();
+  document.getElementById('xpBar').style.width=pct+'%';
+  document.getElementById('xpPct').textContent=pct+'%';
+  document.getElementById('xpNext').textContent=next?`次のステージまで ${next.min-state.total}pt`:'最強ステージ！';
+
+  document.getElementById('statStreak').textContent=calcStreak();
+  document.getElementById('statToday').textContent=done.length;
+  document.getElementById('statRewards').textContent=state.rewards.length;
+
+  document.getElementById('allDoneBanner').style.display=tasks.every(t=>done.includes(t.id))?'block':'none';
+
+  // TODAY
+  const todayPanel=document.getElementById('panelToday');
+  todayPanel.innerHTML='';
+  tasks.forEach(task=>{
+    const isDone=done.includes(task.id);
+    const btn=document.createElement('button');
+    btn.className='task-btn'+(isDone?' done':'');
+    btn.innerHTML=`
+      <div class="task-icon">${task.icon}</div>
+      <div class="task-info">
+        <div class="task-name${isDone?' done':''}">${task.label}</div>
+        <div class="task-time">${task.time}</div>
+      </div>
+      ${isDone?'<div class="task-check">✅</div>':`<div class="task-pts">+${task.pts}pt</div>`}`;
+    if(!isDone) btn.onclick=()=>completeTask(task);
+    todayPanel.appendChild(btn);
+  });
+
+  // REWARDS
+  const rewardList=document.getElementById('rewardList');
+  rewardList.innerHTML='';
+  getRewards().forEach(r=>{
+    const canAfford=state.exch>=r.cost;
+    const pending=state.pendingRewards.filter(p=>p.rewardId===r.id&&!p.confirmed).length;
+    const card=document.createElement('div');
+    card.className='reward-card'+(canAfford?' clickable':' cant');
+    card.innerHTML=`
+      <div class="reward-icon">${r.icon}</div>
+      <div class="reward-info">
+        <div class="reward-name">${r.label}</div>
+        <div class="reward-cost">${r.cost}pt</div>
+      </div>
+      ${pending?`<div class="reward-pending">⏳ 承認待ち</div>`:canAfford?'<div class="reward-get">GET!</div>':''}`;
+    if(canAfford) card.onclick=()=>redeemReward(r);
+    rewardList.appendChild(card);
+  });
+
+  document.getElementById('parentSection').style.display=parentMode?'block':'none';
+  if(parentMode){ renderTitleSettings(); renderTaskSettings(); renderRewardSettings(); renderTodayUndo(); renderWeeklyReport(); renderPtSettings(); renderPending(); renderRewardLog(); }
+
+  // History
+  const histList=document.getElementById('historyList');
+  histList.innerHTML='';
+  const dates=Object.keys(state.history).sort((a,b)=>b.localeCompare(a)).slice(0,14);
+  if(dates.length===0){
+    histList.innerHTML='<div class="empty">まだ記録がないよ！<br>クエストをクリアして<br>記録を作ろう⚔️</div>';
+  } else {
+    dates.forEach(date=>{
+      const dl=state.history[date]||[];
+      const earned=tasks.filter(t=>dl.includes(t.id)).reduce((s,t)=>s+t.pts,0);
+      const card=document.createElement('div');
+      card.className='history-card';
+      const icons=tasks.map(t=>`<span class="history-ico${dl.includes(t.id)?'':' off'}">${t.icon}</span>`).join('');
+      card.innerHTML=`<div class="history-top"><div class="history-date">${date===tk?'🟢 今日':date}</div><div class="history-pts">+${earned}pt</div></div><div class="history-icons">${icons}</div>`;
+      histList.appendChild(card);
+    });
+  }
+}
+
+function renderStory(){
+  const panel=document.getElementById('panelStory');
+  if(STORY_DATA.length===0){ panel.innerHTML='<div class="empty">ストーリーデータを読み込み中...</div>'; return; }
+  let html='';
+  STORY_DATA.forEach(ch=>{
+    html+=`<div class="story-chapter">
+      <div class="chapter-header">
+        <div class="chapter-title">📖 ${ch.title}</div>
+        <div class="chapter-range">Stage ${ch.stageMin}〜${ch.stageMax===Infinity?'':ch.stageMax}pt</div>
+      </div>`;
+    ch.scenes.forEach((sc,idx)=>{
+      const num=`${ch.chapter}-${idx+1}`;
+      const unlocked=state.total>=sc.pt;
+      if(unlocked){
+        html+=`<div class="scene-card">
+          <div class="scene-num">第${num}節 ／ ${sc.pt}pt解放</div>
+          ${sc.monsterImg?`<div class="scene-monster"><img src="${sc.monsterImg}" alt="${sc.monster}"><div class="scene-monster-name">✨ ${sc.monster} が仲間に！</div></div>`:''}
+          <div class="scene-text">${sc.text}</div>
+        </div>`;
+      } else {
+        html+=`<div class="scene-locked">
+          <div class="scene-locked-text">🔒 ?????</div>
+          <div class="scene-locked-pt">${sc.pt}pt で解放</div>
+        </div>`;
+      }
+    });
+    html+='</div>';
+  });
+  panel.innerHTML=html;
+}
+
+function renderMonbook(){
+  const panel=document.getElementById('panelMonbook');
+  const allyUnlocked=ALLY_MONSTERS.filter(m=>state.total>=m.unlockPt).length;
+  const bossUnlocked=BOSS_MONSTERS.filter(m=>state.total>=m.unlockPt).length;
+
+  let html=`<div class="monbook-section">
+    <div class="monbook-section-label">⚔️ 仲間モンスター</div>
+    <div class="monbook-count">解放済み <span>${allyUnlocked}</span> / ${ALLY_MONSTERS.length}体</div>
+    <div class="monbook-grid">`;
+
+  ALLY_MONSTERS.forEach(m=>{
+    const unlocked=state.total>=m.unlockPt;
+    if(unlocked){
+      html+=`<div class="monbook-card unlocked" onclick="showMonDetail('${m.id}','ally')">
+        <img class="monbook-img" src="${m.img}" alt="${m.name}">
+        <div class="monbook-name">${m.name}</div>
+        <div class="monbook-attr">${m.attr}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:2px">${m.h} / ${m.w}</div>
+      </div>`;
+    } else {
+      html+=`<div class="monbook-card locked-card">
+        <div class="monbook-placeholder">？</div>
+        <div class="monbook-locked-name">？？？</div>
+        <div class="monbook-unlock-pt">${m.unlockPt}ptで解放</div>
+      </div>`;
+    }
+  });
+
+  html+=`</div></div>
+  <div class="monbook-section">
+    <div class="monbook-section-label">💀 敵モンスター</div>
+    <div class="monbook-count">遭遇済み <span>${bossUnlocked}</span> / ${BOSS_MONSTERS.length}体</div>
+    <div class="monbook-grid">`;
+
+  BOSS_MONSTERS.forEach(m=>{
+    const unlocked=state.total>=m.unlockPt;
+    if(unlocked){
+      html+=`<div class="monbook-card boss-unlocked" onclick="showMonDetail('${m.id}','boss')">
+        <img class="monbook-img" src="${m.img}" alt="${m.name}">
+        <div class="monbook-name" style="color:var(--fire)">${m.name}</div>
+        <div class="monbook-attr">${m.attr}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:2px">${m.h} / ${m.w}</div>
+      </div>`;
+    } else {
+      html+=`<div class="monbook-card locked-card">
+        <div class="monbook-placeholder">？</div>
+        <div class="monbook-locked-name">？？？</div>
+        <div class="monbook-unlock-pt">${m.unlockPt}ptで解放</div>
+      </div>`;
+    }
+  });
+
+  html+='</div></div>';
+  panel.innerHTML=html;
+}
+function showMonDetail(id, type){
+  const mons = type==='ally' ? ALLY_MONSTERS : BOSS_MONSTERS;
+  const m = mons.find(x=>x.id===id);
+  if(!m) return;
+  const modal = document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:999;display:flex;align-items:center;justify-content:center';
+  modal.onclick=(e)=>{if(e.target===modal) modal.remove()};
+  const box = document.createElement('div');
+  box.style.cssText='background:linear-gradient(135deg,#1a1a2e,#12121e);border:2px solid var(--border);border-radius:16px;padding:24px;width:90%;max-width:380px;max-height:80vh;overflow-y:auto';
+  box.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px">
+      <div>
+        <div style="font-size:11px;color:var(--muted);letter-spacing:1px">${m.attr}</div>
+        <div style="font-family:'Bangers','M PLUS Rounded 1c';font-size:24px;color:${type==='boss'?'var(--fire)':'var(--gold)'};font-weight:900">${m.name}</div>
+      </div>
+      <button onclick="this.closest('div').parentElement.parentElement.remove()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <img src="${m.img}" style="width:100%;max-width:200px;height:200px;object-fit:contain;background:rgba(255,255,255,.05);border-radius:12px;margin-bottom:16px">
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:12px;margin-bottom:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+        <div><span style="color:var(--muted)">身長</span><div style="color:var(--gold);font-weight:900">${m.h}</div></div>
+        <div><span style="color:var(--muted)">体重</span><div style="color:var(--gold);font-weight:900">${m.w}</div></div>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">⚔️ ステータス</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+        <div style="text-align:center"><span style="color:var(--muted)">HP</span><div style="color:var(--fire);font-weight:900;font-size:18px">${m.hp}</div></div>
+        <div style="text-align:center"><span style="color:var(--muted)">ATK</span><div style="color:var(--fire);font-weight:900;font-size:18px">${m.atk}</div></div>
+        <div style="text-align:center"><span style="color:var(--muted)">DEF</span><div style="color:var(--gold);font-weight:900;font-size:18px">${m.def}</div></div>
+        <div style="text-align:center"><span style="color:var(--muted)">SPD</span><div style="color:var(--green);font-weight:900;font-size:18px">${m.spd}</div></div>
+      </div>
+    </div>
+    <div style="font-size:13px;line-height:1.8;color:#c8c8e8;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase">📖 紹介文</div>
+      ${m.desc}
+    </div>
+    <button onclick="this.closest('div').parentElement.remove()" style="width:100%;background:var(--panel2);border:2px solid var(--border);color:var(--text);border-radius:8px;padding:8px;cursor:pointer;font-weight:700;font-family:'M PLUS Rounded 1c'">閉じる</button>
+  `;
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+}
+
+function renderTitleSettings(){
+  const panel=document.getElementById('titleSettings');
+  panel.innerHTML=`
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">ゲーム名</div>
+      <input type="text" id="gameTitle" style="background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--gold);font-family:'Bangers','M PLUS Rounded 1c';font-size:16px;font-weight:900;padding:8px 10px;outline:none;width:100%;box-sizing:border-box" value="${state.gameTitle||'直幸QUEST'}">
+      <div style="font-size:10px;color:var(--muted);margin-top:6px">※ この名前はホーム画面のタイトルに反映されます</div>
+    </div>
+    <button onclick="saveGameTitle()" style="width:100%;background:var(--purple);border:none;color:#0a0a0f;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;margin-top:8px">保存</button>
+  `;
+}
+
+function saveGameTitle(){
+  const input=document.getElementById('gameTitle');
+  if(input) state.gameTitle=input.value.trim()||'直幸QUEST';
+  save(state);
+  document.querySelector('.logo').innerHTML=`${state.gameTitle.split('QUEST')[0]}<span>QUEST</span>`;
+  showBoom('✓ 保存完了');
+}
+
+function renderTaskSettings(){
+  const tasks=getTasks();
+  let html='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">☝️ 上下ボタンで順番を変更できます</div>';
+  tasks.forEach((t,i)=>{
+    const isFirst=i===0, isLast=i===tasks.length-1;
+    html+=`<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="flex:1;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">${t.icon}</span>
+        <div>
+          <div style="font-weight:900;color:var(--text)">${t.label}</div>
+          <div style="font-size:10px;color:var(--muted)">${t.pts}pt / ${t.time}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button onclick="moveTask(${i},-1)" style="background:${isFirst?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isFirst?'default':'pointer'};font-size:12px" ${isFirst?'disabled':''}>▲</button>
+        <button onclick="moveTask(${i},1)" style="background:${isLast?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isLast?'default':'pointer'};font-size:12px" ${isLast?'disabled':''}>▼</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('taskSettings').innerHTML=html;
+}
+
+function renderRewardSettings(){
+  const rewards=getRewards();
+  let html='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">☝️ 上下ボタンで順番を変更できます</div>';
+  rewards.forEach((r,i)=>{
+    const isFirst=i===0, isLast=i===rewards.length-1;
+    html+=`<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="flex:1;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">${r.icon}</span>
+        <div>
+          <div style="font-weight:900;color:var(--text)">${r.label}</div>
+          <div style="font-size:10px;color:var(--muted)">${r.cost}pt で交換</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button onclick="moveReward(${i},-1)" style="background:${isFirst?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isFirst?'default':'pointer'};font-size:12px" ${isFirst?'disabled':''}>▲</button>
+        <button onclick="moveReward(${i},1)" style="background:${isLast?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isLast?'default':'pointer'};font-size:12px" ${isLast?'disabled':''}>▼</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('rewardSettings').innerHTML=html;
+}
+
+function moveTask(idx,dir){
+  const tasks=state.tasks;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=tasks.length) return;
+  [tasks[idx],tasks[newIdx]]=[tasks[newIdx],tasks[idx]];
+  save(state);
+  render();
+  renderTaskSettings();
+}
+
+function moveReward(idx,dir){
+  const rewards=state.rewardList;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=rewards.length) return;
+  [rewards[idx],rewards[newIdx]]=[rewards[newIdx],rewards[idx]];
+  save(state);
+  render();
+  renderRewardSettings();
+}
+
+function renderWeeklyReport(){
+  const tasks=getTasks();
+  const ws=getWeekStats();
+  const maxPts=Math.max(...ws.dailyPts.map(d=>d.pts),1);
+  const DAY=['日','月','火','水','木','金','土'];
+  const bars=ws.dailyPts.map(d=>{
+    const h=Math.max(Math.round((d.pts/maxPts)*52),2);
+    const dayName=DAY[new Date(d.date+'T12:00:00').getDay()];
+    return `<div class="week-bar-col"><div class="week-bar-pt">${d.pts>0?d.pts:''}</div><div class="week-bar-inner" style="height:${h}px"></div><div class="week-bar-day">${dayName}</div></div>`;
+  }).join('');
+  const taskRows=tasks.map(t=>{
+    const cnt=ws.taskCounts[t.id]||0;
+    const pct=Math.round(cnt/7*100);
+    return `<div class="task-complete-row"><span>${t.icon} ${t.label}</span><div style="display:flex;align-items:center;gap:8px"><div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${pct}%"></div></div><span style="font-size:11px;color:var(--gold);width:28px;text-align:right">${cnt}/7</span></div></div>`;
+  }).join('');
+  document.getElementById('weeklyReport').innerHTML=`
+    <div class="report-title">📊 今週（7日間）</div>
+    <div class="report-row"><span>獲得ポイント合計</span><span class="report-val">${ws.totalPts}pt</span></div>
+    <div class="report-row"><span>クリアしたクエスト</span><span class="report-val">${ws.totalDone}回</span></div>
+    <div class="report-row"><span>達成率</span><span class="report-val">${ws.totalPossible>0?Math.round(ws.totalPts/ws.totalPossible*100):0}%</span></div>
+    <div class="week-bar-wrap"><div class="week-bar-label">日別ポイント</div><div class="week-bars">${bars}</div></div>
+    <div style="margin-top:12px"><div class="week-bar-label" style="margin-bottom:6px">タスク別 達成状況</div>${taskRows}</div>`;
+}
+
+function renderPtSettings(){
+  const tasks=getTasks();
+  const rewards=getRewards();
+  let th='<div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:10px">⚔️ タスク</div>';
+  tasks.forEach((t,i)=>{
+    th+=`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <input style="${inputSt()};width:46px;text-align:center;font-size:22px" id="ticon_${i}" value="${t.icon}">
+        <input style="${inputSt()};flex:1;font-size:14px;font-weight:700" id="tlabel_${i}" value="${t.label}">
+        <input style="${inputSt()};width:58px;text-align:center;font-size:14px" id="ttime_${i}" value="${t.time}">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--muted)">ポイント</span>
+        <input class="pts-input" style="width:60px" id="tpts_${i}" type="number" min="1" max="999" value="${t.pts}">
+        <span style="font-size:11px;color:var(--muted)">pt</span>
+        <div style="flex:1"></div>
+        <button onclick="deleteTask(${i})" style="background:rgba(255,77,0,.15);border:1px solid rgba(255,77,0,.3);color:#ff6644;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:700">🗑 削除</button>
+      </div></div>`;
+  });
+  th+=`<button onclick="addTask()" style="width:100%;background:rgba(0,230,118,.08);border:1px dashed rgba(0,230,118,.3);color:var(--green);border-radius:10px;padding:10px;cursor:pointer;font-size:13px;font-weight:700;margin-bottom:6px">＋ タスクを追加する</button>`;
+  let rh='<div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin:14px 0 10px">🎁 ご褒美</div>';
+  rewards.forEach((r,i)=>{
+    rh+=`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <input style="${inputSt()};width:46px;text-align:center;font-size:22px" id="ricon_${i}" value="${r.icon}">
+        <input style="${inputSt()};flex:1;font-size:14px;font-weight:700" id="rlabel_${i}" value="${r.label}">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--muted)">交換ポイント</span>
+        <input class="pts-input" style="width:70px;color:var(--purple)" id="rcost_${i}" type="number" min="1" max="9999" value="${r.cost}">
+        <span style="font-size:11px;color:var(--muted)">pt</span>
+        <div style="flex:1"></div>
+        <button onclick="deleteReward(${i})" style="background:rgba(255,77,0,.15);border:1px solid rgba(255,77,0,.3);color:#ff6644;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:700">🗑 削除</button>
+      </div></div>`;
+  });
+  rh+=`<button onclick="addReward()" style="width:100%;background:rgba(204,68,255,.08);border:1px dashed rgba(204,68,255,.3);color:var(--purple);border-radius:10px;padding:10px;cursor:pointer;font-size:13px;font-weight:700;margin-bottom:6px">＋ ご褒美を追加する</button>`;
+  document.getElementById('ptSettings').innerHTML=th+rh+`<div style="text-align:right;margin-top:12px"><button class="save-pts-btn" onclick="saveSettings()">💾 保存する</button></div>`;
+}
+
+function inputSt(){
+  return "background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'M PLUS Rounded 1c',sans-serif;padding:6px 8px;outline:none";
+}
+
+function addTask(){ saveSettings(true); state.tasks.push({id:newId(),label:'新しいタスク',icon:'⭐',pts:10,time:'いつでも'}); save(state); render(); renderPtSettings(); }
+function deleteTask(i){ if(state.tasks.length<=1){showBoom('タスクは1つ必要！');return;} saveSettings(true); state.tasks.splice(i,1); save(state); render(); renderPtSettings(); }
+function addReward(){ saveSettings(true); state.rewardList.push({id:newId(),label:'新しいご褒美',icon:'🎁',cost:100}); save(state); render(); renderPtSettings(); }
+function deleteReward(i){ if(state.rewardList.length<=1){showBoom('ご褒美は1つ必要！');return;} saveSettings(true); state.rewardList.splice(i,1); save(state); render(); renderPtSettings(); }
+
+function saveSettings(silent){
+  state.tasks.forEach((t,i)=>{
+    const icon=document.getElementById('ticon_'+i), label=document.getElementById('tlabel_'+i);
+    const time=document.getElementById('ttime_'+i), pts=document.getElementById('tpts_'+i);
+    if(icon) t.icon=icon.value.trim()||t.icon;
+    if(label) t.label=label.value.trim()||t.label;
+    if(time) t.time=time.value.trim()||t.time;
+    if(pts){const v=parseInt(pts.value);if(!isNaN(v)&&v>0)t.pts=v;}
+  });
+  state.rewardList.forEach((r,i)=>{
+    const icon=document.getElementById('ricon_'+i), label=document.getElementById('rlabel_'+i);
+    const cost=document.getElementById('rcost_'+i);
+    if(icon) r.icon=icon.value.trim()||r.icon;
+    if(label) r.label=label.value.trim()||r.label;
+    if(cost){const v=parseInt(cost.value);if(!isNaN(v)&&v>0)r.cost=v;}
+  });
+  save(state);
+  if(!silent){showBoom('保存完了！✓');render();}
+}
+function savePtSettings(){ saveSettings(false); }
+
+function renderTodayUndo(){
+  const tk=today();
+  const done=state.history[tk]||[];
+  const tasks=getTasks();
+  const completed=tasks.filter(t=>done.includes(t.id));
+  const list=document.getElementById('todayUndoList');
+  if(completed.length===0){
+    list.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0">今日完了したタスクはありません</div>';
+    return;
+  }
+  list.innerHTML='';
+  completed.forEach(t=>{
+    const item=document.createElement('div');
+    item.className='reward-log-item';
+    item.innerHTML=`
+      <span>${t.icon} ${t.label}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:'Bangers','M PLUS Rounded 1c',sans-serif;color:var(--gold)">${t.pts}pt</span>
+        <button onclick="undoTask('${t.id}')" style="background:rgba(255,77,0,.15);border:1px solid rgba(255,77,0,.3);color:#ff6644;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:700">↩ 取り消す</button>
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+function undoTask(taskId){
+  const tk=today();
+  const done=state.history[tk]||[];
+  if(!done.includes(taskId)) return;
+  const task=state.tasks.find(t=>t.id===taskId);
+  if(!task) return;
+  state.history[tk]=done.filter(id=>id!==taskId);
+  state.total=Math.max(0, state.total-task.pts);
+  state.exch=Math.max(0, state.exch-task.pts);
+  showBoom('↩ '+task.label+'を取り消し');
+  render();
+}
+
+function renderPending(){
+  const pending=state.pendingRewards.filter(p=>!p.confirmed);
+  const list=document.getElementById('pendingList');
+  if(pending.length===0){ list.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0">承認待ちの特典はありません</div>'; return; }
+  list.innerHTML='';
+  pending.forEach((p)=>{
+    const item=document.createElement('div'); item.className='reward-log-item';
+    item.innerHTML=`<span>${p.icon} ${p.label}</span><div style="display:flex;align-items:center;gap:8px"><span class="reward-log-date">${p.date}</span><button class="confirm-btn" onclick="confirmReward(${state.pendingRewards.indexOf(p)})">あげた✓</button></div>`;
+    list.appendChild(item);
+  });
+}
+
+function renderRewardLog(){
+  const confirmed=state.pendingRewards.filter(p=>p.confirmed);
+  const list=document.getElementById('rewardLogList');
+  if(confirmed.length===0){ list.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0">まだありません</div>'; return; }
+  list.innerHTML='';
+  [...confirmed].reverse().forEach(r=>{
+    const item=document.createElement('div'); item.className='reward-log-item';
+    item.innerHTML=`<span>${r.icon} ${r.label}</span><div style="display:flex;align-items:center;gap:8px"><span class="reward-log-date">${r.date}</span><span class="confirmed-badge">あげた✓</span></div>`;
+    list.appendChild(item);
+  });
+}
+
+// ── ACTIONS ──
+function completeTask(task){
+  const tk=today();
+  const done=state.history[tk]||[];
+  if(done.includes(task.id)) return;
+  state.history[tk]=[...done,task.id];
+  state.total+=task.pts;
+  state.exch+=task.pts;
+  showBoom('+'+task.pts+'pt ⚡');
+  render();
+}
+
+function redeemReward(r){
+  if(state.exch<r.cost) return;
+  state.exch-=r.cost;
+  state.rewards.push({...r,date:today()});
+  state.pendingRewards.push({...r,rewardId:r.id,date:today(),confirmed:false});
+  showRewardPopup(r);
+  render();
+}
+
+function confirmReward(idx){
+  if(state.pendingRewards[idx]) state.pendingRewards[idx].confirmed=true;
+  render();
+}
+
+function showBoom(text){
+  const old=document.getElementById('boom'); if(old) old.remove();
+  const el=document.createElement('div'); el.id='boom'; el.textContent=text;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1200);
+}
+
+function showRewardPopup(r){
+  const old=document.getElementById('reward-popup'); if(old) old.remove();
+  const el=document.createElement('div'); el.id='reward-popup';
+  el.innerHTML=`<div class="popup-ico">${r.icon}</div><div class="popup-title">交換完了！</div><div style="font-size:16px;font-weight:900;margin:6px 0">${r.label}</div><div class="popup-sub">親に見せてね🎉</div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2200);
+}
+
+function switchTab(tab){
+  currentTab=tab;
+  const panels={today:'panelToday',rewards:'panelRewards',story:'panelStory',monbook:'panelMonbook',log:'panelLog'};
+  const tabs={today:'tabToday',rewards:'tabRewards',story:'tabStory',monbook:'tabMonbook',log:'tabLog'};
+  Object.keys(panels).forEach(t=>{
+    document.getElementById(panels[t]).style.display=t===tab?'block':'none';
+    document.getElementById(tabs[t]).className='tab'+(t===tab?' active':'');
+  });
+  if(tab==='today') document.getElementById('panelToday').style.cssText='display:flex;flex-direction:column;gap:8px';
+  if(tab==='story') renderStory();
+  if(tab==='monbook') renderMonbook();
+}
+
+// ── PASSCODE ──
+let passcodeInput='';
+function requestParent(){
+  if(parentMode){ exitParent(); return; }
+  passcodeInput=''; updateDots();
+  document.getElementById('passcodeOverlay').style.display='flex';
+}
+function closePasscode(){ document.getElementById('passcodeOverlay').style.display='none'; passcodeInput=''; }
+function numInput(n){
+  if(passcodeInput.length>=PASSCODE.length) return;
+  passcodeInput+=n; updateDots();
+  if(passcodeInput.length===PASSCODE.length){
+    setTimeout(()=>{
+      if(passcodeInput===PASSCODE){
+        closePasscode(); parentMode=true;
+        const btn=document.getElementById('parentBtn');
+        btn.textContent='👤 直幸モード'; btn.className='parent-btn active';
+        switchTab('log'); render();
+      } else {
+        for(let i=0;i<PASSCODE.length;i++) document.getElementById('dot'+i).className='passcode-dot error';
+        setTimeout(()=>{ passcodeInput=''; updateDots(); },700);
+      }
+    },100);
+  }
+}
+function numDel(){ if(passcodeInput.length>0){passcodeInput=passcodeInput.slice(0,-1);updateDots();} }
+function updateDots(){
+  for(let i=0;i<PASSCODE.length;i++)
+    document.getElementById('dot'+i).className='passcode-dot'+(i<passcodeInput.length?' filled':'');
+}
+function exitParent(){
+  parentMode=false;
+  const btn=document.getElementById('parentBtn');
+  btn.textContent='👑 親モード'; btn.className='parent-btn';
+  render();
+}
+
+// ── INIT ──
+render();
+</script>
+</body>
+</html>
