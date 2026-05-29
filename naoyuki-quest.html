@@ -348,12 +348,15 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 const PASSCODE = '1986072453';
 
 const TASKS_DEFAULT = [
-  { id:'z_kai',    label:'Z会',         icon:'📚', pts:40, time:'朝' },
-  { id:'homework', label:'宿題',         icon:'✏️', pts:20, time:'帰宅後' },
-  { id:'piano',    label:'ピアノ練習',  icon:'🎹', pts:5,  time:'夕食後' },
-  { id:'bath',     label:'お風呂',       icon:'🛁', pts:5,  time:'夜' },
-  { id:'teeth',    label:'歯みがき',     icon:'🦷', pts:5,  time:'夜' },
-  { id:'duolingo', label:'デュオリンゴ', icon:'🦉', pts:10, time:'夜' },
+  { id:'wake_up',     label:'朝６時までに起きる',    icon:'🌅', pts:5,  time:'朝' },
+  { id:'teeth_morning', label:'朝のはみがき',        icon:'🦷', pts:5,  time:'朝' },
+  { id:'dishes',      label:'食洗機の食器を片付ける', icon:'🍽️', pts:5,  time:'朝' },
+  { id:'z_kai',       label:'Z会',                  icon:'📚', pts:40, time:'朝' },
+  { id:'homework',    label:'宿題',                  icon:'✏️', pts:20, time:'帰宅後' },
+  { id:'piano',       label:'ピアノ練習',           icon:'🎹', pts:5,  time:'夕食後' },
+  { id:'bath',        label:'お風呂',                icon:'🛁', pts:5,  time:'夜' },
+  { id:'teeth',       label:'夜のはみがき',          icon:'🦷', pts:5,  time:'夜' },
+  { id:'duolingo',    label:'デュオリンゴ',         icon:'🦉', pts:10, time:'夜' },
 ];
 
 const REWARDS_DEFAULT = [
