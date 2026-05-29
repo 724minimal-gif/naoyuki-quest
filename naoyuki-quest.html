@@ -540,6 +540,14 @@ if(!state.tasks)          state.tasks          = TASKS_DEFAULT.map(t=>({...t}));
 if(!state.rewardList)     state.rewardList     = REWARDS_DEFAULT.map(r=>({...r}));
 if(!state.pendingRewards) state.pendingRewards = [];
 
+// 新しいタスクを自動追加（古いlocalStorageでもポイントは残す）
+const existingTaskIds = state.tasks.map(t => t.id);
+const newTasksToAdd = TASKS_DEFAULT.filter(t => !existingTaskIds.includes(t.id));
+if(newTasksToAdd.length > 0) {
+  state.tasks = [...newTasksToAdd, ...state.tasks];
+  save(state); // 更新を保存
+}
+
 let parentMode = false;
 let currentTab = 'today';
 
