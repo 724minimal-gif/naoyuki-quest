@@ -4,10 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0a0a0f">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="直幸QUEST">
-<link rel="manifest" href="/naoyuki-quest/manifest.json">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230a0a0f' width='192' height='192'/><text x='50%' y='50%' font-size='120' font-family='Arial' fill='%23ffd700' text-anchor='middle' dominant-baseline='central' font-weight='bold'>直</text></svg>">
 <title>直幸QUEST</title>
 <link href="https://fonts.googleapis.com/css2?family=Bangers&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
@@ -1147,15 +1143,6 @@ function exitParent(){
 
 // ── INIT ──
 render();
-
-// ── SERVICE WORKER REGISTRATION ──
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/naoyuki-quest/sw.js').then(reg=>{
-    console.log('ServiceWorker registered:', reg);
-  }).catch(err=>{
-    console.log('ServiceWorker registration failed:', err);
-  });
-}
 </script>
 </body>
 </html>
