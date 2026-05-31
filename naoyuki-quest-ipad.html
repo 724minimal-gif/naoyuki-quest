@@ -346,7 +346,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 
 <script>
 // ── CONSTANTS ──
-const PASSCODE = '1986072453';
 
 const TASKS_DEFAULT = [
   { id:'wake_up',     label:'朝６時までに起きる',    icon:'🌅', pts:5,  time:'朝' },
@@ -543,6 +542,8 @@ function save(s){ try{localStorage.setItem('naoyuki_battle3',JSON.stringify(s));
 
 const DEFAULT_STATE = {
   total:0, exch:0, history:{}, rewards:[], pendingRewards:[],
+  passcode: '9999',
+  heroName: 'ナオ',
   tasks: TASKS_DEFAULT.map(t=>({...t})),
   rewardList: REWARDS_DEFAULT.map(r=>({...r})),
 };
@@ -550,6 +551,8 @@ let state = load() || JSON.parse(JSON.stringify(DEFAULT_STATE));
 if(!state.tasks)          state.tasks          = TASKS_DEFAULT.map(t=>({...t}));
 if(!state.rewardList)     state.rewardList     = REWARDS_DEFAULT.map(r=>({...r}));
 if(!state.pendingRewards) state.pendingRewards = [];
+if(!state.passcode)       state.passcode       = '9999';
+if(!state.heroName)       state.heroName       = 'ナオ';
 
 // 新しいタスクを自動追加（古いlocalStorageでもポイントは残す）
 const existingTaskIds = state.tasks.map(t => t.id);
@@ -729,7 +732,7 @@ function renderStory(){
         html+=`<div class="scene-card">
           <div class="scene-num">第${num}節 ／ ${sc.pt}pt解放</div>
           ${sc.monsterImg?`<div class="scene-monster"><img src="${sc.monsterImg}" alt="${sc.monster}"><div class="scene-monster-name">✨ ${sc.monster} が仲間に！</div></div>`:''}
-          <div class="scene-text">${sc.text}</div>
+          <div class="scene-text">${sc.text.replace(/ナオ/g, state.heroName||'ナオ')}</div>
         </div>`;
       } else {
         html+=`<div class="scene-locked">
@@ -847,18 +850,49 @@ function renderTitleSettings(){
     <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
       <div style="font-size:11px;color:var(--muted);margin-bottom:6px">ゲーム名</div>
       <input type="text" id="gameTitle" style="background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--gold);font-family:'Bangers','M PLUS Rounded 1c';font-size:16px;font-weight:900;padding:8px 10px;outline:none;width:100%;box-sizing:border-box" value="${state.gameTitle||'直幸QUEST'}">
-      <div style="font-size:10px;color:var(--muted);margin-top:6px">※ この名前はホーム画面のタイトルに反映されます</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px">※ ホーム画面のタイトルに反映されます</div>
     </div>
-    <button onclick="saveGameTitle()" style="width:100%;background:var(--purple);border:none;color:#0a0a0f;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;margin-top:8px">保存</button>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">主人公の名前</div>
+      <input type="text" id="heroNameInput" style="background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--green);font-family:'M PLUS Rounded 1c';font-size:16px;font-weight:900;padding:8px 10px;outline:none;width:100%;box-sizing:border-box" value="${state.heroName||'ナオ'}">
+      <div style="font-size:10px;color:var(--muted);margin-top:6px">※ ストーリーの主人公名に反映されます</div>
+    </div>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">🔒 親モードのパスワード変更</div>
+      <input type="tel" id="newPasscode" maxlength="10" placeholder="新しいパスワード（数字）" style="background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--purple);font-family:'M PLUS Rounded 1c';font-size:16px;font-weight:900;padding:8px 10px;outline:none;width:100%;box-sizing:border-box;letter-spacing:4px">
+      <input type="tel" id="newPasscodeConfirm" maxlength="10" placeholder="もう一度入力" style="background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--purple);font-family:'M PLUS Rounded 1c';font-size:16px;font-weight:900;padding:8px 10px;outline:none;width:100%;box-sizing:border-box;letter-spacing:4px;margin-top:6px">
+      <div id="passcodeMsg" style="font-size:11px;margin-top:6px;color:var(--muted)">現在：${state.passcode.length}桁のパスワードが設定されています</div>
+    </div>
+    <button onclick="saveTitleSettings()" style="width:100%;background:var(--purple);border:none;color:#0a0a0f;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;font-family:'M PLUS Rounded 1c'">すべて保存</button>
   `;
 }
 
-function saveGameTitle(){
-  const input=document.getElementById('gameTitle');
-  if(input) state.gameTitle=input.value.trim()||'直幸QUEST';
+function saveTitleSettings(){
+  // ゲーム名
+  const titleInput=document.getElementById('gameTitle');
+  if(titleInput) state.gameTitle=titleInput.value.trim()||'直幸QUEST';
+  // 主人公名
+  const heroInput=document.getElementById('heroNameInput');
+  if(heroInput && heroInput.value.trim()) state.heroName=heroInput.value.trim();
+  // パスワード変更
+  const np=document.getElementById('newPasscode');
+  const nc=document.getElementById('newPasscodeConfirm');
+  const msg=document.getElementById('passcodeMsg');
+  if(np && np.value){
+    if(!/^\d+$/.test(np.value)){ if(msg) msg.style.color='var(--fire)'; if(msg) msg.textContent='❌ 数字のみ入力してください'; save(state); return; }
+    if(np.value.length<4){ if(msg) msg.style.color='var(--fire)'; if(msg) msg.textContent='❌ 4桁以上で設定してください'; save(state); return; }
+    if(np.value!==nc.value){ if(msg) msg.style.color='var(--fire)'; if(msg) msg.textContent='❌ パスワードが一致しません'; save(state); return; }
+    state.passcode=np.value;
+    if(np) np.value=''; if(nc) nc.value='';
+  }
   save(state);
   document.querySelector('.logo').innerHTML=`${state.gameTitle.split('QUEST')[0]}<span>QUEST</span>`;
+  renderTitleSettings();
   showBoom('✓ 保存完了');
+}
+
+function saveGameTitle(){
+  saveTitleSettings();
 }
 
 function renderTaskSettings(){
@@ -1142,17 +1176,19 @@ function requestParent(){
 }
 function closePasscode(){ document.getElementById('passcodeOverlay').style.display='none'; passcodeInput=''; }
 function numInput(n){
-  if(passcodeInput.length>=PASSCODE.length) return;
+  const code=state.passcode||'9999';
+  if(passcodeInput.length>=code.length) return;
   passcodeInput+=n; updateDots();
-  if(passcodeInput.length===PASSCODE.length){
+  if(passcodeInput.length===code.length){
     setTimeout(()=>{
-      if(passcodeInput===PASSCODE){
+      if(passcodeInput===code){
         closePasscode(); parentMode=true;
         const btn=document.getElementById('parentBtn');
         btn.textContent='👤 直幸モード'; btn.className='parent-btn active';
         switchTab('log'); render();
       } else {
-        for(let i=0;i<PASSCODE.length;i++) document.getElementById('dot'+i).className='passcode-dot error';
+        const code2=state.passcode||'9999';
+        for(let i=0;i<code2.length;i++) document.getElementById('dot'+i).className='passcode-dot error';
         setTimeout(()=>{ passcodeInput=''; updateDots(); },700);
       }
     },100);
@@ -1160,8 +1196,17 @@ function numInput(n){
 }
 function numDel(){ if(passcodeInput.length>0){passcodeInput=passcodeInput.slice(0,-1);updateDots();} }
 function updateDots(){
-  for(let i=0;i<PASSCODE.length;i++)
-    document.getElementById('dot'+i).className='passcode-dot'+(i<passcodeInput.length?' filled':'');
+  const code=state.passcode||'9999';
+  for(let i=0;i<10;i++){
+    const dot=document.getElementById('dot'+i);
+    if(!dot) continue;
+    if(i<code.length){
+      dot.style.display='';
+      dot.className='passcode-dot'+(i<passcodeInput.length?' filled':'');
+    } else {
+      dot.style.display='none';
+    }
+  }
 }
 function exitParent(){
   parentMode=false;
