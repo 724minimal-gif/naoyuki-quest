@@ -569,6 +569,7 @@ const DEFAULT_STATE = {
   rewardList: REWARDS_DEFAULT.map(r=>({...r})),
   gameTimeMinutes: 0,
   gameTimeVisible: true,
+  gameTimeLog: [],
 };
 let state = load() || JSON.parse(JSON.stringify(DEFAULT_STATE));
 if(!state.tasks)          state.tasks          = TASKS_DEFAULT.map(t=>({...t}));
@@ -578,6 +579,7 @@ if(!state.passcode)       state.passcode       = '9999';
 if(!state.heroName)       state.heroName       = 'ナオ';
 if(state.gameTimeMinutes === undefined) state.gameTimeMinutes = 0;
 if(state.gameTimeVisible === undefined) state.gameTimeVisible = true;
+if(!state.gameTimeLog)    state.gameTimeLog    = [];
 
 // 新しいタスクを自動追加（古いlocalStorageでもポイントは残す）
 const existingTaskIds = state.tasks.map(t => t.id);
@@ -1295,6 +1297,36 @@ function adjustGameTime(delta){
   renderGameTimeSettings();
 }
 
+function addGameTimeRecord(){
+  const labelEl=document.getElementById('gtLabel');
+  const signEl=document.getElementById('gtSign');
+  const hEl=document.getElementById('gtH');
+  const mEl=document.getElementById('gtM');
+  if(!labelEl||!labelEl.value.trim()){showBoom('内容を入力してね');return;}
+  const hours=parseInt(hEl?hEl.value:0)||0;
+  const mins=parseInt(mEl?mEl.value:0)||0;
+  const delta=(hours*60+mins)*(parseInt(signEl?signEl.value:1)||1);
+  if(delta===0){showBoom('時間を入力してね');return;}
+  const next=(state.gameTimeMinutes||0)+delta;
+  if(next<-600||next>600){showBoom('範囲外です（±10時間まで）');return;}
+  const d=new Date();
+  const jst=new Date(d.getTime()+9*60*60*1000);
+  const dateStr=(jst.getMonth()+1)+'/'+(jst.getDate());
+  state.gameTimeLog.push({date:dateStr,label:labelEl.value.trim(),delta});
+  state.gameTimeMinutes=next;
+  save(state);
+  updateGameTimeDisplay();
+  renderGameTimeSettings();
+  showBoom('記録しました ✓');
+}
+
+function deleteGameTimeRecord(idx){
+  if(!state.gameTimeLog) return;
+  state.gameTimeLog.splice(idx,1);
+  save(state);
+  renderGameTimeSettings();
+}
+
 function toggleGameTimeVisible(){
   state.gameTimeVisible=(state.gameTimeVisible===false)?true:false;
   save(state);
@@ -1307,6 +1339,16 @@ function gameTimeBtnSt(type){
   return "background:rgba(0,180,255,.12);border:1px solid rgba(0,180,255,.35);color:var(--blue);border-radius:8px;padding:9px 0;cursor:pointer;font-size:13px;font-weight:700;font-family:'M PLUS Rounded 1c',sans-serif;flex:1";
 }
 
+function gameTimeDeltaStr(delta){
+  const dH=Math.floor(Math.abs(delta)/60);
+  const dM=Math.abs(delta)%60;
+  let s=delta>=0?'＋':'−';
+  if(dH>0&&dM>0) s+=dH+'時間'+dM+'分';
+  else if(dH>0)  s+=dH+'時間';
+  else           s+=dM+'分';
+  return s;
+}
+
 function renderGameTimeSettings(){
   const el=document.getElementById('gameTimeSettings');
   if(!el) return;
@@ -1316,6 +1358,29 @@ function renderGameTimeSettings(){
   const sign=mins<0?'−':'';
   const dispStr=sign+absH+'時間'+absM+'分';
   const visLabel=(state.gameTimeVisible===false)?'👁 ゲーム時間を表示する':'🙈 ゲーム時間を非表示にする';
+
+  const log=state.gameTimeLog||[];
+  let logHtml='';
+  if(log.length===0){
+    logHtml='<div style="font-size:13px;color:var(--muted);padding:6px 0">まだ記録がありません</div>';
+  } else {
+    [...log].reverse().forEach((entry,ri)=>{
+      const idx=log.length-1-ri;
+      const ds=gameTimeDeltaStr(entry.delta);
+      const col=entry.delta>=0?'var(--blue)':'var(--fire)';
+      logHtml+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:4px;font-size:13px">
+        <div>
+          <span style="color:var(--muted);font-size:11px;margin-right:8px">${entry.date}</span>
+          <span style="font-weight:700">${entry.label}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:16px;color:${col}">${ds}</span>
+          <button onclick="deleteGameTimeRecord(${idx})" style="background:rgba(255,77,0,.1);border:1px solid rgba(255,77,0,.25);color:#ff6644;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;font-weight:700">✕</button>
+        </div>
+      </div>`;
+    });
+  }
+
   el.innerHTML=`
     <div style="background:rgba(0,180,255,.05);border:1px solid rgba(0,180,255,.2);border-radius:12px;padding:12px;margin-bottom:8px">
       <div style="text-align:center;font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:26px;color:var(--blue);margin-bottom:12px;text-shadow:0 0 12px rgba(0,180,255,.4)">${dispStr}</div>
@@ -1327,7 +1392,24 @@ function renderGameTimeSettings(){
         <button onclick="adjustGameTime(60)"  style="${gameTimeBtnSt('plus')}">＋1時間</button>
       </div>
       <button onclick="toggleGameTimeVisible()" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:8px;padding:9px;font-weight:700;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif;margin-top:4px">${visLabel}</button>
-    </div>`;
+    </div>
+    <div style="background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.15);border-radius:12px;padding:12px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:10px;font-weight:700">📝 変更を記録する</div>
+      <input type="text" id="gtLabel" placeholder="内容（例：ポイント交換・こたくんの家）" style="${inputSt()};width:100%;font-size:13px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <select id="gtSign" style="${inputSt()};width:56px;font-size:16px;font-weight:900;text-align:center">
+          <option value="1">＋</option>
+          <option value="-1">−</option>
+        </select>
+        <input type="number" id="gtH" min="0" max="10" value="0" style="${inputSt()};width:52px;text-align:center;font-size:16px;font-weight:900;color:var(--blue)">
+        <span style="font-size:12px;color:var(--muted)">時間</span>
+        <input type="number" id="gtM" min="0" max="59" value="0" style="${inputSt()};width:52px;text-align:center;font-size:16px;font-weight:900;color:var(--blue)">
+        <span style="font-size:12px;color:var(--muted)">分</span>
+      </div>
+      <button onclick="addGameTimeRecord()" style="width:100%;background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.35);color:var(--gold);border-radius:8px;padding:9px;font-weight:700;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif">📝 記録して適用</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">📋 変更履歴</div>
+    ${logHtml}`;
 }
 
 // ── INIT ──
