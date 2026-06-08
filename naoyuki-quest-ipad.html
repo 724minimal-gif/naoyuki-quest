@@ -204,6 +204,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .monbook-unlock-pt{font-size:9px;color:rgba(255,215,0,.4);margin-top:2px}
 .monbook-count{font-size:12px;color:var(--muted);margin-bottom:10px}
 .monbook-count span{color:var(--gold);font-weight:900}
+
+/* GAME TIME */
+.game-time-box{background:linear-gradient(135deg,#1a1a2e,#12121e);border:2px solid var(--border);border-radius:16px;padding:14px 18px;margin-top:16px;text-align:center;position:relative;overflow:hidden}
+.game-time-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple))}
+.game-time-label{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.game-time-val{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:32px;color:var(--blue);letter-spacing:1px;text-shadow:0 0 15px rgba(0,180,255,.4);line-height:1.2}
 </style>
 </head>
 <body>
@@ -304,6 +310,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       <div class="settings-card" id="ptSettings"></div>
       <div class="section-title">🔧 ポイント調整（動作確認用）</div>
       <div id="pointAdjustSettings"></div>
+      <div class="section-title">⏱ ゲーム時間</div>
+      <div id="gameTimeSettings"></div>
       <div id="pendingSection">
         <div class="section-title">✅ 承認待ちの特典</div>
         <div id="pendingList"></div>
@@ -313,6 +321,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     </div>
     <div class="section-title">📅 これまでの記録</div>
     <div class="history-list" id="historyList"></div>
+  </div>
+
+  <!-- GAME TIME DISPLAY -->
+  <div id="gameTimeBox" class="game-time-box">
+    <div class="game-time-label">現在のゲーム時間</div>
+    <div class="game-time-val" id="gameTimeDisplay">0時間0分</div>
   </div>
 </div>
 
@@ -553,6 +567,8 @@ const DEFAULT_STATE = {
   heroName: 'ナオ',
   tasks: TASKS_DEFAULT.map(t=>({...t})),
   rewardList: REWARDS_DEFAULT.map(r=>({...r})),
+  gameTimeMinutes: 0,
+  gameTimeVisible: true,
 };
 let state = load() || JSON.parse(JSON.stringify(DEFAULT_STATE));
 if(!state.tasks)          state.tasks          = TASKS_DEFAULT.map(t=>({...t}));
@@ -560,6 +576,8 @@ if(!state.rewardList)     state.rewardList     = REWARDS_DEFAULT.map(r=>({...r})
 if(!state.pendingRewards) state.pendingRewards = [];
 if(!state.passcode)       state.passcode       = '9999';
 if(!state.heroName)       state.heroName       = 'ナオ';
+if(state.gameTimeMinutes === undefined) state.gameTimeMinutes = 0;
+if(state.gameTimeVisible === undefined) state.gameTimeVisible = true;
 
 // 新しいタスクを自動追加（古いlocalStorageでもポイントは残す）
 const existingTaskIds = state.tasks.map(t => t.id);
@@ -701,7 +719,8 @@ function render(){
   });
 
   document.getElementById('parentSection').style.display=parentMode?'block':'none';
-  if(parentMode){ renderTitleSettings(); renderTaskSettings(); renderRewardSettings(); renderTodayUndo(); renderWeeklyReport(); renderPtSettings(); renderPointAdjust(); renderPending(); renderRewardLog(); }
+  if(parentMode){ renderTitleSettings(); renderTaskSettings(); renderRewardSettings(); renderTodayUndo(); renderWeeklyReport(); renderPtSettings(); renderPointAdjust(); renderGameTimeSettings(); renderPending(); renderRewardLog(); }
+  updateGameTimeDisplay();
 
   // History
   const histList=document.getElementById('historyList');
@@ -1251,6 +1270,64 @@ function exitParent(){
   const btn=document.getElementById('parentBtn');
   btn.textContent='👑 親モード'; btn.className='parent-btn';
   render();
+}
+
+// ── GAME TIME ──
+function updateGameTimeDisplay(){
+  const box=document.getElementById('gameTimeBox');
+  if(!box) return;
+  box.style.display=(state.gameTimeVisible===false)?'none':'block';
+  const mins=state.gameTimeMinutes||0;
+  const absH=Math.floor(Math.abs(mins)/60);
+  const absM=Math.abs(mins)%60;
+  const sign=mins<0?'−':'';
+  const el=document.getElementById('gameTimeDisplay');
+  if(el) el.textContent=sign+absH+'時間'+absM+'分';
+}
+
+function adjustGameTime(delta){
+  const cur=state.gameTimeMinutes||0;
+  const next=cur+delta;
+  if(next<-600||next>600) return;
+  state.gameTimeMinutes=next;
+  save(state);
+  updateGameTimeDisplay();
+  renderGameTimeSettings();
+}
+
+function toggleGameTimeVisible(){
+  state.gameTimeVisible=(state.gameTimeVisible===false)?true:false;
+  save(state);
+  updateGameTimeDisplay();
+  renderGameTimeSettings();
+}
+
+function gameTimeBtnSt(type){
+  if(type==='minus') return "background:rgba(255,77,0,.15);border:1px solid rgba(255,77,0,.35);color:var(--fire);border-radius:8px;padding:9px 0;cursor:pointer;font-size:13px;font-weight:700;font-family:'M PLUS Rounded 1c',sans-serif;flex:1";
+  return "background:rgba(0,180,255,.12);border:1px solid rgba(0,180,255,.35);color:var(--blue);border-radius:8px;padding:9px 0;cursor:pointer;font-size:13px;font-weight:700;font-family:'M PLUS Rounded 1c',sans-serif;flex:1";
+}
+
+function renderGameTimeSettings(){
+  const el=document.getElementById('gameTimeSettings');
+  if(!el) return;
+  const mins=state.gameTimeMinutes||0;
+  const absH=Math.floor(Math.abs(mins)/60);
+  const absM=Math.abs(mins)%60;
+  const sign=mins<0?'−':'';
+  const dispStr=sign+absH+'時間'+absM+'分';
+  const visLabel=(state.gameTimeVisible===false)?'👁 ゲーム時間を表示する':'🙈 ゲーム時間を非表示にする';
+  el.innerHTML=`
+    <div style="background:rgba(0,180,255,.05);border:1px solid rgba(0,180,255,.2);border-radius:12px;padding:12px;margin-bottom:8px">
+      <div style="text-align:center;font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:26px;color:var(--blue);margin-bottom:12px;text-shadow:0 0 12px rgba(0,180,255,.4)">${dispStr}</div>
+      <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:8px">−10時間〜＋10時間（分刻みで変更）</div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <button onclick="adjustGameTime(-60)" style="${gameTimeBtnSt('minus')}">−1時間</button>
+        <button onclick="adjustGameTime(-1)"  style="${gameTimeBtnSt('minus')}">−1分</button>
+        <button onclick="adjustGameTime(1)"   style="${gameTimeBtnSt('plus')}">＋1分</button>
+        <button onclick="adjustGameTime(60)"  style="${gameTimeBtnSt('plus')}">＋1時間</button>
+      </div>
+      <button onclick="toggleGameTimeVisible()" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:8px;padding:9px;font-weight:700;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif;margin-top:4px">${visLabel}</button>
+    </div>`;
 }
 
 // ── INIT ──
