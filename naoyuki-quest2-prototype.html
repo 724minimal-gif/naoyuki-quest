@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>直幸QUEST2 〜南の新大陸と光の絆〜（試作版）</title>
+<style>
+:root{
+  --bg:#0a0e1a; --panel:#141b2e; --panel2:#1c2540;
+  --border:#2a3a5c; --text:#e8eef8; --sub:#8fa3c8;
+  --gold:#ffd166; --fire:#ff6b35; --water:#4cc9f0; --light:#a7f3d0;
+  --hp:#4ade80; --hpBad:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Hiragino Maru Gothic ProN','Hiragino Kaku Gothic ProN',sans-serif;overflow-x:hidden;}
+#app{max-width:820px;margin:0 auto;padding:0 12px 80px;}
+
+/* ── 3D canvas ── */
+#bg3d{position:fixed;inset:0;z-index:0;}
+#app,#tabbar{position:relative;z-index:1;}
+
+/* ── header ── */
+.hero-header{text-align:center;padding:18px 0 6px;}
+.hero-header h1{
+  font-size:26px;letter-spacing:2px;
+  background:linear-gradient(135deg,var(--gold),var(--fire),var(--water));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 12px rgba(255,209,102,.35));
+}
+.hero-header .sub{color:var(--sub);font-size:12px;margin-top:4px;}
+.proto-badge{display:inline-block;margin-top:6px;font-size:11px;color:var(--bg);background:var(--gold);border-radius:999px;padding:2px 10px;font-weight:bold;}
+
+/* ── panels ── */
+.panel{background:rgba(20,27,46,.88);border:1px solid var(--border);border-radius:16px;padding:16px;margin-top:14px;backdrop-filter:blur(6px);}
+.panel h2{font-size:16px;color:var(--gold);margin-bottom:10px;}
+.stats-row{display:flex;gap:10px;margin-top:14px;}
+.stat{flex:1;background:rgba(28,37,64,.9);border:1px solid var(--border);border-radius:14px;padding:10px;text-align:center;}
+.stat .v{font-size:22px;font-weight:bold;color:var(--gold);}
+.stat .l{font-size:11px;color:var(--sub);margin-top:2px;}
+
+/* ── duo bond gauge ── */
+.bond-wrap{margin-top:8px;}
+.bond-label{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:4px;}
+.bond-bar{height:14px;background:#0d1322;border-radius:999px;overflow:hidden;border:1px solid var(--border);}
+.bond-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--water),var(--light),var(--gold));transition:width .6s ease;}
+
+/* ── tasks ── */
+.task{display:flex;align-items:center;gap:12px;background:rgba(28,37,64,.9);border:1px solid var(--border);border-radius:14px;padding:12px;margin-top:8px;cursor:pointer;transition:transform .1s;}
+.task:active{transform:scale(.98);}
+.task.done{opacity:.55;border-color:var(--hp);}
+.task .check{width:26px;height:26px;border-radius:8px;border:2px solid var(--sub);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.task.done .check{background:var(--hp);border-color:var(--hp);color:#06281a;}
+.task .name{flex:1;font-size:15px;}
+.task .pt{color:var(--gold);font-weight:bold;font-size:14px;}
+
+/* ── battle ── */
+#battleStage{width:100%;aspect-ratio:16/10;border-radius:14px;overflow:hidden;border:2px solid var(--border);background:#05070f;}
+.hpbars{display:flex;justify-content:space-between;gap:14px;margin-top:10px;}
+.hpunit{flex:1;}
+.hpunit .nm{font-size:12px;color:var(--sub);margin-bottom:3px;display:flex;justify-content:space-between;}
+.hpbar{height:12px;background:#0d1322;border-radius:999px;overflow:hidden;border:1px solid var(--border);}
+.hpfill{height:100%;background:var(--hp);border-radius:999px;transition:width .4s ease;}
+.hpfill.bad{background:var(--hpBad);}
+.btl-actions{display:flex;gap:8px;margin-top:12px;}
+.btn{flex:1;border:none;border-radius:12px;padding:13px 8px;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit;}
+.btn-nao{background:linear-gradient(135deg,var(--gold),var(--fire));color:#231200;}
+.btn-rai{background:linear-gradient(135deg,var(--water),#7c8cf8);color:#001a2e;}
+.btn-duo{background:linear-gradient(135deg,var(--light),var(--gold),var(--fire));color:#1a1200;}
+.btn:disabled{opacity:.4;}
+#btlLog{margin-top:10px;font-size:13px;color:var(--sub);min-height:40px;line-height:1.7;}
+
+/* ── story ── */
+.scene{background:rgba(28,37,64,.9);border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:10px;font-size:14px;line-height:1.9;}
+.scene.locked{opacity:.45;}
+.scene .pt-tag{font-size:11px;color:var(--gold);margin-bottom:6px;}
+.scene .speaker-rai{color:var(--water);font-weight:bold;}
+.scene .speaker-nao{color:var(--gold);font-weight:bold;}
+
+/* ── tabs ── */
+#tabbar{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(10,14,26,.95);border-top:1px solid var(--border);backdrop-filter:blur(10px);}
+.tab{flex:1;border:none;background:none;color:var(--sub);font-size:12px;padding:10px 0 14px;cursor:pointer;font-family:inherit;}
+.tab.active{color:var(--gold);}
+.tab .ic{font-size:20px;display:block;margin-bottom:2px;}
+.view{display:none;}
+.view.active{display:block;}
+</style>
+</head>
+<body>
+<canvas id="bg3d"></canvas>
+<div id="app">
+  <div class="hero-header">
+    <h1>直幸QUEST2</h1>
+    <div class="sub">〜南の新大陸と光の絆〜</div>
+    <div class="proto-badge">試作版 ver 0.1</div>
+  </div>
+
+  <!-- HOME -->
+  <div class="view active" id="view-home">
+    <div class="stats-row">
+      <div class="stat"><div class="v" id="stTotal">0</div><div class="l">累積ポイント</div></div>
+      <div class="stat"><div class="v" id="stToday">0</div><div class="l">今日のポイント</div></div>
+      <div class="stat"><div class="v" id="stStreak">0</div><div class="l">連続日数</div></div>
+    </div>
+    <div class="panel">
+      <h2>🤝 ナオ＆ライ 絆ゲージ</h2>
+      <div class="bond-wrap">
+        <div class="bond-label"><span>二人の絆</span><span id="bondPct">0%</span></div>
+        <div class="bond-bar"><div class="bond-fill" id="bondFill" style="width:0%"></div></div>
+      </div>
+      <div style="font-size:12px;color:var(--sub);margin-top:8px;line-height:1.7;">
+        クエストをこなすたびに絆が深まる。絆ゲージが満タンになると、バトルで<b style="color:var(--gold)">合体必殺技「ダブル・ライト」</b>が使えるようになる！
+      </div>
+    </div>
+    <div class="panel">
+      <h2>📋 今日のクエスト</h2>
+      <div id="taskList"></div>
+    </div>
+  </div>
+
+  <!-- BATTLE -->
+  <div class="view" id="view-battle">
+    <div class="panel">
+      <h2>⚔️ 3Dバトル（デモ）：荒波のガーディアン</h2>
+      <div id="battleStage"></div>
+      <div class="hpbars">
+        <div class="hpunit"><div class="nm"><span>🛡️ ナオ＆ライ</span><span id="heroHpTxt">100/100</span></div><div class="hpbar"><div class="hpfill" id="heroHp" style="width:100%"></div></div></div>
+        <div class="hpunit"><div class="nm"><span>👹 ガーディアン</span><span id="foeHpTxt">120/120</span></div><div class="hpbar"><div class="hpfill" id="foeHp" style="width:100%"></div></div></div>
+      </div>
+      <div class="btl-actions">
+        <button class="btn btn-nao" id="btnNao" onclick="attack('nao')">🔥 ナオの剣撃</button>
+        <button class="btn btn-rai" id="btnRai" onclick="attack('rai')">💧 ライの光魔法</button>
+        <button class="btn btn-duo" id="btnDuo" onclick="attack('duo')" disabled>✨ ダブル・ライト</button>
+      </div>
+      <div id="btlLog">バトル開始！ナオとライが構えた。</div>
+    </div>
+  </div>
+
+  <!-- STORY -->
+  <div class="view" id="view-story">
+    <div class="panel">
+      <h2>📖 第1章「二人の船出」</h2>
+      <div id="storyList"></div>
+    </div>
+  </div>
+</div>
+
+<div id="tabbar">
+  <button class="tab active" data-v="home" onclick="go('home')"><span class="ic">🏠</span>ホーム</button>
+  <button class="tab" data-v="battle" onclick="go('battle')"><span class="ic">⚔️</span>バトル</button>
+  <button class="tab" data-v="story" onclick="go('story')"><span class="ic">📖</span>ストーリー</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script>
+'use strict';
+/* =====================================================
+   直幸QUEST2 試作版
+   - localStorage key: naoyuki_quest2_proto（本編とは別キー）
+   - 3D: Three.js r160（CDN）
+   ===================================================== */
+
+// ── タスク（本編と同じ9つ） ──
+const TASKS = [
+  {id:'wake',   name:'朝６時までに起きる', pt:5},
+  {id:'mteeth', name:'朝のはみがき',       pt:5},
+  {id:'dish',   name:'食洗機の食器を片付ける', pt:5},
+  {id:'zkai',   name:'Z会',               pt:40},
+  {id:'hw',     name:'宿題',              pt:20},
+  {id:'piano',  name:'ピアノ',            pt:5},
+  {id:'bath',   name:'お風呂',            pt:5},
+  {id:'nteeth', name:'夜のはみがき',       pt:5},
+  {id:'duo',    name:'デュオリンゴ',       pt:10},
+];
+
+// ── シーズン2 第1章（試作：5シーン） ──
+const STORY = [
+  {pt:0, text:'ハジマリ村の港。大きな白い帆船の前に、ナオとライが並んで立っていた。<span class="speaker-rai">ライ</span>「本当に、俺も行っていいのか」<span class="speaker-nao">ナオ</span>「当たり前だろ。約束したじゃないか。一緒に、また始めようって」ライは新しいクエストの書を胸に抱えた。真っ白なページの一番上に、今日の日付と最初のクエストが書き込まれていた。百年ぶりの、一行目だった。'},
+  {pt:30, text:'船が南へ進む。ライは船べりで、慣れない手つきでクエストの書をつけていた。<span class="speaker-rai">ライ</span>「……たった一行書くだけなのに、手が震える」<span class="speaker-nao">ナオ</span>「最初はみんなそうだよ。でも明日も書けば、震えなくなる」ライは笑った。百年間忘れていた、続けることの怖さと、嬉しさを思い出しながら。'},
+  {pt:70, text:'三日目の朝、ライが誰よりも早く甲板に出ていた。朝日に向かって、剣の素振りをしている。<span class="speaker-nao">ナオ</span>「早いね」<span class="speaker-rai">ライ</span>「三日続いた。たった三日だ。でも、百年で一番誇らしい三日だ」その目には、かつてのヤミノ王の影はもうなかった。ナオは隣に並び、一緒に剣を振った。'},
+  {pt:120, text:'突然、海が割れた。巨大な水の巨人「荒波のガーディアン」が船の行く手を塞いだ。「新大陸に渡りたくば、二人の絆を見せてみよ」ナオが剣を抜き、ライが光の魔法を構えた。二人が背中合わせに立つ。<span class="speaker-nao">ナオ</span>「ライ、合わせられるか」<span class="speaker-rai">ライ</span>「ああ。お前となら」初めての、二人での戦いが始まった。'},
+  {pt:180, text:'ナオの剣撃とライの光魔法が重なった瞬間、二つの光が螺旋を描いて一つになった。合体技「ダブル・ライト」。荒波のガーディアンは光に貫かれ、静かに頭を垂れた。「見事な絆だ。通るがよい」海が開き、水平線の向こうに緑の大陸が見えた。<span class="speaker-rai">ライ</span>「あれが、南の新大陸……」二人の新しい冒険が、いま本当に始まる。第1章・完。'},
+];
+
+// ── 状態 ──
+const KEY='naoyuki_quest2_proto';
+function load(){try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function today(){const d=new Date(Date.now()+9*36e5);return d.toISOString().split('T')[0];}
+let state = load() || {total:0, history:{}, streak:0, lastDay:null};
+
+// ── レンダリング ──
+function todayDone(){return state.history[today()]||[];}
+function todayPt(){return todayDone().reduce((a,id)=>{const t=TASKS.find(t=>t.id===id);return a+(t?t.pt:0);},0);}
+function bondPct(){return Math.min(100, Math.round(todayDone().length/TASKS.length*100));}
+
+function render(){
+  document.getElementById('stTotal').textContent=state.total;
+  document.getElementById('stToday').textContent=todayPt();
+  document.getElementById('stStreak').textContent=state.streak;
+  const pct=bondPct();
+  document.getElementById('bondFill').style.width=pct+'%';
+  document.getElementById('bondPct').textContent=pct+'%';
+  document.getElementById('btnDuo').disabled = pct<100 || btl.over;
+
+  const list=document.getElementById('taskList');
+  list.innerHTML='';
+  const done=todayDone();
+  TASKS.forEach(t=>{
+    const d=done.includes(t.id);
+    const el=document.createElement('div');
+    el.className='task'+(d?' done':'');
+    el.innerHTML=`<div class="check">${d?'✓':''}</div><div class="name">${t.name}</div><div class="pt">+${t.pt}P</div>`;
+    el.onclick=()=>toggle(t.id);
+    list.appendChild(el);
+  });
+
+  const sl=document.getElementById('storyList');
+  sl.innerHTML='';
+  STORY.forEach(sc=>{
+    const open=state.total>=sc.pt;
+    const el=document.createElement('div');
+    el.className='scene'+(open?'':' locked');
+    el.innerHTML=`<div class="pt-tag">${sc.pt}P で解放</div>${open?sc.text:'🔒 クエストを続けると読めるようになる'}`;
+    sl.appendChild(el);
+  });
+}
+
+function toggle(id){
+  const d=today();
+  if(!state.history[d]) state.history[d]=[];
+  const arr=state.history[d];
+  const t=TASKS.find(t=>t.id===id);
+  const i=arr.indexOf(id);
+  if(i>=0){arr.splice(i,1); state.total-=t.pt;}
+  else{
+    arr.push(id); state.total+=t.pt;
+    if(state.lastDay!==d){
+      const y=new Date(Date.now()+9*36e5-864e5).toISOString().split('T')[0];
+      state.streak=(state.lastDay===y)?state.streak+1:1;
+      state.lastDay=d;
+    }
+  }
+  save(); render();
+}
+
+function go(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelector(`.tab[data-v="${v}"]`).classList.add('active');
+  if(v==='battle') initBattle3D();
+}
+
+/* =====================================================
+   3D 背景（タイトル：海と新大陸の島）
+   ===================================================== */
+let bgRenderer, bgScene, bgCam, island, ocean, stars=[];
+function initBg3D(){
+  const cv=document.getElementById('bg3d');
+  bgRenderer=new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:false});
+  bgRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  bgScene=new THREE.Scene();
+  bgScene.fog=new THREE.Fog(0x0a0e1a, 18, 60);
+  bgScene.background=new THREE.Color(0x0a0e1a);
+  bgCam=new THREE.PerspectiveCamera(55, innerWidth/innerHeight, .1, 100);
+  bgCam.position.set(0, 3.5, 13);
+  bgCam.lookAt(0, 1, 0);
+
+  bgScene.add(new THREE.AmbientLight(0x334466, 1.2));
+  const moon=new THREE.DirectionalLight(0xaac8ff, 1.4);
+  moon.position.set(-6, 10, 4); bgScene.add(moon);
+  const warm=new THREE.PointLight(0xffd166, 2.5, 30);
+  warm.position.set(2, 4, 2); bgScene.add(warm);
+
+  // 海（揺れる平面）
+  const og=new THREE.PlaneGeometry(80, 80, 48, 48);
+  ocean=new THREE.Mesh(og, new THREE.MeshStandardMaterial({color:0x12305a, metalness:.6, roughness:.4, flatShading:true}));
+  ocean.rotation.x=-Math.PI/2; bgScene.add(ocean);
+
+  // 新大陸の島（ローポリ円錐群）
+  island=new THREE.Group();
+  const mk=(geo,col,x,y,z,s)=>{const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:col,flatShading:true}));m.position.set(x,y,z);m.scale.setScalar(s);island.add(m);return m;};
+  mk(new THREE.ConeGeometry(2.2,3,7), 0x2d6a4f, 0, 1.4, 0, 1);          // 山
+  mk(new THREE.ConeGeometry(1.4,2,6), 0x40916c, -2.1, .9, .8, 1);       // 丘
+  mk(new THREE.ConeGeometry(1.1,1.6,6), 0x40916c, 1.9, .7, -.6, 1);     // 丘
+  mk(new THREE.ConeGeometry(.55,1.5,5), 0xffd166, 0, 3.6, 0, 1);        // 光の山頂
+  mk(new THREE.CylinderGeometry(3.2,3.6,.8,9), 0xc2a86b, 0, .1, 0, 1);  // 砂浜
+  island.position.set(0, .2, -4);
+  bgScene.add(island);
+
+  // 星
+  const sg=new THREE.SphereGeometry(.05,4,4);
+  const sm=new THREE.MeshBasicMaterial({color:0xffffff});
+  for(let i=0;i<120;i++){
+    const st=new THREE.Mesh(sg,sm);
+    st.position.set((Math.random()-.5)*70, 6+Math.random()*22, -10-Math.random()*40);
+    stars.push(st); bgScene.add(st);
+  }
+  resizeBg(); animateBg();
+}
+function resizeBg(){
+  bgRenderer.setSize(innerWidth, innerHeight);
+  bgCam.aspect=innerWidth/innerHeight; bgCam.updateProjectionMatrix();
+}
+let bgT=0;
+function animateBg(){
+  requestAnimationFrame(animateBg);
+  bgT+=.012;
+  // 波
+  const pos=ocean.geometry.attributes.position;
+  for(let i=0;i<pos.count;i++){
+    const x=pos.getX(i), y=pos.getY(i);
+    pos.setZ(i, Math.sin(x*.5+bgT)*.25 + Math.cos(y*.4+bgT*.8)*.2);
+  }
+  pos.needsUpdate=true;
+  island.rotation.y+=.0015;
+  island.position.y=.2+Math.sin(bgT*.5)*.08;
+  bgRenderer.render(bgScene, bgCam);
+}
+addEventListener('resize', resizeBg);
+
+/* =====================================================
+   3D バトル（デモ）
+   ===================================================== */
+let btl={inited:false, over:false, heroHp:100, foeHp:120, busy:false};
+let bRenderer, bScene, bCam, naoMesh, raiMesh, foeMesh, fxGroup;
+
+function makeHero(color, swordColor){
+  const g=new THREE.Group();
+  const mat=c=>new THREE.MeshStandardMaterial({color:c, flatShading:true});
+  const body=new THREE.Mesh(new THREE.CapsuleGeometry(.32,.6,4,8), mat(color)); body.position.y=.85; g.add(body);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.28,8,8), mat(0xffe0bd)); head.position.y=1.65; g.add(head);
+  const sword=new THREE.Mesh(new THREE.BoxGeometry(.08,.9,.08), new THREE.MeshStandardMaterial({color:swordColor, emissive:swordColor, emissiveIntensity:.6}));
+  sword.position.set(.45,1.1,.1); sword.rotation.z=-.5; g.add(sword);
+  return g;
+}
+function makeFoe(){
+  const g=new THREE.Group();
+  const mat=new THREE.MeshStandardMaterial({color:0x1d5d8f, flatShading:true, transparent:true, opacity:.92});
+  const body=new THREE.Mesh(new THREE.IcosahedronGeometry(1.1,0), mat); body.position.y=1.5; g.add(body);
+  const head=new THREE.Mesh(new THREE.IcosahedronGeometry(.55,0), mat); head.position.y=2.8; g.add(head);
+  const eyeM=new THREE.MeshBasicMaterial({color:0xff4d4d});
+  [-.2,.2].forEach(x=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.09,6,6),eyeM);e.position.set(x,2.85,.5);g.add(e);});
+  [-1.3,1.3].forEach(x=>{const a=new THREE.Mesh(new THREE.CapsuleGeometry(.25,.8,4,6),mat);a.position.set(x,1.6,0);a.rotation.z=x>0?-.6:.6;g.add(a);});
+  return g;
+}
+
+function initBattle3D(){
+  if(btl.inited){return;}
+  btl.inited=true;
+  const stage=document.getElementById('battleStage');
+  const cv=document.createElement('canvas');
+  stage.appendChild(cv);
+  bRenderer=new THREE.WebGLRenderer({canvas:cv, antialias:true});
+  bRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  bScene=new THREE.Scene();
+  bScene.background=new THREE.Color(0x05070f);
+  bScene.fog=new THREE.Fog(0x05070f, 10, 30);
+  bCam=new THREE.PerspectiveCamera(50, 16/10, .1, 50);
+  bCam.position.set(0, 2.6, 7.5); bCam.lookAt(0, 1.2, 0);
+
+  bScene.add(new THREE.AmbientLight(0x445577, 1.4));
+  const key=new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(4,8,6); bScene.add(key);
+  const rim=new THREE.PointLight(0x4cc9f0, 2, 20); rim.position.set(-4,3,-2); bScene.add(rim);
+
+  const floor=new THREE.Mesh(new THREE.CylinderGeometry(8,8,.3,24), new THREE.MeshStandardMaterial({color:0x16213c, flatShading:true}));
+  floor.position.y=-.15; bScene.add(floor);
+
+  naoMesh=makeHero(0xd4a017, 0xffd166); naoMesh.position.set(-2.4,0,.6); naoMesh.rotation.y=.6; bScene.add(naoMesh);
+  raiMesh=makeHero(0x3a86c8, 0x4cc9f0); raiMesh.position.set(-2.4,0,-.9); raiMesh.rotation.y=.5; bScene.add(raiMesh);
+  foeMesh=makeFoe(); foeMesh.position.set(2.6,0,0); foeMesh.rotation.y=-.8; bScene.add(foeMesh);
+  fxGroup=new THREE.Group(); bScene.add(fxGroup);
+
+  resizeBattle(); animateBattle();
+  addEventListener('resize', resizeBattle);
+}
+function resizeBattle(){
+  const stage=document.getElementById('battleStage');
+  if(!stage||!bRenderer)return;
+  const w=stage.clientWidth, h=stage.clientHeight;
+  bRenderer.setSize(w,h); bCam.aspect=w/h; bCam.updateProjectionMatrix();
+}
+let bT=0;
+function animateBattle(){
+  requestAnimationFrame(animateBattle);
+  if(!bRenderer)return;
+  bT+=.03;
+  naoMesh.position.y=Math.abs(Math.sin(bT*1.2))*.06;
+  raiMesh.position.y=Math.abs(Math.sin(bT*1.2+.8))*.06;
+  foeMesh.position.y=Math.sin(bT*.8)*.15;
+  foeMesh.rotation.y=-.8+Math.sin(bT*.4)*.1;
+  // エフェクト粒子を減衰
+  fxGroup.children.forEach(p=>{
+    p.position.add(p.userData.v);
+    p.userData.life-=.02;
+    p.material.opacity=Math.max(0,p.userData.life);
+    if(p.userData.life<=0) fxGroup.remove(p);
+  });
+  bRenderer.render(bScene, bCam);
+}
+function burst(pos, color, n){
+  for(let i=0;i<n;i++){
+    const p=new THREE.Mesh(new THREE.SphereGeometry(.09,5,5), new THREE.MeshBasicMaterial({color, transparent:true}));
+    p.position.copy(pos);
+    p.userData={v:new THREE.Vector3((Math.random()-.5)*.25,(Math.random())*.2,(Math.random()-.5)*.25), life:1};
+    fxGroup.add(p);
+  }
+}
+
+function setHp(){
+  const h=Math.max(0,btl.heroHp), f=Math.max(0,btl.foeHp);
+  const hb=document.getElementById('heroHp'), fb=document.getElementById('foeHp');
+  hb.style.width=h+'%'; hb.classList.toggle('bad',h<35);
+  fb.style.width=(f/120*100)+'%'; fb.classList.toggle('bad',f<40);
+  document.getElementById('heroHpTxt').textContent=h+'/100';
+  document.getElementById('foeHpTxt').textContent=f+'/120';
+}
+function log(t){document.getElementById('btlLog').innerHTML=t;}
+function lockBtns(v){['btnNao','btnRai'].forEach(id=>document.getElementById(id).disabled=v||btl.over);
+  document.getElementById('btnDuo').disabled=v||btl.over||bondPct()<100;}
+
+async function attack(who){
+  if(btl.busy||btl.over)return;
+  btl.busy=true; lockBtns(true);
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  let dmg, name, color, attacker;
+  if(who==='nao'){dmg=14+Math.floor(Math.random()*8); name='ナオの剣撃'; color=0xffd166; attacker=naoMesh;}
+  else if(who==='rai'){dmg=12+Math.floor(Math.random()*10); name='ライの光魔法'; color=0x4cc9f0; attacker=raiMesh;}
+  else {dmg=45+Math.floor(Math.random()*15); name='✨ダブル・ライト✨'; color=0xa7f3d0; attacker=naoMesh;}
+
+  // 突進アニメーション
+  const ox=attacker.position.x;
+  for(let i=0;i<8;i++){attacker.position.x=ox+(i/8)*3.6; await sleep(20);}
+  burst(foeMesh.position.clone().add(new THREE.Vector3(0,1.8,0)), color, who==='duo'?40:16);
+  if(who==='duo') burst(foeMesh.position.clone().add(new THREE.Vector3(0,1.2,0)), 0xffd166, 30);
+  btl.foeHp-=dmg; setHp();
+  log(`<b style="color:#ffd166">${name}！</b> ガーディアンに ${dmg} ダメージ！`);
+  for(let i=8;i>=0;i--){attacker.position.x=ox+(i/8)*3.6; await sleep(20);}
+
+  if(btl.foeHp<=0){
+    btl.over=true;
+    burst(foeMesh.position.clone().add(new THREE.Vector3(0,1.5,0)), 0xffffff, 60);
+    foeMesh.visible=false;
+    log('🎉 <b style="color:#a7f3d0">勝利！</b>「見事な絆だ。通るがよい」海が開き、新大陸への道が現れた！');
+    btl.busy=false; lockBtns(true); return;
+  }
+
+  await sleep(500);
+  // 敵の反撃
+  const fdmg=8+Math.floor(Math.random()*8);
+  const fx=foeMesh.position.x;
+  for(let i=0;i<8;i++){foeMesh.position.x=fx-(i/8)*3.4; await sleep(20);}
+  burst(naoMesh.position.clone().add(new THREE.Vector3(0,1,0)), 0xff4d4d, 14);
+  btl.heroHp-=fdmg; setHp();
+  log(`👹 ガーディアンの大波！ ${fdmg} ダメージを受けた…！`);
+  for(let i=8;i>=0;i--){foeMesh.position.x=fx-(i/8)*3.4; await sleep(20);}
+
+  if(btl.heroHp<=0){
+    btl.over=true;
+    log('💔 二人は倒れた…。でも、明日もクエストを続ければ、もっと強くなれる！（ページを再読み込みで再戦）');
+  }
+  btl.busy=false; lockBtns(false);
+}
+
+// ── 起動 ──
+initBg3D();
+render();
+</script>
+</body>
+</html>
