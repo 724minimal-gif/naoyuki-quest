@@ -340,62 +340,93 @@ function makeGlowTexture(){
 }
 let glowTex;
 
-// ── 勇者（高精細版：鎧・マント・剣・髪） ──
+// ── 勇者（関節リグ版：肩・肘・腰・膝が個別に動く） ──
 function makeHero(opt){
   const g=new THREE.Group();
   const std=(c,r,m)=>new THREE.MeshStandardMaterial({color:c, roughness:r??.55, metalness:m??.1});
   const sh=mesh=>{mesh.castShadow=true; return mesh;};
+  const J={}; // 関節一覧
 
-  // 脚＋ブーツ
-  [-.14,.14].forEach(x=>{
-    const leg=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.09,.42,4,8), std(0x2b3350,.8)));
-    leg.position.set(x,.42,0); g.add(leg);
-    const boot=sh(new THREE.Mesh(new THREE.BoxGeometry(.16,.14,.26), std(0x3d2b1f,.9)));
-    boot.position.set(x,.08,.04); g.add(boot);
-  });
-  // 胴体＋胸当て
-  const torso=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.26,.5,6,12), std(opt.cloth,.7)));
-  torso.position.y=.95; g.add(torso);
-  const chest=sh(new THREE.Mesh(new THREE.CylinderGeometry(.3,.27,.42,12), std(opt.armor,.3,.85)));
-  chest.position.y=1.08; chest.scale.z=.72; g.add(chest);
-  // ベルト
-  const belt=sh(new THREE.Mesh(new THREE.TorusGeometry(.27,.04,8,16), std(0x8a6d3b,.4,.6)));
-  belt.rotation.x=Math.PI/2; belt.position.y=.78; belt.scale.z=.8; g.add(belt);
-  // 肩当て
-  [-.34,.34].forEach(x=>{
-    const pad=sh(new THREE.Mesh(new THREE.SphereGeometry(.15,12,8,0,Math.PI*2,0,Math.PI/2), std(opt.armor,.3,.85)));
-    pad.position.set(x,1.32,0); g.add(pad);
-  });
-  // 腕
-  [-.36,.36].forEach(x=>{
-    const arm=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.07,.4,4,8), std(opt.cloth,.7)));
-    arm.position.set(x,1.0,.02); arm.rotation.z=x>0?-.18:.18; g.add(arm);
-  });
-  // 頭・髪・目
-  const head=sh(new THREE.Mesh(new THREE.SphereGeometry(.24,16,14), std(0xffd9b3,.6)));
-  head.position.y=1.68; g.add(head);
-  const hair=sh(new THREE.Mesh(new THREE.SphereGeometry(.255,14,10,0,Math.PI*2,0,Math.PI*.55), std(opt.hair,.85)));
-  hair.position.y=1.72; hair.rotation.x=-.25; g.add(hair);
+  // 腰（全身の親関節）
+  J.pelvis=new THREE.Group(); J.pelvis.position.y=.82; g.add(J.pelvis);
+  const hipMesh=sh(new THREE.Mesh(new THREE.SphereGeometry(.2,10,8), std(0x2b3350,.8)));
+  hipMesh.scale.set(1.2,.7,.9); J.pelvis.add(hipMesh);
+
+  // 上半身（背骨：前傾・ひねりに使う）
+  J.spine=new THREE.Group(); J.spine.position.y=.12; J.pelvis.add(J.spine);
+  const torso=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.24,.34,6,12), std(opt.cloth,.7)));
+  torso.position.y=.3; J.spine.add(torso);
+  const chest=sh(new THREE.Mesh(new THREE.CylinderGeometry(.28,.25,.36,12), std(opt.armor,.3,.85)));
+  chest.position.y=.36; chest.scale.z=.72; J.spine.add(chest);
+  const belt=sh(new THREE.Mesh(new THREE.TorusGeometry(.25,.04,8,16), std(0x8a6d3b,.4,.6)));
+  belt.rotation.x=Math.PI/2; belt.position.y=.04; belt.scale.z=.8; J.spine.add(belt);
+
+  // 首・頭
+  J.neck=new THREE.Group(); J.neck.position.y=.62; J.spine.add(J.neck);
+  const head=sh(new THREE.Mesh(new THREE.SphereGeometry(.22,16,14), std(0xffd9b3,.6)));
+  head.position.y=.18; J.neck.add(head);
+  const hair=sh(new THREE.Mesh(new THREE.SphereGeometry(.235,14,10,0,Math.PI*2,0,Math.PI*.55), std(opt.hair,.85)));
+  hair.position.y=.22; hair.rotation.x=-.25; J.neck.add(hair);
   const eyeM=new THREE.MeshBasicMaterial({color:0x222233});
-  [-.09,.09].forEach(x=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.028,6,6),eyeM);e.position.set(x,1.69,.21);g.add(e);});
-  // マント（頂点アニメ用に分割平面）
-  const capeGeo=new THREE.PlaneGeometry(.55,.85,4,8);
+  [-.08,.08].forEach(x=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.026,6,6),eyeM);e.position.set(x,.19,.19);J.neck.add(e);});
+
+  // 腕（肩関節→肘関節の2段）
+  const mkArm=(side)=>{
+    const s=side==='L'?-1:1;
+    const shoulder=new THREE.Group(); shoulder.position.set(s*.3,.52,0); J.spine.add(shoulder);
+    const pad=sh(new THREE.Mesh(new THREE.SphereGeometry(.13,12,8,0,Math.PI*2,0,Math.PI/2), std(opt.armor,.3,.85)));
+    shoulder.add(pad);
+    const upper=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.06,.2,4,8), std(opt.cloth,.7)));
+    upper.position.y=-.15; shoulder.add(upper);
+    const elbow=new THREE.Group(); elbow.position.y=-.3; shoulder.add(elbow);
+    const fore=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.055,.18,4,8), std(0xffd9b3,.6)));
+    fore.position.y=-.12; elbow.add(fore);
+    const hand=sh(new THREE.Mesh(new THREE.SphereGeometry(.07,8,8), std(0xffd9b3,.6)));
+    hand.position.y=-.26; elbow.add(hand);
+    J['sh'+side]=shoulder; J['el'+side]=elbow;
+    return elbow;
+  };
+  mkArm('L'); const elR=mkArm('R');
+
+  // 脚（腰関節→膝関節の2段＋足）
+  const mkLeg=(side)=>{
+    const s=side==='L'?-1:1;
+    const hip=new THREE.Group(); hip.position.set(s*.13,-.06,0); J.pelvis.add(hip);
+    const thigh=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.085,.22,4,8), std(0x2b3350,.8)));
+    thigh.position.y=-.16; hip.add(thigh);
+    const knee=new THREE.Group(); knee.position.y=-.34; hip.add(knee);
+    const shin=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.07,.2,4,8), std(0x2b3350,.8)));
+    shin.position.y=-.14; knee.add(shin);
+    const foot=sh(new THREE.Mesh(new THREE.BoxGeometry(.14,.1,.24), std(0x3d2b1f,.9)));
+    foot.position.set(0,-.3,.05); knee.add(foot);
+    J['hip'+side]=hip; J['knee'+side]=knee;
+  };
+  mkLeg('L'); mkLeg('R');
+
+  // マント（背骨に追従してなびく）
+  const capeGeo=new THREE.PlaneGeometry(.5,.8,4,8);
   const cape=new THREE.Mesh(capeGeo, new THREE.MeshStandardMaterial({color:opt.cape, roughness:.85, side:THREE.DoubleSide}));
-  cape.position.set(0,1.18,-.3); cape.rotation.x=.18; cape.castShadow=true;
+  cape.position.set(0,.3,-.26); cape.rotation.x=.18; cape.castShadow=true;
   cape.userData.base=capeGeo.attributes.position.array.slice();
-  capes.push(cape); g.add(cape);
-  // 剣（刃＋鍔＋柄、刃は発光）
+  capes.push(cape); J.spine.add(cape);
+
+  // 剣（右手に握る）
   const sword=new THREE.Group();
-  const blade=new THREE.Mesh(new THREE.BoxGeometry(.055,.85,.015),
+  const blade=new THREE.Mesh(new THREE.BoxGeometry(.05,.8,.014),
     new THREE.MeshStandardMaterial({color:0xe8eef8, roughness:.15, metalness:.9, emissive:opt.glow, emissiveIntensity:.55}));
-  blade.position.y=.55; sword.add(blade);
-  const tip=new THREE.Mesh(new THREE.ConeGeometry(.04,.12,4),
-    blade.material); tip.position.y=1.02; tip.rotation.y=Math.PI/4; sword.add(tip);
-  const guard=new THREE.Mesh(new THREE.BoxGeometry(.2,.04,.05), std(0xc9a227,.3,.9)); guard.position.y=.12; sword.add(guard);
-  const grip=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.2,8), std(0x4a3020,.8)); sword.add(grip);
-  const swLight=new THREE.PointLight(opt.glow,.9,2.5); swLight.position.y=.6; sword.add(swLight);
-  sword.position.set(.42,.95,.12); sword.rotation.z=-.55;
-  g.add(sword); g.userData.sword=sword;
+  blade.position.y=.5; sword.add(blade);
+  const tip=new THREE.Mesh(new THREE.ConeGeometry(.038,.11,4), blade.material);
+  tip.position.y=.95; tip.rotation.y=Math.PI/4; sword.add(tip);
+  const guard=new THREE.Mesh(new THREE.BoxGeometry(.18,.04,.05), std(0xc9a227,.3,.9)); guard.position.y=.1; sword.add(guard);
+  const grip=new THREE.Mesh(new THREE.CylinderGeometry(.022,.022,.18,8), std(0x4a3020,.8)); sword.add(grip);
+  const swLight=new THREE.PointLight(opt.glow,.9,2.5); swLight.position.y=.55; sword.add(swLight);
+  sword.position.set(0,-.26,.05); sword.rotation.x=.4;
+  elR.add(sword);
+
+  // 構えの初期ポーズ
+  J.shR.rotation.set(-.5,0,-.25); J.elR.rotation.x=-.7;
+  J.shL.rotation.set(-.25,0,.2);  J.elL.rotation.x=-.4;
+  g.userData={j:J, sword, mode:'idle', swinging:false, flinch:0, phase:Math.random()*Math.PI*2};
   return g;
 }
 
@@ -434,13 +465,17 @@ function makeFoe(){
     ice.rotation.set(Math.sin(a)*.3,0,-Math.cos(a)*.3);
     g.add(ice);
   }
-  // 腕（うねる水流）
-  [-1.4,1.4].forEach(x=>{
+  // 腕（肩関節つき：振り上げ→叩きつけが可能）
+  const arms=[];
+  [-1,1].forEach(sx=>{
+    const shoulder=new THREE.Group(); shoulder.position.set(sx*.95,2.4,0); g.add(shoulder);
     const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.3,1.1,4,10), waterM);
-    arm.position.set(x,1.75,0); arm.rotation.z=x>0?-.65:.65; arm.castShadow=true; g.add(arm);
+    arm.position.set(sx*.45,-.65,0); arm.rotation.z=sx*.65; arm.castShadow=true; shoulder.add(arm);
     const fist=new THREE.Mesh(new THREE.SphereGeometry(.4,12,10), waterM);
-    fist.position.set(x*1.35,1.05,0); fist.castShadow=true; g.add(fist);
+    fist.position.set(sx*.95,-1.35,0); fist.castShadow=true; shoulder.add(fist);
+    arms.push(shoulder);
   });
+  g.userData.arms=arms; g.userData.attacking=false;
   return g;
 }
 
@@ -509,9 +544,9 @@ function initBattle3D(){
   }
 
   naoMesh=makeHero({cloth:0x9a6b1f, armor:0xd9b54a, hair:0x4a3220, cape:0xb33939, glow:0xffd166});
-  naoMesh.position.set(-2.5,.2,.7); naoMesh.rotation.y=.7; bScene.add(naoMesh);
+  naoMesh.position.set(-2.5,.13,.7); naoMesh.rotation.y=.7; bScene.add(naoMesh);
   raiMesh=makeHero({cloth:0x2c4a7a, armor:0x8fb8e8, hair:0x1a1a2e, cape:0xf0f4ff, glow:0x4cc9f0});
-  raiMesh.position.set(-2.5,.2,-1.0); raiMesh.rotation.y=.6; bScene.add(raiMesh);
+  raiMesh.position.set(-2.5,.13,-1.0); raiMesh.rotation.y=.6; bScene.add(raiMesh);
   foeMesh=makeFoe(); foeMesh.position.set(2.7,.2,0); foeMesh.rotation.y=-.85; bScene.add(foeMesh);
   fxGroup=new THREE.Group(); bScene.add(fxGroup);
 
@@ -529,11 +564,44 @@ function animateBattle(){
   requestAnimationFrame(animateBattle);
   if(!bRenderer)return;
   bT+=.03;
-  // 勇者：呼吸＋剣の構え揺れ
-  naoMesh.position.y=.2+Math.abs(Math.sin(bT*1.1))*.05;
-  raiMesh.position.y=.2+Math.abs(Math.sin(bT*1.1+.9))*.05;
-  naoMesh.userData.sword.rotation.z=-.55+Math.sin(bT*.9)*.06;
-  raiMesh.userData.sword.rotation.z=-.55+Math.sin(bT*.9+.5)*.06;
+  // 勇者：関節アニメ（待機＝呼吸と重心移動／走り＝足と腕が交互に振れる）
+  [naoMesh,raiMesh].forEach(h=>{
+    const J=h.userData.j, ph=h.userData.phase, sw=h.userData.swinging;
+    if(h.userData.mode==='run'){
+      const s=bT*9+ph;
+      h.position.y=.13+Math.abs(Math.sin(s))*.07;
+      J.hipL.rotation.x=Math.sin(s)*.85;
+      J.kneeL.rotation.x=Math.max(0,Math.sin(s+1.2))*1.1;
+      J.hipR.rotation.x=Math.sin(s+Math.PI)*.85;
+      J.kneeR.rotation.x=Math.max(0,Math.sin(s+Math.PI+1.2))*1.1;
+      if(!sw){
+        J.spine.rotation.x=.3; J.spine.rotation.y=0;
+        J.neck.rotation.x=-.15;
+        J.shL.rotation.x=-.25+Math.sin(s+Math.PI)*.7;
+        J.shR.rotation.x=-.5+Math.sin(s)*.7;
+      }
+    }else{
+      const s=bT*1.6+ph;
+      h.position.y=.13;
+      J.hipL.rotation.x=0; J.hipR.rotation.x=0;
+      J.kneeL.rotation.x=.05; J.kneeR.rotation.x=.05;
+      if(!sw){
+        J.spine.rotation.x=.04+Math.sin(s)*.03;      // 呼吸
+        J.spine.rotation.y=Math.sin(s*.7)*.04;       // 重心の揺れ
+        J.neck.rotation.x=Math.sin(s*.9)*.04;
+        J.neck.rotation.y=Math.sin(s*.5)*.06;
+        J.shL.rotation.x=-.25+Math.sin(s)*.05;
+        J.shR.rotation.x=-.5+Math.sin(s+.5)*.05;
+      }
+    }
+    // 被弾時ののけぞり（徐々に戻る）
+    if(h.userData.flinch>0){
+      J.spine.rotation.x=-.45*h.userData.flinch;
+      J.neck.rotation.x=-.3*h.userData.flinch;
+      h.userData.flinch*=.9;
+      if(h.userData.flinch<.01) h.userData.flinch=0;
+    }
+  });
   // マントのなびき（頂点アニメ）
   capes.forEach((cape,ci)=>{
     const pos=cape.geometry.attributes.position, base=cape.userData.base;
@@ -558,6 +626,11 @@ function animateBattle(){
   }
   foeMesh.position.y=.2+Math.sin(bT*.7)*.12;
   foeMesh.rotation.y=-.85+Math.sin(bT*.35)*.08;
+  // ガーディアンの腕がゆったりうねる（攻撃中以外）
+  if(foeMesh.userData.arms&&!foeMesh.userData.attacking){
+    foeMesh.userData.arms[0].rotation.z=-Math.sin(bT*.9)*.12;
+    foeMesh.userData.arms[1].rotation.z=Math.sin(bT*.9+.6)*.12;
+  }
   // ルーン円の回転と明滅
   if(lightning){lightning.rotation.z+=.004; lightning.material.opacity=.5+Math.sin(bT*2)*.25;}
   // カメラ：ゆったり漂い＋シェイク
@@ -626,28 +699,88 @@ function lockBtns(v){['btnNao','btnRai'].forEach(id=>document.getElementById(id)
   document.getElementById('btnDuo').disabled=v||btl.over||bondPct()<100;}
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-// 滑らかな突進（イージング付き）
+// 滑らかな突進（走りモーション付き）
 async function dash(mesh, dist, steps=12){
   const ox=mesh.position.x;
+  if(mesh.userData) mesh.userData.mode='run';
   for(let i=1;i<=steps;i++){
     const t=i/steps, e=1-Math.pow(1-t,3); // ease-out
     mesh.position.x=ox+e*dist; await sleep(16);
   }
+  if(mesh.userData) mesh.userData.mode='idle';
   return ox;
 }
 async function dashBack(mesh, ox, steps=10){
   const cx=mesh.position.x;
+  if(mesh.userData) mesh.userData.mode='run';
   for(let i=1;i<=steps;i++){
     const t=i/steps, e=1-Math.pow(1-t,2);
     mesh.position.x=cx+(ox-cx)*e; await sleep(16);
   }
   mesh.position.x=ox;
+  if(mesh.userData) mesh.userData.mode='idle';
 }
-// 剣を振り下ろす
+// 剣撃：振りかぶり→一気に振り下ろし→構えに戻る（肩・肘・背骨が連動）
 async function swing(hero){
-  const sw=hero.userData.sword;
-  for(let i=0;i<6;i++){sw.rotation.z=-.55-(i/6)*1.6; await sleep(14);}
-  for(let i=6;i>=0;i--){sw.rotation.z=-.55-(i/6)*1.6; await sleep(20);}
+  const J=hero.userData.j;
+  hero.userData.swinging=true;
+  // 振りかぶり（腕を頭上へ、体をひねる）
+  for(let i=0;i<=5;i++){
+    const t=i/5;
+    J.shR.rotation.x=-.5-t*1.9;
+    J.elR.rotation.x=-.7-t*.3;
+    J.spine.rotation.y=-t*.4;
+    await sleep(16);
+  }
+  // 振り下ろし（速く）
+  for(let i=0;i<=4;i++){
+    const t=i/4;
+    J.shR.rotation.x=-2.4+t*3.1;
+    J.elR.rotation.x=-1+t*.7;
+    J.spine.rotation.y=-.4+t*.7;
+    J.spine.rotation.x=.04+t*.3;
+    await sleep(11);
+  }
+  await sleep(90);
+  // 構えに戻る
+  for(let i=0;i<=6;i++){
+    const t=i/6;
+    J.shR.rotation.x=.7-t*1.2;
+    J.elR.rotation.x=-.3-t*.4;
+    J.spine.rotation.y=.3-t*.3;
+    J.spine.rotation.x=.34-t*.3;
+    await sleep(18);
+  }
+  hero.userData.swinging=false;
+}
+// 魔法詠唱：両手を前にかざして光を放つ
+async function cast(hero){
+  const J=hero.userData.j;
+  hero.userData.swinging=true;
+  for(let i=0;i<=6;i++){
+    const t=i/6;
+    J.shR.rotation.x=-.5-t*1.3;  J.elR.rotation.x=-.7+t*.7;
+    J.shL.rotation.x=-.25-t*1.55; J.elL.rotation.x=-.4+t*.4;
+    J.neck.rotation.x=-t*.15;
+    await sleep(20);
+  }
+  await sleep(140);
+  for(let i=0;i<=6;i++){
+    const t=i/6;
+    J.shR.rotation.x=-1.8+t*1.3;  J.elR.rotation.x=0-t*.7;
+    J.shL.rotation.x=-1.8+t*1.55; J.elL.rotation.x=0-t*.4;
+    J.neck.rotation.x=-.15+t*.15;
+    await sleep(20);
+  }
+  hero.userData.swinging=false;
+}
+// 勝利ポーズ：両腕を高く上げる
+function victoryPose(hero){
+  const J=hero.userData.j;
+  hero.userData.swinging=true;
+  J.shR.rotation.set(-2.7,0,-.3); J.elR.rotation.x=-.2;
+  J.shL.rotation.set(-2.7,0,.3);  J.elL.rotation.x=-.2;
+  J.neck.rotation.x=-.2;
 }
 
 async function attack(who){
@@ -665,7 +798,7 @@ async function attack(who){
     await sleep(450);
     const ox1=await dash(naoMesh, 3.6, 9);
     const ox2Promise=dash(raiMesh, 3.6, 9);
-    swing(naoMesh); swing(raiMesh);
+    swing(naoMesh); cast(raiMesh);
     const ox2=await ox2Promise;
     const dmg=45+Math.floor(Math.random()*15);
     burst(hitPos(), 0xffd166, 35, {speed:.4, shake:.3});
@@ -697,7 +830,7 @@ async function attack(who){
     }else{
       // ライは遠距離魔法：光弾が飛んでいく
       log('💧 ライが光の魔法を唱える…');
-      await swing(attacker);
+      await cast(attacker);
       const orb=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, color, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false}));
       orb.scale.setScalar(.8);
       orb.position.copy(attacker.position).add(new THREE.Vector3(.4,1.3,0));
@@ -721,20 +854,45 @@ async function attack(who){
     await sleep(300);
     foeMesh.visible=false;
     burst(hitPos(), 0x9ef0ff, 40, {speed:.15, gravity:-.003, shake:0});
+    victoryPose(naoMesh); victoryPose(raiMesh);
     log('🎉 <b style="color:#a7f3d0">勝利！</b>「見事な絆だ。通るがよい」水の巨人は静かに頭を垂れ、海が割れて新大陸への道が現れた！');
     btl.busy=false; lockBtns(true); return;
   }
 
   await sleep(500);
-  // ── 敵の反撃：大波を叩きつける ──
+  // ── 敵の反撃：両腕を振り上げ、迫って叩きつける ──
   const fdmg=8+Math.floor(Math.random()*8);
   const fx=foeMesh.position.x;
-  for(let i=0;i<10;i++){foeMesh.position.x=fx-(i/10)*3.4; await sleep(18);}
-  burst(naoMesh.position.clone().add(new THREE.Vector3(0,1.1,0)), 0x6fb8e8, 20, {speed:.25, shake:.22});
+  const arms=foeMesh.userData.arms;
+  foeMesh.userData.attacking=true;
+  // 振り上げながら迫る
+  for(let i=0;i<10;i++){
+    const t=i/10;
+    foeMesh.position.x=fx-t*3.4;
+    arms[0].rotation.z=-t*1.2; arms[1].rotation.z=t*1.2;
+    await sleep(20);
+  }
+  // 叩きつけ（速く）
+  for(let i=0;i<=4;i++){
+    const t=i/4;
+    arms[0].rotation.z=-1.2+t*1.7; arms[1].rotation.z=1.2-t*1.7;
+    await sleep(13);
+  }
+  burst(naoMesh.position.clone().add(new THREE.Vector3(0,1.1,0)), 0x6fb8e8, 20, {speed:.25, shake:.25});
   burst(raiMesh.position.clone().add(new THREE.Vector3(0,1.1,0)), 0x6fb8e8, 12, {speed:.2, shake:0});
+  shockwave(naoMesh.position.clone().add(new THREE.Vector3(.6,.2,0)), 0x6fb8e8);
+  naoMesh.userData.flinch=1; raiMesh.userData.flinch=1;  // のけぞり
   btl.heroHp-=fdmg; setHp();
   log(`👹 ガーディアンの大波が二人を襲う！ ${fdmg} ダメージ…！`);
-  for(let i=10;i>=0;i--){foeMesh.position.x=fx-(i/10)*3.4; await sleep(20);}
+  // 腕を戻しながら退く
+  for(let i=10;i>=0;i--){
+    const t=i/10;
+    foeMesh.position.x=fx-t*3.4;
+    arms[0].rotation.z=.5*(t-1)*-1-.5; arms[1].rotation.z=-(.5*(t-1)*-1-.5);
+    await sleep(20);
+  }
+  arms[0].rotation.z=0; arms[1].rotation.z=0;
+  foeMesh.userData.attacking=false;
 
   if(btl.heroHp<=0){
     btl.over=true;
