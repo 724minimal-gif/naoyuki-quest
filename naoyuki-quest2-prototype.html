@@ -89,6 +89,9 @@ body{background:var(--bg);color:var(--text);font-family:'Hiragino Maru Gothic Pr
 .cmds{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
 .cmd{flex:1;min-width:84px;padding:12px 4px;border-radius:10px;border:1px solid #44598c;background:#16224a;color:#fff;font-family:inherit;font-size:13px;font-weight:bold;cursor:pointer;}
 .cmd:active{background:#233a6e;}
+.cmd.limit{flex-basis:100%;background:linear-gradient(135deg,#ff6b35,#ffd166);color:#231200;border:none;animation:limitPulse 1s infinite;}
+@keyframes limitPulse{0%,100%{box-shadow:0 0 6px rgba(255,107,53,.5)}50%{box-shadow:0 0 20px rgba(255,209,102,.95)}}
+#muteBtn{position:fixed;right:14px;top:14px;z-index:10;background:rgba(20,27,46,.85);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:16px;padding:6px 10px;cursor:pointer;}
 .submenu{margin-top:8px;display:grid;gap:6px;}
 .subitem{display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid #44598c;border-radius:10px;background:#101a3a;color:#fff;font-size:13px;cursor:pointer;}
 .subitem.dis{opacity:.4;cursor:default;}
@@ -112,6 +115,7 @@ body{background:var(--bg);color:var(--text);font-family:'Hiragino Maru Gothic Pr
 </head>
 <body>
 <canvas id="bg3d"></canvas>
+<button id="muteBtn" onclick="toggleMute()">🔊</button>
 <div id="app">
   <div class="hero-header">
     <h1>直幸QUEST2</h1>
@@ -145,7 +149,7 @@ body{background:var(--bg);color:var(--text);font-family:'Hiragino Maru Gothic Pr
   <!-- BATTLE -->
   <div class="view" id="view-battle">
     <div class="panel">
-      <h2>⚔️ バトル：シャドウ・ウルフ（練習試合）</h2>
+      <h2 id="btlTitle">⚔️ バトル</h2>
       <div class="btl-screen" id="btlScreen">
         <div class="btl-bg"></div>
         <div class="btl-vignette"></div>
@@ -269,6 +273,11 @@ function toggle(id){
 }
 
 function go(v){
+  currentView=v;
+  if(AU.ctx&&!state.muted){
+    const want=(v==='battle'&&B&&!B.over)||v==='battle'?'battle':'home';
+    if(AU.bgmName!==want) playBgm(want);
+  }
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
@@ -391,12 +400,126 @@ function grantItems(){
 
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
+/* =====================================================
+   サウンド（Web Audio：ファイル不要のチップチューン）
+   ===================================================== */
+let currentView='home';
+const AU={ctx:null, bgmName:null, bgmTimer:null, step:0};
+function aReady(){ return AU.ctx && !state.muted; }
+function aInit(){
+  if(!AU.ctx){
+    try{ AU.ctx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
+  }
+  if(AU.ctx.state==='suspended') AU.ctx.resume();
+  if(!AU.bgmName) playBgm(currentView==='battle'?'battle':'home');
+}
+document.addEventListener('pointerdown', aInit);
+
+// 単音（type=波形, slideTo=音程スライド）
+function tone(f, start, dur, type, vol, slideTo){
+  if(!aReady()) return;
+  const c=AU.ctx, o=c.createOscillator(), g=c.createGain(), t0=c.currentTime+start;
+  o.type=type||'square';
+  o.frequency.setValueAtTime(f, t0);
+  if(slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(30,slideTo), t0+dur);
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol??.12, t0+.01);
+  g.gain.exponentialRampToValueAtTime(.001, t0+dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0+dur+.05);
+}
+// ノイズ（打撃音・ハイハット用）
+function noiseHit(start, dur, vol, cutoff){
+  if(!aReady()) return;
+  const c=AU.ctx, t0=c.currentTime+start;
+  const buf=c.createBuffer(1, Math.max(1,c.sampleRate*dur), c.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  const n=c.createBufferSource(); n.buffer=buf;
+  const f=c.createBiquadFilter(); f.type='lowpass'; f.frequency.value=cutoff||1000;
+  const g=c.createGain();
+  g.gain.setValueAtTime(vol??.15, t0);
+  g.gain.exponentialRampToValueAtTime(.001, t0+dur);
+  n.connect(f); f.connect(g); g.connect(c.destination);
+  n.start(t0);
+}
+// 効果音いろいろ
+const SFX={
+  attack(){ noiseHit(0,.12,.18,2500); tone(180,.05,.12,'square',.15,60); },
+  hit(){ noiseHit(0,.18,.2,600); tone(110,0,.18,'sawtooth',.14,50); },
+  heal(){ [523,659,784,1047].forEach((f,i)=>tone(f,i*.08,.2,'sine',.11)); },
+  ready(){ tone(880,0,.08,'square',.06); tone(1320,.08,.1,'square',.06); },
+  cutin(){ tone(220,0,.4,'sawtooth',.11,880); noiseHit(.05,.3,.07,1200); },
+  limit(){ tone(110,0,.5,'sawtooth',.15,440); tone(220,.2,.5,'square',.11,880); noiseHit(.3,.4,.11,3000); },
+  item(){ tone(988,0,.07,'square',.1); tone(1319,.07,.15,'square',.1); },
+  tick(){ tone(660,0,.05,'square',.05); },
+  win(){
+    [[523,0],[523,.15],[523,.3],[659,.45],[784,.75],[659,1.0],[784,1.3]].forEach(([f,t])=>tone(f,t,.25,'square',.11));
+    [262,330,392].forEach(f=>tone(f,1.3,.7,'triangle',.07));
+  },
+  lose(){ [392,349,311,262].forEach((f,i)=>tone(f,i*.3,.35,'triangle',.1)); },
+};
+// BGM（ループ：battle=緊迫の戦闘曲 / home=穏やかな冒険曲）
+const BGM_SONGS={
+  battle:{bpm:160,
+    bass:[110,110,82.4,82.4,87.3,87.3,98,98],
+    lead:[440,523,659,587,523,587,659,784,440,523,659,880,784,659,587,523]},
+  home:{bpm:84,
+    bass:[130.8,98,110,98],
+    lead:[262,330,392,494,392,330,294,247,262,330,392,523,494,392,330,294]},
+};
+function playBgm(name){
+  if(AU.bgmTimer){ clearInterval(AU.bgmTimer); AU.bgmTimer=null; }
+  AU.bgmName=name; AU.step=0;
+  if(!name||!AU.ctx) return;
+  const song=BGM_SONGS[name];
+  const stepDur=60/song.bpm/2; // 8分音符
+  AU.bgmTimer=setInterval(()=>{
+    if(!aReady()) return;
+    const s=AU.step;
+    tone(song.bass[s%song.bass.length], 0, stepDur*.9, 'triangle', name==='battle'?.085:.055);
+    tone(song.lead[s%song.lead.length], 0, stepDur*.85, name==='battle'?'square':'sine', name==='battle'?.05:.045);
+    if(name==='battle'&&s%2===0) noiseHit(0,.03,.035,6000); // ハイハット
+    AU.step++;
+  }, stepDur*1000);
+}
+function toggleMute(){
+  state.muted=!state.muted; save();
+  document.getElementById('muteBtn').textContent=state.muted?'🔇':'🔊';
+  if(state.muted) playBgm(null);
+  else { aInit(); playBgm(currentView==='battle'?'battle':'home'); }
+}
+
+/* =====================================================
+   節ごとの出現モンスター＆章ごとの戦闘背景
+   ※QUEST2用の敵画像が揃うまでは「ライの幻影魔法で
+     過去の強敵を再現して修行する」という設定で
+     本編の画像を流用。画像が揃ったらここを差し替えるだけ。
+   ===================================================== */
+const ENCOUNTERS=[
+  {minPt:0,    name:'シャドウ・ウルフの幻影',     img:'images/shadowwolf.PNG',   bg:'images/chapter2.png', mul:1.0},
+  {minPt:120,  name:'荒波のガーディアン',         img:'images/stormking.PNG',    bg:'images/chapter3.png', mul:1.15},
+  {minPt:500,  name:'鎧の巨人の幻影',             img:'images/darkguardian.PNG', bg:'images/chapter5.png', mul:1.3},
+  {minPt:1000, name:'炎の番人の幻影',             img:'images/inferl.PNG',       bg:'images/chapter7.png', mul:1.45},
+  {minPt:2000, name:'ヤミノ王の幻影',             img:'images/yaminoou1.png',    bg:'images/chapter7.png', mul:1.6},
+  {minPt:3000, name:'ヤミノ王・最終形態の幻影',   img:'images/Yaminoou2.png',    bg:'images/chapter8.png', mul:1.8},
+];
+function currentEncounter(){ return [...ENCOUNTERS].reverse().find(e=>state.total>=e.minPt); }
+
+// リミット技（HP30%以下のピンチで1戦闘1回だけ使える）
+const LIMITS={
+  nao:{name:'クライシスブレード', desc:'ピンチの力を剣に変える'},
+  rai:{name:'ひかりのいのり',     desc:'仲間全員を大回復し、光で攻撃'},
+};
+
 // ── バトル状態 ──
 let B=null, atbTimer=null;
 function initBattle(){
   if(B && !B.over){ renderBattleAll(); return; } // 戦闘継続中はそのまま
   const lv=heroLv();
-  const mk=(key,name,em,hp,mp,atk,mag,spd)=>({key,name,em,lv,hp,mhp:hp,mp,mmp:mp,atk,mag,spd,atb:0,alive:true,defend:false});
+  const enc=currentEncounter();
+  const mk=(key,name,em,hp,mp,atk,mag,spd)=>({key,name,em,lv,hp,mhp:hp,mp,mmp:mp,atk,mag,spd,atb:0,alive:true,defend:false,limitUsed:false});
+  const fhp=Math.round((130+lv*22)*enc.mul);
   B={
     over:false, menuOpen:false, acting:false, turnHero:null, duoUsed:false,
     heroes:[
@@ -404,12 +527,17 @@ function initBattle(){
       mk('rai','ライ','✨',  70+lv*10, 30+lv*4, 7+lv*2, 10+lv*3, 27),
       null, null, // なかまモンスター枠（ストーリーが進むと仲間が増える）
     ],
-    foe:{name:'シャドウ・ウルフ', hp:130+lv*22, mhp:130+lv*22, atk:9+lv*2, spd:24, atb:20, alive:true},
+    foe:{name:enc.name, hp:fhp, mhp:fhp, atk:Math.round((9+lv*2)*enc.mul), spd:24, atb:20, alive:true},
   };
   B.heroes[0].atb=40;
+  // 章に合わせて敵画像と戦闘背景を切り替え
+  document.getElementById('foeSpr').src=enc.img;
+  document.querySelector('.btl-bg').style.backgroundImage=`url('${enc.bg}')`;
+  document.getElementById('btlTitle').textContent=`⚔️ バトル：${enc.name}`;
   const got=grantItems();
   renderBattleAll();
-  bmsg(got.length?`📦 クエスト達成のごほうび：${got.join('、')} を手に入れた！`:'シャドウ・ウルフが あらわれた！');
+  bmsg(got.length?`📦 クエスト達成のごほうび：${got.join('、')} を手に入れた！`:`${enc.name} があらわれた！（ライの幻影魔法による修行バトル）`);
+  if(AU.ctx&&!state.muted&&AU.bgmName!=='battle') playBgm('battle');
   if(!atbTimer){
     let last=performance.now();
     atbTimer=setInterval(()=>{
@@ -469,6 +597,7 @@ function bmsg(t){document.getElementById('btlMsg').innerHTML=t;}
 // ── コマンドメニュー ──
 function openCmd(){
   B.menuOpen=true;
+  SFX.ready();
   const idx=B.heroes.indexOf(B.turnHero);
   const el=document.getElementById('hero'+idx);
   if(el) el.classList.add('active');
@@ -476,6 +605,8 @@ function openCmd(){
 }
 function cmdMain(){
   const h=B.turnHero;
+  // HP30%以下のピンチで、まだ使っていなければリミット技が解放
+  const limitReady=h.hp/h.mhp<=.3&&!h.limitUsed;
   document.getElementById('cmdArea').innerHTML=`
     <div style="font-size:13px;color:#ffd166;margin-top:8px;">▶ ${h.name} のターン！</div>
     <div class="cmds">
@@ -483,9 +614,36 @@ function cmdMain(){
       <button class="cmd" onclick="cmdSkills()">${h.key==='nao'?'💥 とくぎ':'🔮 まほう'}</button>
       <button class="cmd" onclick="cmdItems()">🎒 アイテム</button>
       <button class="cmd" onclick="doDefend()">🛡️ ぼうぎょ</button>
+      ${limitReady?`<button class="cmd limit" onclick="useLimit()">⚡ リミット技：${LIMITS[h.key].name}</button>`:''}
     </div>`;
 }
+async function useLimit(){
+  const h=B.turnHero, idx=B.heroes.indexOf(h);
+  B.menuOpen=false; B.acting=true; closeCmd();
+  h.limitUsed=true;
+  SFX.limit();
+  fxCutin('⚡ '+LIMITS[h.key].name+' ⚡','#ff9d5c');
+  await wait(900);
+  if(h.key==='nao'){
+    fxLunge(idx); await wait(220);
+    dealToFoe(h.atk*6, '⚡ クライシスブレード！ ピンチの力が爆発した！');
+  }else{
+    B.heroes.forEach(x=>{
+      if(x&&x.alive){
+        const amt=Math.round(x.mhp*.6);
+        x.hp=Math.min(x.mhp,x.hp+amt);
+        popDmg('hero'+B.heroes.indexOf(x),'+'+amt,'#4ade80');
+      }
+    });
+    SFX.heal();
+    await wait(400);
+    dealToFoe(h.mag*3, '✨ ひかりのいのり！ 祈りの光が敵を貫いた！');
+  }
+  await wait(650);
+  B.acting=false; endTurn();
+}
 function cmdSkills(){
+  SFX.tick();
   const h=B.turnHero;
   const list=SKILLS[h.key].filter(s=>state.total>=s.unlockPt);
   const locked=SKILLS[h.key].filter(s=>state.total<s.unlockPt);
@@ -506,6 +664,7 @@ function cmdSkills(){
   document.getElementById('cmdArea').innerHTML=html;
 }
 function cmdItems(){
+  SFX.tick();
   if(!state.inv) state.inv={};
   let html='<div class="submenu">';
   let any=false;
@@ -547,6 +706,7 @@ function fxFlashFoe(){const f=document.getElementById('foeSpr');f.classList.remo
 function fxLunge(idx){const e=document.getElementById('hero'+idx);if(!e)return;e.classList.add('atk-fwd');setTimeout(()=>e.classList.remove('atk-fwd'),300);}
 function fxCutin(text,color){
   const scr=document.getElementById('btlScreen');
+  SFX.cutin();
   const c=document.createElement('div'); c.className='cutin'; c.textContent=text;
   if(color) c.style.color=color;
   scr.appendChild(c); setTimeout(()=>c.remove(),1100);
@@ -559,6 +719,7 @@ function dealToFoe(base,label){
   const crit=Math.random()<critChance();
   if(crit) dmg=Math.round(dmg*1.8);
   B.foe.hp-=dmg;
+  SFX.attack();
   fxFlashFoe(); fxShake();
   popDmg('foeSpr',dmg,(crit?'#ffd166':'#fff'));
   bmsg(`${label} ${B.foe.name}に <b style="color:#ffd166">${dmg}</b> ダメージ！${crit?` <b style="color:#ffd166">クリティカル！（れんぞく${state.streak}日ボーナス）</b>`:''}`);
@@ -593,6 +754,7 @@ async function useSkill(id){
     const target=B.heroes.filter(x=>x&&x.alive).sort((a,b)=>a.hp/a.mhp-b.hp/b.mhp)[0];
     const amt=Math.round(target.mhp*.4+h.mag*2);
     target.hp=Math.min(target.mhp,target.hp+amt);
+    SFX.heal();
     popDmg('hero'+B.heroes.indexOf(target),'+'+amt,'#4ade80');
     bmsg(`💚 ${s.name}！ ${target.name}のHPが ${amt} 回復した！`);
   }else{
@@ -605,6 +767,7 @@ async function useSkill(id){
 async function useItem(id){
   B.menuOpen=false; B.acting=true; closeCmd();
   state.inv[id]--; save();
+  SFX.item();
   if(id==='potion'){
     const t=B.heroes.filter(x=>x&&x.alive).sort((a,b)=>a.hp/a.mhp-b.hp/b.mhp)[0];
     const amt=Math.round(t.mhp*.5);
@@ -649,9 +812,10 @@ async function foeAct(){
   if(t.defend){ dmg=Math.round(dmg/2); t.defend=false; }
   t.hp-=dmg;
   if(t.hp<=0){ t.hp=0; t.alive=false; }
+  SFX.hit();
   fxShake();
   popDmg('hero'+idx,dmg,'#f87171');
-  bmsg(`👿 シャドウ・ウルフの攻撃！ ${t.name}に ${dmg} ダメージ${t.alive?'！':'…！ '+t.name+'は倒れた！'}`);
+  bmsg(`👿 ${B.foe.name}の攻撃！ ${t.name}に ${dmg} ダメージ${t.alive?'！':'…！ '+t.name+'は倒れた！'}`);
   f.classList.remove('foe-fwd');
   await wait(550);
   B.acting=false;
@@ -663,6 +827,7 @@ function checkEnd(){
   if(B.over) return;
   if(B.foe.hp<=0){
     B.over=true; B.foe.alive=false;
+    playBgm(null); SFX.win();
     document.getElementById('foeSpr').style.opacity=0;
     fxCutin('🎉 WIN！','#ffd166');
     let drop='';
@@ -673,6 +838,7 @@ function checkEnd(){
   }
   if(!B.heroes.some(h=>h&&h.alive)){
     B.over=true;
+    playBgm(null); SFX.lose();
     bmsg('💔 全員倒れた…。でも明日もクエストを続ければ、もっと強くなれる！');
     document.getElementById('cmdArea').innerHTML='<div class="cmds"><button class="cmd" onclick="B=null;initBattle()">🔁 再挑戦する</button></div>';
   }
@@ -681,6 +847,7 @@ function checkEnd(){
 // ── 起動 ──
 initBg3D();
 render();
+document.getElementById('muteBtn').textContent=state.muted?'🔇':'🔊';
 </script>
 </body>
 </html>
