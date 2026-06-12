@@ -53,21 +53,46 @@ body{background:var(--bg);color:var(--text);font-family:'Hiragino Maru Gothic Pr
 .task .name{flex:1;font-size:15px;}
 .task .pt{color:var(--gold);font-weight:bold;font-size:14px;}
 
-/* ── battle ── */
-#battleStage{width:100%;aspect-ratio:16/10;border-radius:14px;overflow:hidden;border:2px solid var(--border);background:#05070f;}
-.hpbars{display:flex;justify-content:space-between;gap:14px;margin-top:10px;}
-.hpunit{flex:1;}
-.hpunit .nm{font-size:12px;color:var(--sub);margin-bottom:3px;display:flex;justify-content:space-between;}
-.hpbar{height:12px;background:#0d1322;border-radius:999px;overflow:hidden;border:1px solid var(--border);}
-.hpfill{height:100%;background:var(--hp);border-radius:999px;transition:width .4s ease;}
-.hpfill.bad{background:var(--hpBad);}
-.btl-actions{display:flex;gap:8px;margin-top:12px;}
-.btn{flex:1;border:none;border-radius:12px;padding:13px 8px;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit;}
-.btn-nao{background:linear-gradient(135deg,var(--gold),var(--fire));color:#231200;}
-.btn-rai{background:linear-gradient(135deg,var(--water),#7c8cf8);color:#001a2e;}
-.btn-duo{background:linear-gradient(135deg,var(--light),var(--gold),var(--fire));color:#1a1200;}
-.btn:disabled{opacity:.4;}
-#btlLog{margin-top:10px;font-size:13px;color:var(--sub);min-height:40px;line-height:1.7;}
+/* ── battle (2D ATB / FF6風) ── */
+.btl-screen{position:relative;width:100%;aspect-ratio:16/11;border-radius:14px;overflow:hidden;border:2px solid var(--border);background:#000;}
+.btl-bg{position:absolute;inset:0;background:url('images/chapter2.png') center/cover;filter:brightness(.32) saturate(.9) blur(1.5px);transform:scale(1.04);}
+.btl-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,transparent 35%,rgba(0,0,10,.7));}
+#foeGlow{position:absolute;left:-2%;top:8%;width:56%;aspect-ratio:1;background:radial-gradient(circle,rgba(165,185,235,.55),rgba(120,140,200,.25) 45%,transparent 68%);}
+#foeSpr{position:absolute;left:6%;top:22%;width:38%;max-width:250px;mix-blend-mode:multiply;filter:contrast(1.1);animation:foeIdle 3s ease-in-out infinite;transition:opacity .8s,transform .25s;}
+@keyframes foeIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+#foeSpr.foe-fwd{animation:none;transform:translateX(46px) scale(1.06);}
+#foeSpr.flash{animation:foeFlash .3s;}
+@keyframes foeFlash{0%,100%{filter:drop-shadow(0 14px 20px rgba(0,0,0,.7))}50%{filter:brightness(2.4) saturate(.3) drop-shadow(0 0 18px #fff)}}
+.hero-spr{position:absolute;width:16%;max-width:92px;aspect-ratio:4/5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:linear-gradient(160deg,rgba(40,50,82,.92),rgba(16,22,42,.92));border:2px solid var(--border);border-radius:12px;transition:transform .2s,border-color .2s,box-shadow .2s;}
+.hero-spr.empty{opacity:.45;border-style:dashed;}
+.hero-spr.active{border-color:var(--gold);box-shadow:0 0 16px rgba(255,209,102,.55);}
+.hero-spr.atk-fwd{transform:translateX(-30px) scale(1.08);}
+.hero-spr .em{font-size:32px;}
+.hero-spr .nm{font-size:10px;color:var(--sub);}
+.dmg{position:absolute;font-weight:bold;font-size:24px;text-shadow:0 2px 6px #000,0 0 10px rgba(0,0,0,.8);animation:dmgUp .9s forwards;pointer-events:none;z-index:5;}
+@keyframes dmgUp{0%{transform:translateY(0);opacity:1}75%{opacity:1}100%{transform:translateY(-48px);opacity:0}}
+.btl-screen.shake{animation:scrShake .4s;}
+@keyframes scrShake{0%,100%{transform:translate(0)}20%{transform:translate(-8px,4px)}40%{transform:translate(7px,-5px)}60%{transform:translate(-5px,3px)}80%{transform:translate(4px,-2px)}}
+.cutin{position:absolute;left:0;right:0;top:38%;text-align:center;font-size:28px;font-weight:bold;color:#fff;letter-spacing:5px;padding:12px 0;z-index:6;text-shadow:0 0 18px rgba(255,209,102,.9),0 3px 8px #000;background:linear-gradient(90deg,transparent,rgba(0,0,24,.8),transparent);animation:cutinAnim 1.1s forwards;}
+@keyframes cutinAnim{0%{transform:scaleX(.15);opacity:0}15%{transform:scaleX(1);opacity:1}80%{opacity:1}100%{opacity:0}}
+/* FF6風コマンドウィンドウ */
+.ff-window{margin-top:10px;border-radius:10px;border:2px solid #8fa3c8;background:linear-gradient(180deg,#1a2c5e,#0d1733);box-shadow:inset 0 0 0 2px #0a1126,0 4px 14px rgba(0,0,0,.5);padding:10px;}
+.party-rows{display:grid;gap:6px;}
+.prow{display:grid;grid-template-columns:1fr 56px 44px 84px;align-items:center;gap:8px;font-size:13px;}
+.prow .pn{color:#fff;white-space:nowrap;overflow:hidden;}
+.prow.dead .pn{color:var(--hpBad);text-decoration:line-through;}
+.prow .hp{color:var(--hp);text-align:right;}
+.prow .mp{color:#9bb6ff;text-align:right;}
+.atb{height:11px;border:1px solid #44598c;border-radius:99px;overflow:hidden;background:#0a1126;}
+.atb i{display:block;height:100%;background:linear-gradient(90deg,#4cc9f0,#ffd166);}
+.atb.full i{background:#ffd166;box-shadow:0 0 8px #ffd166;}
+.cmds{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.cmd{flex:1;min-width:84px;padding:12px 4px;border-radius:10px;border:1px solid #44598c;background:#16224a;color:#fff;font-family:inherit;font-size:13px;font-weight:bold;cursor:pointer;}
+.cmd:active{background:#233a6e;}
+.submenu{margin-top:8px;display:grid;gap:6px;}
+.subitem{display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid #44598c;border-radius:10px;background:#101a3a;color:#fff;font-size:13px;cursor:pointer;}
+.subitem.dis{opacity:.4;cursor:default;}
+#btlMsg{min-height:22px;margin-top:10px;font-size:13px;color:var(--text);line-height:1.7;}
 
 /* ── story ── */
 .scene{background:rgba(28,37,64,.9);border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:10px;font-size:14px;line-height:1.9;}
@@ -120,18 +145,19 @@ body{background:var(--bg);color:var(--text);font-family:'Hiragino Maru Gothic Pr
   <!-- BATTLE -->
   <div class="view" id="view-battle">
     <div class="panel">
-      <h2>⚔️ 3Dバトル（デモ）：荒波のガーディアン</h2>
-      <div id="battleStage"></div>
-      <div class="hpbars">
-        <div class="hpunit"><div class="nm"><span>🛡️ ナオ＆ライ</span><span id="heroHpTxt">100/100</span></div><div class="hpbar"><div class="hpfill" id="heroHp" style="width:100%"></div></div></div>
-        <div class="hpunit"><div class="nm"><span>👹 ガーディアン</span><span id="foeHpTxt">120/120</span></div><div class="hpbar"><div class="hpfill" id="foeHp" style="width:100%"></div></div></div>
+      <h2>⚔️ バトル：シャドウ・ウルフ（練習試合）</h2>
+      <div class="btl-screen" id="btlScreen">
+        <div class="btl-bg"></div>
+        <div class="btl-vignette"></div>
+        <div id="foeGlow"></div>
+        <img id="foeSpr" src="images/shadowwolf.PNG" alt="シャドウ・ウルフ">
+        <div id="heroSprs"></div>
       </div>
-      <div class="btl-actions">
-        <button class="btn btn-nao" id="btnNao" onclick="attack('nao')">🔥 ナオの剣撃</button>
-        <button class="btn btn-rai" id="btnRai" onclick="attack('rai')">💧 ライの光魔法</button>
-        <button class="btn btn-duo" id="btnDuo" onclick="attack('duo')" disabled>✨ ダブル・ライト</button>
+      <div class="ff-window">
+        <div class="party-rows" id="partyRows"></div>
+        <div id="cmdArea"></div>
+        <div id="btlMsg">ATBゲージが溜まったら行動できる！</div>
       </div>
-      <div id="btlLog">バトル開始！ナオとライが構えた。</div>
     </div>
   </div>
 
@@ -200,7 +226,6 @@ function render(){
   const pct=bondPct();
   document.getElementById('bondFill').style.width=pct+'%';
   document.getElementById('bondPct').textContent=pct+'%';
-  document.getElementById('btnDuo').disabled = pct<100 || btl.over;
 
   const list=document.getElementById('taskList');
   list.innerHTML='';
@@ -248,7 +273,7 @@ function go(v){
   document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   document.querySelector(`.tab[data-v="${v}"]`).classList.add('active');
-  if(v==='battle') initBattle3D();
+  if(v==='battle') initBattle();
 }
 
 /* =====================================================
@@ -320,585 +345,337 @@ function animateBg(){
 addEventListener('resize', resizeBg);
 
 /* =====================================================
-   3D バトル（デモ）
+   2D ATBバトル（FF6風）
+   - ATBゲージが溜まったらコマンド選択
+   - レベル・技・アイテムは累積ポイントと連動
    ===================================================== */
-let btl={inited:false, over:false, heroHp:100, foeHp:120, busy:false};
-let bRenderer, bScene, bCam, naoMesh, raiMesh, foeMesh, fxGroup;
-let foeCore, foeBody, foeBase, capes=[], shake=0, camBase=new THREE.Vector3(0,2.7,7.2);
-let arenaWater, lightning;
+// レベル：累積ポイントから自動計算（クエストを続けるほど強くなる）
+function heroLv(){ return Math.max(1, Math.min(50, 1+Math.floor(Math.sqrt(state.total/25)))); }
 
-// 光の粒テクスチャ（放射状グラデーションをその場で生成）
-function makeGlowTexture(){
-  const cv=document.createElement('canvas'); cv.width=cv.height=64;
-  const c=cv.getContext('2d');
-  const g=c.createRadialGradient(32,32,0,32,32,32);
-  g.addColorStop(0,'rgba(255,255,255,1)');
-  g.addColorStop(.3,'rgba(255,255,255,.8)');
-  g.addColorStop(1,'rgba(255,255,255,0)');
-  c.fillStyle=g; c.fillRect(0,0,64,64);
-  const tx=new THREE.CanvasTexture(cv); return tx;
+// 技・魔法（unlockPt の累積ポイントに達すると習得）
+const SKILLS={
+  nao:[
+    {id:'kaiten', name:'かいてんぎり',     mp:4,  unlockPt:0,    pow:1.6, type:'phys', desc:'回転しながら斬りつける'},
+    {id:'rekka',  name:'れっかざん',       mp:8,  unlockPt:500,  pow:2.3, type:'phys', desc:'炎をまとった三連斬り'},
+    {id:'hikari', name:'ひかりのつるぎ',   mp:14, unlockPt:1500, pow:3.2, type:'phys', desc:'光の力を剣に集めて放つ'},
+  ],
+  rai:[
+    {id:'shine',  name:'シャイン',         mp:5,  unlockPt:0,    pow:1.8, type:'mag',  desc:'光の弾を放つ'},
+    {id:'heal',   name:'ヒール',           mp:6,  unlockPt:300,  pow:0,   type:'heal', desc:'いちばん弱った仲間のHPを回復'},
+    {id:'burst',  name:'シャインバースト', mp:12, unlockPt:1000, pow:2.6, type:'mag',  desc:'まばゆい光の大爆発'},
+  ],
+};
+
+// アイテム：累積ポイントに応じて自動支給
+const ITEM_DEFS=[
+  {id:'potion', name:'ポーション', every:100,  desc:'HPを50%回復'},
+  {id:'ether',  name:'エーテル',   every:300,  desc:'MPを50%回復'},
+  {id:'elixir', name:'エリクサー', every:1000, desc:'HPとMPを全回復'},
+];
+function grantItems(){
+  if(!state.inv) state.inv={};
+  if(!state.granted) state.granted={};
+  const got=[];
+  ITEM_DEFS.forEach(d=>{
+    const due=Math.floor(state.total/d.every);
+    const had=state.granted[d.id]||0;
+    if(due>had){
+      state.inv[d.id]=(state.inv[d.id]||0)+(due-had);
+      got.push(`${d.name}×${due-had}`);
+      state.granted[d.id]=due;
+    }
+  });
+  if(got.length) save();
+  return got;
 }
-let glowTex;
 
-// ── 勇者（関節リグ版：肩・肘・腰・膝が個別に動く） ──
-function makeHero(opt){
-  const g=new THREE.Group();
-  const std=(c,r,m)=>new THREE.MeshStandardMaterial({color:c, roughness:r??.55, metalness:m??.1});
-  const sh=mesh=>{mesh.castShadow=true; return mesh;};
-  const J={}; // 関節一覧
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
-  // 腰（全身の親関節）
-  J.pelvis=new THREE.Group(); J.pelvis.position.y=.82; g.add(J.pelvis);
-  const hipMesh=sh(new THREE.Mesh(new THREE.SphereGeometry(.2,10,8), std(0x2b3350,.8)));
-  hipMesh.scale.set(1.2,.7,.9); J.pelvis.add(hipMesh);
-
-  // 上半身（背骨：前傾・ひねりに使う）
-  J.spine=new THREE.Group(); J.spine.position.y=.12; J.pelvis.add(J.spine);
-  const torso=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.24,.34,6,12), std(opt.cloth,.7)));
-  torso.position.y=.3; J.spine.add(torso);
-  const chest=sh(new THREE.Mesh(new THREE.CylinderGeometry(.28,.25,.36,12), std(opt.armor,.3,.85)));
-  chest.position.y=.36; chest.scale.z=.72; J.spine.add(chest);
-  const belt=sh(new THREE.Mesh(new THREE.TorusGeometry(.25,.04,8,16), std(0x8a6d3b,.4,.6)));
-  belt.rotation.x=Math.PI/2; belt.position.y=.04; belt.scale.z=.8; J.spine.add(belt);
-
-  // 首・頭
-  J.neck=new THREE.Group(); J.neck.position.y=.62; J.spine.add(J.neck);
-  const head=sh(new THREE.Mesh(new THREE.SphereGeometry(.22,16,14), std(0xffd9b3,.6)));
-  head.position.y=.18; J.neck.add(head);
-  const hair=sh(new THREE.Mesh(new THREE.SphereGeometry(.235,14,10,0,Math.PI*2,0,Math.PI*.55), std(opt.hair,.85)));
-  hair.position.y=.22; hair.rotation.x=-.25; J.neck.add(hair);
-  const eyeM=new THREE.MeshBasicMaterial({color:0x222233});
-  [-.08,.08].forEach(x=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.026,6,6),eyeM);e.position.set(x,.19,.19);J.neck.add(e);});
-
-  // 腕（肩関節→肘関節の2段）
-  const mkArm=(side)=>{
-    const s=side==='L'?-1:1;
-    const shoulder=new THREE.Group(); shoulder.position.set(s*.3,.52,0); J.spine.add(shoulder);
-    const pad=sh(new THREE.Mesh(new THREE.SphereGeometry(.13,12,8,0,Math.PI*2,0,Math.PI/2), std(opt.armor,.3,.85)));
-    shoulder.add(pad);
-    const upper=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.06,.2,4,8), std(opt.cloth,.7)));
-    upper.position.y=-.15; shoulder.add(upper);
-    const elbow=new THREE.Group(); elbow.position.y=-.3; shoulder.add(elbow);
-    const fore=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.055,.18,4,8), std(0xffd9b3,.6)));
-    fore.position.y=-.12; elbow.add(fore);
-    const hand=sh(new THREE.Mesh(new THREE.SphereGeometry(.07,8,8), std(0xffd9b3,.6)));
-    hand.position.y=-.26; elbow.add(hand);
-    J['sh'+side]=shoulder; J['el'+side]=elbow;
-    return elbow;
+// ── バトル状態 ──
+let B=null, atbTimer=null;
+function initBattle(){
+  if(B && !B.over){ renderBattleAll(); return; } // 戦闘継続中はそのまま
+  const lv=heroLv();
+  const mk=(key,name,em,hp,mp,atk,mag,spd)=>({key,name,em,lv,hp,mhp:hp,mp,mmp:mp,atk,mag,spd,atb:0,alive:true,defend:false});
+  B={
+    over:false, menuOpen:false, acting:false, turnHero:null, duoUsed:false,
+    heroes:[
+      mk('nao','ナオ','🗡️', 80+lv*12, 20+lv*2, 10+lv*3, 6+lv*2, 30),
+      mk('rai','ライ','✨',  70+lv*10, 30+lv*4, 7+lv*2, 10+lv*3, 27),
+      null, null, // なかまモンスター枠（ストーリーが進むと仲間が増える）
+    ],
+    foe:{name:'シャドウ・ウルフ', hp:130+lv*22, mhp:130+lv*22, atk:9+lv*2, spd:24, atb:20, alive:true},
   };
-  mkArm('L'); const elR=mkArm('R');
-
-  // 脚（腰関節→膝関節の2段＋足）
-  const mkLeg=(side)=>{
-    const s=side==='L'?-1:1;
-    const hip=new THREE.Group(); hip.position.set(s*.13,-.06,0); J.pelvis.add(hip);
-    const thigh=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.085,.22,4,8), std(0x2b3350,.8)));
-    thigh.position.y=-.16; hip.add(thigh);
-    const knee=new THREE.Group(); knee.position.y=-.34; hip.add(knee);
-    const shin=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.07,.2,4,8), std(0x2b3350,.8)));
-    shin.position.y=-.14; knee.add(shin);
-    const foot=sh(new THREE.Mesh(new THREE.BoxGeometry(.14,.1,.24), std(0x3d2b1f,.9)));
-    foot.position.set(0,-.3,.05); knee.add(foot);
-    J['hip'+side]=hip; J['knee'+side]=knee;
-  };
-  mkLeg('L'); mkLeg('R');
-
-  // マント（背骨に追従してなびく）
-  const capeGeo=new THREE.PlaneGeometry(.5,.8,4,8);
-  const cape=new THREE.Mesh(capeGeo, new THREE.MeshStandardMaterial({color:opt.cape, roughness:.85, side:THREE.DoubleSide}));
-  cape.position.set(0,.3,-.26); cape.rotation.x=.18; cape.castShadow=true;
-  cape.userData.base=capeGeo.attributes.position.array.slice();
-  capes.push(cape); J.spine.add(cape);
-
-  // 剣（右手に握る）
-  const sword=new THREE.Group();
-  const blade=new THREE.Mesh(new THREE.BoxGeometry(.05,.8,.014),
-    new THREE.MeshStandardMaterial({color:0xe8eef8, roughness:.15, metalness:.9, emissive:opt.glow, emissiveIntensity:.55}));
-  blade.position.y=.5; sword.add(blade);
-  const tip=new THREE.Mesh(new THREE.ConeGeometry(.038,.11,4), blade.material);
-  tip.position.y=.95; tip.rotation.y=Math.PI/4; sword.add(tip);
-  const guard=new THREE.Mesh(new THREE.BoxGeometry(.18,.04,.05), std(0xc9a227,.3,.9)); guard.position.y=.1; sword.add(guard);
-  const grip=new THREE.Mesh(new THREE.CylinderGeometry(.022,.022,.18,8), std(0x4a3020,.8)); sword.add(grip);
-  const swLight=new THREE.PointLight(opt.glow,.9,2.5); swLight.position.y=.55; sword.add(swLight);
-  sword.position.set(0,-.26,.05); sword.rotation.x=.4;
-  elR.add(sword);
-
-  // 構えの初期ポーズ
-  J.shR.rotation.set(-.5,0,-.25); J.elR.rotation.x=-.7;
-  J.shL.rotation.set(-.25,0,.2);  J.elL.rotation.x=-.4;
-  g.userData={j:J, sword, mode:'idle', swinging:false, flinch:0, phase:Math.random()*Math.PI*2};
-  return g;
-}
-
-// ── 荒波のガーディアン（水のタイタン：脈動する体＋発光コア＋氷の冠） ──
-function makeFoe(){
-  const g=new THREE.Group();
-  const waterM=new THREE.MeshStandardMaterial({
-    color:0x15518f, roughness:.1, metalness:.45,
-    transparent:true, opacity:.92, emissive:0x062a55, emissiveIntensity:.85,
-  });
-  // 体（頂点を波打たせる）
-  foeBody=new THREE.Mesh(new THREE.IcosahedronGeometry(1.25,2), waterM);
-  foeBody.position.y=1.7; foeBody.castShadow=true;
-  foeBase=foeBody.geometry.attributes.position.array.slice();
-  g.add(foeBody);
-  // 発光コア（心臓）
-  foeCore=new THREE.Mesh(new THREE.SphereGeometry(.42,16,16),
-    new THREE.MeshBasicMaterial({color:0x9ef0ff, transparent:true, opacity:.95}));
-  foeCore.position.y=1.7; g.add(foeCore);
-  const coreLight=new THREE.PointLight(0x6fd8ff, 3, 8); coreLight.position.y=1.7; g.add(coreLight);
-  // 頭
-  const head=new THREE.Mesh(new THREE.IcosahedronGeometry(.6,1), waterM);
-  head.position.y=3.05; head.castShadow=true; g.add(head);
-  // 目（怒りの赤）
-  const eyeM=new THREE.MeshBasicMaterial({color:0xff5544});
-  [-.22,.22].forEach(x=>{
-    const e=new THREE.Mesh(new THREE.SphereGeometry(.09,8,8),eyeM); e.position.set(x,3.1,.5); g.add(e);
-    const el=new THREE.PointLight(0xff5544,.6,2); el.position.set(x,3.1,.55); g.add(el);
-  });
-  // 氷の冠
-  for(let i=0;i<7;i++){
-    const a=(i/7)*Math.PI*2;
-    const ice=new THREE.Mesh(new THREE.ConeGeometry(.09,.45+Math.random()*.3,5),
-      new THREE.MeshStandardMaterial({color:0xbfe8ff, roughness:.05, metalness:.1, transparent:true, opacity:.85}));
-    ice.position.set(Math.cos(a)*.45, 3.55, Math.sin(a)*.45);
-    ice.rotation.set(Math.sin(a)*.3,0,-Math.cos(a)*.3);
-    g.add(ice);
+  B.heroes[0].atb=40;
+  const got=grantItems();
+  renderBattleAll();
+  bmsg(got.length?`📦 クエスト達成のごほうび：${got.join('、')} を手に入れた！`:'シャドウ・ウルフが あらわれた！');
+  if(!atbTimer){
+    let last=performance.now();
+    atbTimer=setInterval(()=>{
+      const now=performance.now(), dt=now-last; last=now;
+      battleTick(dt);
+    },50);
   }
-  // 腕（肩関節つき：振り上げ→叩きつけが可能）
-  const arms=[];
-  [-1,1].forEach(sx=>{
-    const shoulder=new THREE.Group(); shoulder.position.set(sx*.95,2.4,0); g.add(shoulder);
-    const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.3,1.1,4,10), waterM);
-    arm.position.set(sx*.45,-.65,0); arm.rotation.z=sx*.65; arm.castShadow=true; shoulder.add(arm);
-    const fist=new THREE.Mesh(new THREE.SphereGeometry(.4,12,10), waterM);
-    fist.position.set(sx*.95,-1.35,0); fist.castShadow=true; shoulder.add(fist);
-    arms.push(shoulder);
+}
+
+function battleTick(dt){
+  if(!B||B.over||B.menuOpen||B.acting) return;  // ウェイトモード：選択中は時間停止
+  B.heroes.forEach(h=>{ if(h&&h.alive&&B.turnHero!==h) h.atb=Math.min(100,h.atb+h.spd*dt*.0011); });
+  if(B.foe.alive) B.foe.atb=Math.min(100,B.foe.atb+B.foe.spd*dt*.0011);
+  if(!B.turnHero){
+    const ready=B.heroes.find(h=>h&&h.alive&&h.atb>=100);
+    if(ready){ B.turnHero=ready; openCmd(); return; }
+  }
+  if(B.foe.alive&&B.foe.atb>=100){ foeAct(); return; }
+  renderRows();
+}
+
+// ── 画面描画 ──
+function renderBattleAll(){
+  const wrap=document.getElementById('heroSprs');
+  wrap.innerHTML='';
+  const pos=[{r:'21%',t:'14%'},{r:'4%',t:'34%'},{r:'21%',t:'54%'},{r:'4%',t:'74%'}];
+  B.heroes.forEach((h,i)=>{
+    const el=document.createElement('div');
+    el.className='hero-spr'+(h?'':' empty');
+    el.id='hero'+i;
+    el.style.right=pos[i].r; el.style.top=pos[i].t;
+    el.innerHTML=h?`<div class="em">${h.em}</div><div class="nm">${h.name} Lv${h.lv}</div>`
+                  :`<div class="em" style="opacity:.35">❔</div><div class="nm">なかま募集中</div>`;
+    wrap.appendChild(el);
   });
-  g.userData.arms=arms; g.userData.attacking=false;
-  return g;
+  document.getElementById('foeSpr').style.opacity=B.foe.alive?1:0;
+  renderRows(); closeCmd();
 }
+function renderRows(){
+  const rows=document.getElementById('partyRows');
+  const fr=Math.max(0,B.foe.hp/B.foe.mhp*100);
+  let html=`<div class="prow"><span class="pn">👿 ${B.foe.name}</span><span></span><span></span>
+    <div class="atb"><i style="width:${fr}%;background:${fr<30?'#f87171':'#4ade80'}"></i></div></div>`;
+  B.heroes.forEach(h=>{
+    if(!h) return;
+    html+=`<div class="prow${h.alive?'':' dead'}">
+      <span class="pn">${h.em} ${h.name}</span>
+      <span class="hp">${Math.max(0,Math.ceil(h.hp))}</span>
+      <span class="mp">${Math.ceil(h.mp)}</span>
+      <div class="atb${h.atb>=100?' full':''}"><i style="width:${h.atb}%"></i></div>
+    </div>`;
+  });
+  rows.innerHTML=html;
+}
+function bmsg(t){document.getElementById('btlMsg').innerHTML=t;}
 
-function initBattle3D(){
-  if(btl.inited){return;}
-  btl.inited=true;
-  glowTex=makeGlowTexture();
-  const stage=document.getElementById('battleStage');
-  const cv=document.createElement('canvas');
-  stage.appendChild(cv);
-  bRenderer=new THREE.WebGLRenderer({canvas:cv, antialias:true});
-  bRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  bRenderer.shadowMap.enabled=true;
-  bRenderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  bRenderer.outputEncoding=THREE.sRGBEncoding;
-  bRenderer.toneMapping=THREE.ACESFilmicToneMapping;
-  bRenderer.toneMappingExposure=.92;
-
-  bScene=new THREE.Scene();
-  bScene.background=new THREE.Color(0x060a16);
-  bScene.fog=new THREE.FogExp2(0x060a16, .045);
-  bCam=new THREE.PerspectiveCamera(48, 16/10, .1, 60);
-  bCam.position.copy(camBase); bCam.lookAt(0, 1.4, 0);
-
-  // ── 照明（月光＋リム＋環境） ──
-  bScene.add(new THREE.HemisphereLight(0x4a6398, 0x070c18, .5));
-  const key=new THREE.DirectionalLight(0xb8d0ff, .95);
-  key.position.set(5,10,6); key.castShadow=true;
-  key.shadow.mapSize.set(1024,1024);
-  key.shadow.camera.left=-8; key.shadow.camera.right=8;
-  key.shadow.camera.top=8; key.shadow.camera.bottom=-8;
-  bScene.add(key);
-  const rim=new THREE.PointLight(0xff8c42, 1.6, 18); rim.position.set(-5,2.5,-3); bScene.add(rim);
-
-  // ── アリーナ：揺れる海面＋光るルーン円＋岩柱 ──
-  const wg=new THREE.CircleGeometry(11, 64);
-  arenaWater=new THREE.Mesh(wg, new THREE.MeshStandardMaterial({
-    color:0x0e2a52, roughness:.1, metalness:.65,
-  }));
-  arenaWater.rotation.x=-Math.PI/2; arenaWater.receiveShadow=true; bScene.add(arenaWater);
-  // 戦いの足場（石の円盤）
-  const disc=new THREE.Mesh(new THREE.CylinderGeometry(5.2,5.6,.35,48),
-    new THREE.MeshStandardMaterial({color:0x222a42, roughness:.9}));
-  disc.position.y=.02; disc.receiveShadow=true; bScene.add(disc);
-  // ルーンの光輪
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(4.6,.05,8,80),
-    new THREE.MeshBasicMaterial({color:0x4cc9f0, transparent:true, opacity:.7}));
-  ring.rotation.x=Math.PI/2; ring.position.y=.22; bScene.add(ring);
-  lightning=ring;
-  // 周囲の岩柱（遠景の迫力）
-  for(let i=0;i<9;i++){
-    const a=(i/9)*Math.PI*2+.3;
-    const h=2.5+Math.random()*4;
-    const rock=new THREE.Mesh(new THREE.CylinderGeometry(.35+Math.random()*.3,.6+Math.random()*.4,h,7),
-      new THREE.MeshStandardMaterial({color:0x222c44, roughness:.95, flatShading:true}));
-    rock.position.set(Math.cos(a)*(7.5+Math.random()*2), h/2-.4, Math.sin(a)*(7.5+Math.random()*2));
-    rock.rotation.y=Math.random()*Math.PI; rock.castShadow=true;
-    bScene.add(rock);
+// ── コマンドメニュー ──
+function openCmd(){
+  B.menuOpen=true;
+  const idx=B.heroes.indexOf(B.turnHero);
+  const el=document.getElementById('hero'+idx);
+  if(el) el.classList.add('active');
+  cmdMain();
+}
+function cmdMain(){
+  const h=B.turnHero;
+  document.getElementById('cmdArea').innerHTML=`
+    <div style="font-size:13px;color:#ffd166;margin-top:8px;">▶ ${h.name} のターン！</div>
+    <div class="cmds">
+      <button class="cmd" onclick="doAttack()">⚔️ たたかう</button>
+      <button class="cmd" onclick="cmdSkills()">${h.key==='nao'?'💥 とくぎ':'🔮 まほう'}</button>
+      <button class="cmd" onclick="cmdItems()">🎒 アイテム</button>
+      <button class="cmd" onclick="doDefend()">🛡️ ぼうぎょ</button>
+    </div>`;
+}
+function cmdSkills(){
+  const h=B.turnHero;
+  const list=SKILLS[h.key].filter(s=>state.total>=s.unlockPt);
+  const locked=SKILLS[h.key].filter(s=>state.total<s.unlockPt);
+  let html='<div class="submenu">';
+  list.forEach(s=>{
+    const ok=h.mp>=s.mp;
+    html+=`<div class="subitem${ok?'':' dis'}" ${ok?`onclick="useSkill('${s.id}')"`:''}>
+      <span>${s.name}<small style="color:#8fa3c8;margin-left:8px">${s.desc}</small></span><span style="color:#9bb6ff">MP${s.mp}</span></div>`;
+  });
+  if(h.key==='nao'&&bondPct()===100&&!B.duoUsed&&B.heroes[1].alive){
+    html+=`<div class="subitem" style="border-color:#ffd166" onclick="useSkill('duo')">
+      <span>✨ダブル・ライト<small style="color:#8fa3c8;margin-left:8px">二人の絆の合体技（1戦闘1回）</small></span><span style="color:#ffd166">絆MAX</span></div>`;
   }
-  // 漂う霧（スプライト）
-  for(let i=0;i<10;i++){
-    const m=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, color:0x33507a, transparent:true, opacity:.10, depthWrite:false}));
-    m.scale.setScalar(5+Math.random()*5);
-    m.position.set((Math.random()-.5)*14, .4+Math.random()*1.2, (Math.random()-.5)*10);
-    bScene.add(m);
-  }
-
-  naoMesh=makeHero({cloth:0x9a6b1f, armor:0xd9b54a, hair:0x4a3220, cape:0xb33939, glow:0xffd166});
-  naoMesh.position.set(-2.5,.13,.7); naoMesh.rotation.y=.7; bScene.add(naoMesh);
-  raiMesh=makeHero({cloth:0x2c4a7a, armor:0x8fb8e8, hair:0x1a1a2e, cape:0xf0f4ff, glow:0x4cc9f0});
-  raiMesh.position.set(-2.5,.13,-1.0); raiMesh.rotation.y=.6; bScene.add(raiMesh);
-  foeMesh=makeFoe(); foeMesh.position.set(2.7,.2,0); foeMesh.rotation.y=-.85; bScene.add(foeMesh);
-  fxGroup=new THREE.Group(); bScene.add(fxGroup);
-
-  resizeBattle(); animateBattle();
-  addEventListener('resize', resizeBattle);
+  locked.forEach(s=>{
+    html+=`<div class="subitem dis"><span>❓ ？？？</span><span style="font-size:11px;color:#8fa3c8">累積${s.unlockPt}Pで習得</span></div>`;
+  });
+  html+=`<div class="subitem" onclick="cmdMain()"><span>↩ もどる</span><span></span></div></div>`;
+  document.getElementById('cmdArea').innerHTML=html;
 }
-function resizeBattle(){
-  const stage=document.getElementById('battleStage');
-  if(!stage||!bRenderer)return;
-  const w=stage.clientWidth, h=stage.clientHeight;
-  bRenderer.setSize(w,h); bCam.aspect=w/h; bCam.updateProjectionMatrix();
-}
-let bT=0;
-function animateBattle(){
-  requestAnimationFrame(animateBattle);
-  if(!bRenderer)return;
-  bT+=.03;
-  // 勇者：関節アニメ（待機＝呼吸と重心移動／走り＝足と腕が交互に振れる）
-  [naoMesh,raiMesh].forEach(h=>{
-    const J=h.userData.j, ph=h.userData.phase, sw=h.userData.swinging;
-    if(h.userData.mode==='run'){
-      const s=bT*9+ph;
-      h.position.y=.13+Math.abs(Math.sin(s))*.07;
-      J.hipL.rotation.x=Math.sin(s)*.85;
-      J.kneeL.rotation.x=Math.max(0,Math.sin(s+1.2))*1.1;
-      J.hipR.rotation.x=Math.sin(s+Math.PI)*.85;
-      J.kneeR.rotation.x=Math.max(0,Math.sin(s+Math.PI+1.2))*1.1;
-      if(!sw){
-        J.spine.rotation.x=.3; J.spine.rotation.y=0;
-        J.neck.rotation.x=-.15;
-        J.shL.rotation.x=-.25+Math.sin(s+Math.PI)*.7;
-        J.shR.rotation.x=-.5+Math.sin(s)*.7;
-      }
-    }else{
-      const s=bT*1.6+ph;
-      h.position.y=.13;
-      J.hipL.rotation.x=0; J.hipR.rotation.x=0;
-      J.kneeL.rotation.x=.05; J.kneeR.rotation.x=.05;
-      if(!sw){
-        J.spine.rotation.x=.04+Math.sin(s)*.03;      // 呼吸
-        J.spine.rotation.y=Math.sin(s*.7)*.04;       // 重心の揺れ
-        J.neck.rotation.x=Math.sin(s*.9)*.04;
-        J.neck.rotation.y=Math.sin(s*.5)*.06;
-        J.shL.rotation.x=-.25+Math.sin(s)*.05;
-        J.shR.rotation.x=-.5+Math.sin(s+.5)*.05;
-      }
-    }
-    // 被弾時ののけぞり（徐々に戻る）
-    if(h.userData.flinch>0){
-      J.spine.rotation.x=-.45*h.userData.flinch;
-      J.neck.rotation.x=-.3*h.userData.flinch;
-      h.userData.flinch*=.9;
-      if(h.userData.flinch<.01) h.userData.flinch=0;
+function cmdItems(){
+  if(!state.inv) state.inv={};
+  let html='<div class="submenu">';
+  let any=false;
+  ITEM_DEFS.forEach(d=>{
+    const n=state.inv[d.id]||0;
+    if(n>0){ any=true;
+      html+=`<div class="subitem" onclick="useItem('${d.id}')"><span>${d.name}<small style="color:#8fa3c8;margin-left:8px">${d.desc}</small></span><span>×${n}</span></div>`;
     }
   });
-  // マントのなびき（頂点アニメ）
-  capes.forEach((cape,ci)=>{
-    const pos=cape.geometry.attributes.position, base=cape.userData.base;
-    for(let i=0;i<pos.count;i++){
-      const y=base[i*3+1];
-      const w=(.425-y)/.85; // 下ほど大きく揺れる
-      pos.setZ(i, base[i*3+2]+Math.sin(bT*2.2+y*4+ci)*.10*w+Math.sin(bT*3.7+ci*2)*.04*w);
-    }
-    pos.needsUpdate=true; cape.geometry.computeVertexNormals();
-  });
-  // ガーディアン：体表が波打つ＋コア脈動
-  if(foeBody&&foeMesh.visible){
-    const pos=foeBody.geometry.attributes.position;
-    for(let i=0;i<pos.count;i++){
-      const x=foeBase[i*3],y=foeBase[i*3+1],z=foeBase[i*3+2];
-      const n=1+Math.sin(bT*2+x*3+y*2)*.05+Math.cos(bT*1.5+z*4)*.04;
-      pos.setXYZ(i,x*n,y*n,z*n);
-    }
-    pos.needsUpdate=true; foeBody.geometry.computeVertexNormals();
-    foeCore.scale.setScalar(1+Math.sin(bT*3)*.12);
-    foeCore.material.opacity=.75+Math.sin(bT*3)*.2;
-  }
-  foeMesh.position.y=.2+Math.sin(bT*.7)*.12;
-  foeMesh.rotation.y=-.85+Math.sin(bT*.35)*.08;
-  // ガーディアンの腕がゆったりうねる（攻撃中以外）
-  if(foeMesh.userData.arms&&!foeMesh.userData.attacking){
-    foeMesh.userData.arms[0].rotation.z=-Math.sin(bT*.9)*.12;
-    foeMesh.userData.arms[1].rotation.z=Math.sin(bT*.9+.6)*.12;
-  }
-  // ルーン円の回転と明滅
-  if(lightning){lightning.rotation.z+=.004; lightning.material.opacity=.5+Math.sin(bT*2)*.25;}
-  // カメラ：ゆったり漂い＋シェイク
-  const sway=Math.sin(bT*.3)*.25;
-  bCam.position.set(camBase.x+sway+(Math.random()-.5)*shake,
-                    camBase.y+Math.sin(bT*.45)*.1+(Math.random()-.5)*shake,
-                    camBase.z+(Math.random()-.5)*shake);
-  bCam.lookAt(0,1.4,0);
-  shake*=.88;
-  // エフェクト粒子（加算合成スプライト）
-  for(let i=fxGroup.children.length-1;i>=0;i--){
-    const p=fxGroup.children[i];
-    p.position.add(p.userData.v);
-    p.userData.v.y-=p.userData.g||0;       // 重力
-    p.userData.life-=p.userData.decay||.02;
-    p.material.opacity=Math.max(0,p.userData.life);
-    if(p.userData.grow) p.scale.multiplyScalar(p.userData.grow);
-    if(p.userData.life<=0){fxGroup.remove(p);}
-  }
-  bRenderer.render(bScene, bCam);
+  if(!any) html+='<div class="subitem dis"><span>アイテムなし（クエストでポイントを貯めると自動でもらえる）</span><span></span></div>';
+  html+=`<div class="subitem" onclick="cmdMain()"><span>↩ もどる</span><span></span></div></div>`;
+  document.getElementById('cmdArea').innerHTML=html;
 }
-// 光の爆発（加算合成のスプライト粒子）
-function burst(pos, color, n, opt={}){
-  for(let i=0;i<n;i++){
-    const p=new THREE.Sprite(new THREE.SpriteMaterial({
-      map:glowTex, color, transparent:true, opacity:1,
-      blending:THREE.AdditiveBlending, depthWrite:false,
-    }));
-    p.position.copy(pos);
-    p.scale.setScalar(.18+Math.random()*.4);
-    const sp=opt.speed||.28;
-    p.userData={
-      v:new THREE.Vector3((Math.random()-.5)*sp,(Math.random()-.2)*sp,(Math.random()-.5)*sp),
-      life:1, decay:.015+Math.random()*.02, g:opt.gravity??.006,
-    };
-    fxGroup.add(p);
-  }
-  shake=Math.max(shake, opt.shake??.12);
+function closeCmd(){
+  document.getElementById('cmdArea').innerHTML='';
+  document.querySelectorAll('.hero-spr').forEach(e=>e.classList.remove('active'));
 }
-// 衝撃波リング
-function shockwave(pos, color){
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(.3,.06,8,40),
-    new THREE.MeshBasicMaterial({color, transparent:true, opacity:.9, blending:THREE.AdditiveBlending, depthWrite:false}));
-  ring.position.copy(pos); ring.rotation.x=Math.PI/2;
-  ring.userData={v:new THREE.Vector3(0,.005,0), life:1, decay:.04, grow:1.13};
-  fxGroup.add(ring);
-}
-// 被弾フラッシュ
-function hitFlash(){
-  if(!foeBody)return;
-  const m=foeBody.material;
-  m.emissive.setHex(0xff6666); m.emissiveIntensity=1.6;
-  setTimeout(()=>{m.emissive.setHex(0x062a55); m.emissiveIntensity=.85;},140);
+function endTurn(){
+  if(B.turnHero) B.turnHero.atb=0;
+  B.turnHero=null; B.menuOpen=false; closeCmd(); renderRows();
+  checkEnd();
 }
 
-function setHp(){
-  const h=Math.max(0,btl.heroHp), f=Math.max(0,btl.foeHp);
-  const hb=document.getElementById('heroHp'), fb=document.getElementById('foeHp');
-  hb.style.width=h+'%'; hb.classList.toggle('bad',h<35);
-  fb.style.width=(f/120*100)+'%'; fb.classList.toggle('bad',f<40);
-  document.getElementById('heroHpTxt').textContent=h+'/100';
-  document.getElementById('foeHpTxt').textContent=f+'/120';
+// ── 演出ヘルパー ──
+function popDmg(targetId, text, color){
+  const scr=document.getElementById('btlScreen');
+  const t=document.getElementById(targetId);
+  if(!t) return;
+  const d=document.createElement('div');
+  d.className='dmg'; d.textContent=text; d.style.color=color||'#fff';
+  const r=t.getBoundingClientRect(), sr=scr.getBoundingClientRect();
+  d.style.left=(r.left-sr.left+r.width*.3+Math.random()*20)+'px';
+  d.style.top=(r.top-sr.top)+'px';
+  scr.appendChild(d);
+  setTimeout(()=>d.remove(),950);
 }
-function log(t){document.getElementById('btlLog').innerHTML=t;}
-function lockBtns(v){['btnNao','btnRai'].forEach(id=>document.getElementById(id).disabled=v||btl.over);
-  document.getElementById('btnDuo').disabled=v||btl.over||bondPct()<100;}
-
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-// 滑らかな突進（走りモーション付き）
-async function dash(mesh, dist, steps=12){
-  const ox=mesh.position.x;
-  if(mesh.userData) mesh.userData.mode='run';
-  for(let i=1;i<=steps;i++){
-    const t=i/steps, e=1-Math.pow(1-t,3); // ease-out
-    mesh.position.x=ox+e*dist; await sleep(16);
-  }
-  if(mesh.userData) mesh.userData.mode='idle';
-  return ox;
+function fxShake(){const s=document.getElementById('btlScreen');s.classList.remove('shake');void s.offsetWidth;s.classList.add('shake');}
+function fxFlashFoe(){const f=document.getElementById('foeSpr');f.classList.remove('flash');void f.offsetWidth;f.classList.add('flash');}
+function fxLunge(idx){const e=document.getElementById('hero'+idx);if(!e)return;e.classList.add('atk-fwd');setTimeout(()=>e.classList.remove('atk-fwd'),300);}
+function fxCutin(text,color){
+  const scr=document.getElementById('btlScreen');
+  const c=document.createElement('div'); c.className='cutin'; c.textContent=text;
+  if(color) c.style.color=color;
+  scr.appendChild(c); setTimeout(()=>c.remove(),1100);
 }
-async function dashBack(mesh, ox, steps=10){
-  const cx=mesh.position.x;
-  if(mesh.userData) mesh.userData.mode='run';
-  for(let i=1;i<=steps;i++){
-    const t=i/steps, e=1-Math.pow(1-t,2);
-    mesh.position.x=cx+(ox-cx)*e; await sleep(16);
-  }
-  mesh.position.x=ox;
-  if(mesh.userData) mesh.userData.mode='idle';
+function critChance(){ return Math.min(.25,(state.streak||0)*.02); }
+
+// ── プレイヤーの行動 ──
+function dealToFoe(base,label){
+  let dmg=Math.round(base*(0.9+Math.random()*.2));
+  const crit=Math.random()<critChance();
+  if(crit) dmg=Math.round(dmg*1.8);
+  B.foe.hp-=dmg;
+  fxFlashFoe(); fxShake();
+  popDmg('foeSpr',dmg,(crit?'#ffd166':'#fff'));
+  bmsg(`${label} ${B.foe.name}に <b style="color:#ffd166">${dmg}</b> ダメージ！${crit?` <b style="color:#ffd166">クリティカル！（れんぞく${state.streak}日ボーナス）</b>`:''}`);
 }
-// 剣撃：振りかぶり→一気に振り下ろし→構えに戻る（肩・肘・背骨が連動）
-async function swing(hero){
-  const J=hero.userData.j;
-  hero.userData.swinging=true;
-  // 振りかぶり（腕を頭上へ、体をひねる）
-  for(let i=0;i<=5;i++){
-    const t=i/5;
-    J.shR.rotation.x=-.5-t*1.9;
-    J.elR.rotation.x=-.7-t*.3;
-    J.spine.rotation.y=-t*.4;
-    await sleep(16);
-  }
-  // 振り下ろし（速く）
-  for(let i=0;i<=4;i++){
-    const t=i/4;
-    J.shR.rotation.x=-2.4+t*3.1;
-    J.elR.rotation.x=-1+t*.7;
-    J.spine.rotation.y=-.4+t*.7;
-    J.spine.rotation.x=.04+t*.3;
-    await sleep(11);
-  }
-  await sleep(90);
-  // 構えに戻る
-  for(let i=0;i<=6;i++){
-    const t=i/6;
-    J.shR.rotation.x=.7-t*1.2;
-    J.elR.rotation.x=-.3-t*.4;
-    J.spine.rotation.y=.3-t*.3;
-    J.spine.rotation.x=.34-t*.3;
-    await sleep(18);
-  }
-  hero.userData.swinging=false;
+async function doAttack(){
+  const h=B.turnHero, idx=B.heroes.indexOf(h);
+  B.menuOpen=false; B.acting=true; closeCmd();
+  fxLunge(idx);
+  await wait(250);
+  dealToFoe(h.atk*2.2, `⚔️ ${h.name}のこうげき！`);
+  await wait(650);
+  B.acting=false; endTurn();
 }
-// 魔法詠唱：両手を前にかざして光を放つ
-async function cast(hero){
-  const J=hero.userData.j;
-  hero.userData.swinging=true;
-  for(let i=0;i<=6;i++){
-    const t=i/6;
-    J.shR.rotation.x=-.5-t*1.3;  J.elR.rotation.x=-.7+t*.7;
-    J.shL.rotation.x=-.25-t*1.55; J.elL.rotation.x=-.4+t*.4;
-    J.neck.rotation.x=-t*.15;
-    await sleep(20);
+async function useSkill(id){
+  const h=B.turnHero, idx=B.heroes.indexOf(h);
+  B.menuOpen=false; B.acting=true; closeCmd();
+  if(id==='duo'){
+    B.duoUsed=true;
+    fxCutin('✨ ダブル・ライト ✨','#ffd166');
+    await wait(800);
+    fxLunge(0); fxLunge(1);
+    await wait(250);
+    dealToFoe((B.heroes[0].atk+B.heroes[1].mag)*3.2, '✨二人の光が重なった！');
+    await wait(650);
+    B.acting=false; endTurn(); return;
   }
-  await sleep(140);
-  for(let i=0;i<=6;i++){
-    const t=i/6;
-    J.shR.rotation.x=-1.8+t*1.3;  J.elR.rotation.x=0-t*.7;
-    J.shL.rotation.x=-1.8+t*1.55; J.elL.rotation.x=0-t*.4;
-    J.neck.rotation.x=-.15+t*.15;
-    await sleep(20);
+  const s=SKILLS[h.key].find(x=>x.id===id);
+  h.mp-=s.mp;
+  fxCutin(s.name, h.key==='nao'?'#ff9d5c':'#7fd8ff');
+  await wait(700);
+  if(s.type==='heal'){
+    const target=B.heroes.filter(x=>x&&x.alive).sort((a,b)=>a.hp/a.mhp-b.hp/b.mhp)[0];
+    const amt=Math.round(target.mhp*.4+h.mag*2);
+    target.hp=Math.min(target.mhp,target.hp+amt);
+    popDmg('hero'+B.heroes.indexOf(target),'+'+amt,'#4ade80');
+    bmsg(`💚 ${s.name}！ ${target.name}のHPが ${amt} 回復した！`);
+  }else{
+    fxLunge(idx); await wait(200);
+    dealToFoe((s.type==='phys'?h.atk:h.mag)*2.2*s.pow, `${h.key==='nao'?'💥':'🔮'} ${s.name}！`);
   }
-  hero.userData.swinging=false;
+  await wait(650);
+  B.acting=false; endTurn();
 }
-// 勝利ポーズ：両腕を高く上げる
-function victoryPose(hero){
-  const J=hero.userData.j;
-  hero.userData.swinging=true;
-  J.shR.rotation.set(-2.7,0,-.3); J.elR.rotation.x=-.2;
-  J.shL.rotation.set(-2.7,0,.3);  J.elL.rotation.x=-.2;
-  J.neck.rotation.x=-.2;
+async function useItem(id){
+  B.menuOpen=false; B.acting=true; closeCmd();
+  state.inv[id]--; save();
+  if(id==='potion'){
+    const t=B.heroes.filter(x=>x&&x.alive).sort((a,b)=>a.hp/a.mhp-b.hp/b.mhp)[0];
+    const amt=Math.round(t.mhp*.5);
+    t.hp=Math.min(t.mhp,t.hp+amt);
+    popDmg('hero'+B.heroes.indexOf(t),'+'+amt,'#4ade80');
+    bmsg(`🧪 ポーション！ ${t.name}のHPが ${amt} 回復！`);
+  }else if(id==='ether'){
+    const t=B.heroes.filter(x=>x&&x.alive).sort((a,b)=>a.mp/a.mmp-b.mp/b.mmp)[0];
+    const amt=Math.round(t.mmp*.5);
+    t.mp=Math.min(t.mmp,t.mp+amt);
+    popDmg('hero'+B.heroes.indexOf(t),'+'+amt+'MP','#9bb6ff');
+    bmsg(`💙 エーテル！ ${t.name}のMPが ${amt} 回復！`);
+  }else if(id==='elixir'){
+    const t=B.heroes.filter(x=>x&&x.alive).sort((a,b)=>a.hp/a.mhp-b.hp/b.mhp)[0];
+    t.hp=t.mhp; t.mp=t.mmp;
+    popDmg('hero'+B.heroes.indexOf(t),'全回復!','#ffd166');
+    bmsg(`✨ エリクサー！ ${t.name}が完全回復した！`);
+  }
+  await wait(700);
+  B.acting=false; endTurn();
+}
+async function doDefend(){
+  const h=B.turnHero;
+  B.menuOpen=false; B.acting=true; closeCmd();
+  h.defend=true;
+  bmsg(`🛡️ ${h.name}は身を守っている（次のダメージ半減）`);
+  await wait(450);
+  B.acting=false; endTurn();
 }
 
-async function attack(who){
-  if(btl.busy||btl.over)return;
-  btl.busy=true; lockBtns(true);
-  const hitPos=()=>foeMesh.position.clone().add(new THREE.Vector3(0,1.7,0));
+// ── 敵の行動 ──
+async function foeAct(){
+  B.acting=true; B.foe.atb=0;
+  const targets=B.heroes.filter(h=>h&&h.alive);
+  if(!targets.length){ B.acting=false; return; }
+  const t=targets[Math.floor(Math.random()*targets.length)];
+  const idx=B.heroes.indexOf(t);
+  const f=document.getElementById('foeSpr');
+  f.classList.add('foe-fwd');
+  await wait(280);
+  let dmg=Math.round(B.foe.atk*2*(0.9+Math.random()*.2));
+  if(t.defend){ dmg=Math.round(dmg/2); t.defend=false; }
+  t.hp-=dmg;
+  if(t.hp<=0){ t.hp=0; t.alive=false; }
+  fxShake();
+  popDmg('hero'+idx,dmg,'#f87171');
+  bmsg(`👿 シャドウ・ウルフの攻撃！ ${t.name}に ${dmg} ダメージ${t.alive?'！':'…！ '+t.name+'は倒れた！'}`);
+  f.classList.remove('foe-fwd');
+  await wait(550);
+  B.acting=false;
+  renderRows(); checkEnd();
+}
 
-  if(who==='duo'){
-    // ── 合体必殺技：カメラが寄り、二人同時に突進、二色の光が螺旋爆発 ──
-    log('✨ 二人の絆が光になる…！');
-    const oz=camBase.z;
-    for(let i=0;i<14;i++){camBase.z=oz-(i/14)*2.2; await sleep(25);} // ズームイン
-    burst(naoMesh.position.clone().add(new THREE.Vector3(0,1.2,0)), 0xffd166, 18, {speed:.1, gravity:0, shake:0});
-    burst(raiMesh.position.clone().add(new THREE.Vector3(0,1.2,0)), 0x4cc9f0, 18, {speed:.1, gravity:0, shake:0});
-    await sleep(450);
-    const ox1=await dash(naoMesh, 3.6, 9);
-    const ox2Promise=dash(raiMesh, 3.6, 9);
-    swing(naoMesh); cast(raiMesh);
-    const ox2=await ox2Promise;
-    const dmg=45+Math.floor(Math.random()*15);
-    burst(hitPos(), 0xffd166, 35, {speed:.4, shake:.3});
-    burst(hitPos(), 0x4cc9f0, 35, {speed:.4, shake:.3});
-    burst(hitPos(), 0xffffff, 20, {speed:.2, shake:.3});
-    shockwave(foeMesh.position.clone().add(new THREE.Vector3(0,.3,0)), 0xa7f3d0);
-    shockwave(foeMesh.position.clone().add(new THREE.Vector3(0,.3,0)), 0xffd166);
-    hitFlash();
-    btl.foeHp-=dmg; setHp();
-    log(`<b style="color:#a7f3d0">✨ダブル・ライト✨</b> 二つの光が螺旋を描いた！ ガーディアンに <b>${dmg}</b> ダメージ！！`);
-    await Promise.all([dashBack(naoMesh,ox1), dashBack(raiMesh,ox2)]);
-    for(let i=14;i>=0;i--){camBase.z=oz-(i/14)*2.2; await sleep(18);} // ズームアウト
-    camBase.z=oz;
-  } else {
-    const isNao=who==='nao';
-    const attacker=isNao?naoMesh:raiMesh;
-    const dmg=(isNao?14:12)+Math.floor(Math.random()*(isNao?8:10));
-    const color=isNao?0xffd166:0x4cc9f0;
-    const name=isNao?'🔥 ナオの剣撃':'💧 ライの光魔法';
-    if(isNao){
-      const ox=await dash(attacker, 3.7);
-      await swing(attacker);
-      burst(hitPos(), color, 22, {speed:.3, shake:.18});
-      shockwave(foeMesh.position.clone().add(new THREE.Vector3(0,.3,0)), color);
-      hitFlash();
-      btl.foeHp-=dmg; setHp();
-      log(`<b style="color:#ffd166">${name}！</b> 鋭い斬撃が水の巨体を切り裂いた！ ${dmg} ダメージ！`);
-      await dashBack(attacker, ox);
-    }else{
-      // ライは遠距離魔法：光弾が飛んでいく
-      log('💧 ライが光の魔法を唱える…');
-      await cast(attacker);
-      const orb=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, color, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false}));
-      orb.scale.setScalar(.8);
-      orb.position.copy(attacker.position).add(new THREE.Vector3(.4,1.3,0));
-      orb.userData={v:new THREE.Vector3(.32,.02,0), life:1.2, decay:.0, g:0};
-      fxGroup.add(orb);
-      await sleep(400);
-      fxGroup.remove(orb);
-      burst(hitPos(), color, 26, {speed:.3, shake:.18});
-      shockwave(foeMesh.position.clone().add(new THREE.Vector3(0,.3,0)), color);
-      hitFlash();
-      btl.foeHp-=dmg; setHp();
-      log(`<b style="color:#4cc9f0">${name}！</b> 光の弾がコアを直撃した！ ${dmg} ダメージ！`);
-    }
+// ── 勝敗判定 ──
+function checkEnd(){
+  if(B.over) return;
+  if(B.foe.hp<=0){
+    B.over=true; B.foe.alive=false;
+    document.getElementById('foeSpr').style.opacity=0;
+    fxCutin('🎉 WIN！','#ffd166');
+    let drop='';
+    if(Math.random()<.4){ state.inv.potion=(state.inv.potion||0)+1; save(); drop=' ポーションを落とした！'; }
+    bmsg(`🎉 <b style="color:#a7f3d0">勝利！</b> 闇の霧が晴れていく…。${drop}`);
+    document.getElementById('cmdArea').innerHTML='<div class="cmds"><button class="cmd" onclick="B=null;initBattle()">🔁 もう一度たたかう</button></div>';
+    return;
   }
-
-  if(btl.foeHp<=0){
-    btl.over=true;
-    // 撃破演出：白い大爆発→コアだけ残って浮かび上がり消える
-    burst(hitPos(), 0xffffff, 70, {speed:.45, shake:.4});
-    shockwave(foeMesh.position.clone().add(new THREE.Vector3(0,.3,0)), 0xffffff);
-    await sleep(300);
-    foeMesh.visible=false;
-    burst(hitPos(), 0x9ef0ff, 40, {speed:.15, gravity:-.003, shake:0});
-    victoryPose(naoMesh); victoryPose(raiMesh);
-    log('🎉 <b style="color:#a7f3d0">勝利！</b>「見事な絆だ。通るがよい」水の巨人は静かに頭を垂れ、海が割れて新大陸への道が現れた！');
-    btl.busy=false; lockBtns(true); return;
+  if(!B.heroes.some(h=>h&&h.alive)){
+    B.over=true;
+    bmsg('💔 全員倒れた…。でも明日もクエストを続ければ、もっと強くなれる！');
+    document.getElementById('cmdArea').innerHTML='<div class="cmds"><button class="cmd" onclick="B=null;initBattle()">🔁 再挑戦する</button></div>';
   }
-
-  await sleep(500);
-  // ── 敵の反撃：両腕を振り上げ、迫って叩きつける ──
-  const fdmg=8+Math.floor(Math.random()*8);
-  const fx=foeMesh.position.x;
-  const arms=foeMesh.userData.arms;
-  foeMesh.userData.attacking=true;
-  // 振り上げながら迫る
-  for(let i=0;i<10;i++){
-    const t=i/10;
-    foeMesh.position.x=fx-t*3.4;
-    arms[0].rotation.z=-t*1.2; arms[1].rotation.z=t*1.2;
-    await sleep(20);
-  }
-  // 叩きつけ（速く）
-  for(let i=0;i<=4;i++){
-    const t=i/4;
-    arms[0].rotation.z=-1.2+t*1.7; arms[1].rotation.z=1.2-t*1.7;
-    await sleep(13);
-  }
-  burst(naoMesh.position.clone().add(new THREE.Vector3(0,1.1,0)), 0x6fb8e8, 20, {speed:.25, shake:.25});
-  burst(raiMesh.position.clone().add(new THREE.Vector3(0,1.1,0)), 0x6fb8e8, 12, {speed:.2, shake:0});
-  shockwave(naoMesh.position.clone().add(new THREE.Vector3(.6,.2,0)), 0x6fb8e8);
-  naoMesh.userData.flinch=1; raiMesh.userData.flinch=1;  // のけぞり
-  btl.heroHp-=fdmg; setHp();
-  log(`👹 ガーディアンの大波が二人を襲う！ ${fdmg} ダメージ…！`);
-  // 腕を戻しながら退く
-  for(let i=10;i>=0;i--){
-    const t=i/10;
-    foeMesh.position.x=fx-t*3.4;
-    arms[0].rotation.z=.5*(t-1)*-1-.5; arms[1].rotation.z=-(.5*(t-1)*-1-.5);
-    await sleep(20);
-  }
-  arms[0].rotation.z=0; arms[1].rotation.z=0;
-  foeMesh.userData.attacking=false;
-
-  if(btl.heroHp<=0){
-    btl.over=true;
-    log('💔 二人は倒れた…。でも、明日もクエストを続ければ、もっと強くなれる！（ページを再読み込みで再戦）');
-  }
-  btl.busy=false; lockBtns(false);
 }
 
 // ── 起動 ──
