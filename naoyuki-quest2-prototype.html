@@ -3,56 +3,213 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>直幸QUEST2 〜南の新大陸と光の絆〜（試作版）</title>
+<meta name="theme-color" content="#0a0a0f">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230a0a0f' width='192' height='192'/><text x='50%' y='50%' font-size='120' font-family='Arial' fill='%23ffd700' text-anchor='middle' dominant-baseline='central' font-weight='bold'>直</text></svg>">
+<title>直幸QUEST2 〜南の新大陸と光の絆〜</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0a0e1a; --panel:#141b2e; --panel2:#1c2540;
-  --border:#2a3a5c; --text:#e8eef8; --sub:#8fa3c8;
-  --gold:#ffd166; --fire:#ff6b35; --water:#4cc9f0; --light:#a7f3d0;
-  --hp:#4ade80; --hpBad:#f87171;
+:root {
+  --fire:#ff4d00; --gold:#ffd700; --elec:#ffe600;
+  --dark:#0a0a0f; --panel:#12121e; --panel2:#1a1a2e; --border:#2a2a4a;
+  --text:#f0f0ff; --muted:#6666aa; --green:#00e676; --blue:#00b4ff; --purple:#cc44ff;
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--text);font-family:'Hiragino Maru Gothic ProN','Hiragino Kaku Gothic ProN',sans-serif;overflow-x:hidden;}
-#app{max-width:820px;margin:0 auto;padding:0 12px 80px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--dark);color:var(--text);font-family:'M PLUS Rounded 1c',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 40% at 50% 0%,rgba(255,77,0,.12) 0%,transparent 70%),
+  radial-gradient(ellipse 60% 30% at 20% 100%,rgba(0,180,255,.08) 0%,transparent 60%),
+  repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,.012) 60px,rgba(255,255,255,.012) 61px),
+  repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,.012) 60px,rgba(255,255,255,.012) 61px)}
+.wrap{max-width:480px;margin:0 auto;padding:0 12px 100px;position:relative;z-index:1}
 
-/* ── 3D canvas ── */
-#bg3d{position:fixed;inset:0;z-index:0;}
-#app,#tabbar{position:relative;z-index:1;}
+/* HEADER */
+.header{padding:16px 0 12px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:30px;letter-spacing:2px;line-height:1;color:var(--gold);text-shadow:3px 3px 0 #7a3c00,0 0 30px rgba(255,215,0,.5)}
+.logo span{color:var(--fire);text-shadow:3px 3px 0 #5a1000,0 0 30px rgba(255,77,0,.6)}
+.parent-btn{background:var(--panel2);border:2px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;color:var(--muted);font-size:12px;font-family:'M PLUS Rounded 1c',sans-serif;font-weight:700;transition:all .2s}
+.parent-btn.active{border-color:var(--purple);color:var(--purple)}
 
-/* ── header ── */
-.hero-header{text-align:center;padding:18px 0 6px;}
-.hero-header h1{
-  font-size:26px;letter-spacing:2px;
-  background:linear-gradient(135deg,var(--gold),var(--fire),var(--water));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 0 12px rgba(255,209,102,.35));
-}
-.hero-header .sub{color:var(--sub);font-size:12px;margin-top:4px;}
-.proto-badge{display:inline-block;margin-top:6px;font-size:11px;color:var(--bg);background:var(--gold);border-radius:999px;padding:2px 10px;font-weight:bold;}
+/* FIGHTER CARD */
+.fighter-card{background:linear-gradient(135deg,#1a1a2e,#12121e);border:2px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden}
+.fighter-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--fire),var(--gold),var(--elec))}
+.fighter-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.rank-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.rank-name{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:22px;letter-spacing:1px;text-shadow:2px 2px 0 rgba(0,0,0,.5)}
+.pts-row{display:flex;gap:16px}
+.pts-box{text-align:right}
+.pts-label{font-size:9px;color:var(--muted);letter-spacing:1px}
+.pts-val{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:26px;letter-spacing:1px;line-height:1}
+.pts-val.gold{color:var(--gold);text-shadow:0 0 15px rgba(255,215,0,.4)}
+.pts-val.purple{color:var(--purple);text-shadow:0 0 15px rgba(204,68,255,.4)}
+.xp-labels{display:flex;justify-content:space-between;margin-bottom:4px}
+.xp-label{font-size:10px;color:var(--muted)}
+.xp-next{font-size:10px;color:var(--gold)}
+.hp-bar-bg{background:#1a1a1a;border-radius:4px;overflow:hidden;height:14px;border:1px solid rgba(255,255,255,.1)}
+.hp-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--fire) 0%,var(--gold) 60%,var(--elec) 100%);transition:width .8s cubic-bezier(.34,1.56,.64,1);position:relative}
+.hp-bar-fill::after{content:'';position:absolute;inset:2px 0;background:linear-gradient(180deg,rgba(255,255,255,.3) 0%,transparent 100%);border-radius:2px}
+.hp-pct{font-size:10px;color:var(--gold);text-align:right;margin-top:2px}
 
-/* ── panels ── */
-.panel{background:rgba(20,27,46,.88);border:1px solid var(--border);border-radius:16px;padding:16px;margin-top:14px;backdrop-filter:blur(6px);}
-.panel h2{font-size:16px;color:var(--gold);margin-bottom:10px;}
-.stats-row{display:flex;gap:10px;margin-top:14px;}
-.stat{flex:1;background:rgba(28,37,64,.9);border:1px solid var(--border);border-radius:14px;padding:10px;text-align:center;}
-.stat .v{font-size:22px;font-weight:bold;color:var(--gold);}
-.stat .l{font-size:11px;color:var(--sub);margin-top:2px;}
+/* STATS */
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.stat-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.stat-card.fire::after{background:var(--fire);box-shadow:0 0 8px var(--fire)}
+.stat-card.green::after{background:var(--green);box-shadow:0 0 8px var(--green)}
+.stat-card.purple::after{background:var(--purple);box-shadow:0 0 8px var(--purple)}
+.stat-icon{font-size:22px;margin-bottom:2px}
+.stat-num{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:24px;line-height:1}
+.stat-num.fire{color:var(--fire)}
+.stat-num.green{color:var(--green)}
+.stat-num.purple{color:var(--purple)}
+.stat-desc{font-size:10px;color:var(--muted);margin-top:1px}
 
-/* ── duo bond gauge ── */
-.bond-wrap{margin-top:8px;}
-.bond-label{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:4px;}
-.bond-bar{height:14px;background:#0d1322;border-radius:999px;overflow:hidden;border:1px solid var(--border);}
-.bond-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--water),var(--light),var(--gold));transition:width .6s ease;}
+/* ALL DONE */
+.all-done{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,77,0,.1));border:2px solid var(--gold);border-radius:12px;padding:12px;text-align:center;margin-bottom:10px;animation:flamePulse 1.5s infinite}
+@keyframes flamePulse{0%,100%{box-shadow:0 0 20px rgba(255,215,0,.2)}50%{box-shadow:0 0 40px rgba(255,215,0,.5),0 0 80px rgba(255,77,0,.2)}}
+.all-done-text{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:20px;color:var(--gold);letter-spacing:1px;text-shadow:2px 2px 0 #7a3c00}
 
-/* ── tasks ── */
-.task{display:flex;align-items:center;gap:12px;background:rgba(28,37,64,.9);border:1px solid var(--border);border-radius:14px;padding:12px;margin-top:8px;cursor:pointer;transition:transform .1s;}
-.task:active{transform:scale(.98);}
-.task.done{opacity:.55;border-color:var(--hp);}
-.task .check{width:26px;height:26px;border-radius:8px;border:2px solid var(--sub);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-.task.done .check{background:var(--hp);border-color:var(--hp);color:#06281a;}
-.task .name{flex:1;font-size:15px;}
-.task .pt{color:var(--gold);font-weight:bold;font-size:14px;}
+/* TABS — 5タブ */
+.tabs{display:flex;gap:3px;margin-bottom:10px;background:var(--panel);border-radius:12px;padding:4px;border:2px solid var(--border)}
+.tab{flex:1;padding:9px 2px;border:none;border-radius:8px;cursor:pointer;font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:11px;letter-spacing:.5px;transition:all .2s;background:transparent;color:var(--muted);white-space:nowrap}
+.tab.active{background:linear-gradient(135deg,rgba(255,77,0,.25),rgba(255,215,0,.1));color:var(--gold);border:1px solid rgba(255,215,0,.3);text-shadow:0 0 10px rgba(255,215,0,.4)}
 
+/* TASKS */
+.task-list{display:flex;flex-direction:column;gap:8px}
+.task-btn{width:100%;padding:14px 16px;background:var(--panel2);border:2px solid var(--border);border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;transition:all .18s;text-align:left}
+.task-btn:not(.done):active{transform:scale(.97)}
+.task-btn:not(.done):hover{border-color:var(--fire);box-shadow:0 0 20px rgba(255,77,0,.2),inset 0 0 20px rgba(255,77,0,.05);transform:translateX(4px)}
+.task-btn.done{background:rgba(0,230,118,.06);border-color:rgba(0,230,118,.3);cursor:default}
+.task-btn.done::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green);box-shadow:0 0 10px var(--green);border-radius:0 2px 2px 0}
+.task-icon{font-size:32px;line-height:1;flex-shrink:0}
+.task-info{flex:1}
+.task-name{font-size:17px;font-weight:900}
+.task-name.done{color:var(--green)}
+.task-time{font-size:11px;color:var(--muted);margin-top:1px}
+.task-pts{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:20px;color:var(--gold);text-shadow:0 0 10px rgba(255,215,0,.5);white-space:nowrap}
+.task-check{font-size:24px;color:var(--green)}
+
+/* REWARDS */
+.reward-balance{font-size:13px;color:var(--muted);text-align:center;margin-bottom:10px}
+.reward-balance span{color:var(--purple);font-weight:900;font-size:18px}
+.reward-list{display:flex;flex-direction:column;gap:8px}
+.reward-card{background:var(--panel2);border:2px solid rgba(204,68,255,.2);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:all .18s}
+.reward-card.clickable{cursor:pointer}
+.reward-card.clickable:hover{border-color:var(--purple);box-shadow:0 0 20px rgba(204,68,255,.25);transform:translateY(-2px)}
+.reward-card.clickable:active{transform:scale(.97)}
+.reward-card.cant{opacity:.35;cursor:not-allowed}
+.reward-icon{font-size:32px}
+.reward-info{flex:1}
+.reward-name{font-size:16px;font-weight:900}
+.reward-cost{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:16px;color:var(--purple);margin-top:2px}
+.reward-get{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:14px;letter-spacing:1px;color:var(--purple);border:2px solid var(--purple);border-radius:8px;padding:4px 10px;white-space:nowrap}
+.reward-pending{font-size:11px;color:var(--gold);background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);border-radius:6px;padding:3px 8px;white-space:nowrap}
+
+/* HISTORY */
+.history-list{display:flex;flex-direction:column;gap:8px}
+.history-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:12px 14px}
+.history-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.history-date{font-size:12px;color:var(--muted)}
+.history-pts{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:16px;color:var(--gold)}
+.history-icons{display:flex;gap:8px}
+.history-ico{font-size:22px}
+.history-ico.off{opacity:.2;filter:grayscale(1)}
+.parent-badge{background:rgba(204,68,255,.1);border:2px solid rgba(204,68,255,.3);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:13px;color:#cc88ff}
+.section-title{font-size:11px;color:var(--muted);letter-spacing:2px;margin:14px 0 6px;text-transform:uppercase}
+.reward-log-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(204,68,255,.06);border-radius:8px;margin-bottom:4px;font-size:13px}
+.reward-log-date{font-size:10px;color:var(--muted)}
+.confirm-btn{font-size:11px;font-weight:700;color:#0a0a0f;background:var(--green);border:none;border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap}
+.confirmed-badge{font-size:11px;color:var(--green);opacity:.6}
+
+/* WEEKLY REPORT */
+.report-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px}
+.report-title{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:18px;color:var(--gold);margin-bottom:10px;letter-spacing:1px}
+.report-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}
+.report-row:last-child{border-bottom:none}
+.report-val{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:16px;color:var(--gold)}
+.week-bar-wrap{margin-top:10px}
+.week-bar-label{font-size:10px;color:var(--muted);margin-bottom:4px}
+.week-bars{display:flex;gap:4px;align-items:flex-end;height:60px}
+.week-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.week-bar-inner{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--gold),var(--fire));min-height:2px;transition:height .6s cubic-bezier(.34,1.56,.64,1)}
+.week-bar-day{font-size:9px;color:var(--muted)}
+.week-bar-pt{font-size:8px;color:var(--gold)}
+.task-complete-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.task-complete-row:last-child{border-bottom:none}
+.mini-bar-bg{width:80px;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+.mini-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--fire),var(--gold))}
+
+/* PARENT SETTINGS */
+.settings-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:14px}
+.pts-input{width:70px;background:#0a0a1a;border:2px solid var(--border);border-radius:8px;color:var(--gold);font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:18px;text-align:center;padding:4px 8px;outline:none}
+.pts-input:focus{border-color:var(--gold)}
+.save-pts-btn{font-size:12px;font-weight:700;color:#0a0a0f;background:var(--gold);border:none;border-radius:8px;padding:6px 14px;cursor:pointer}
+.save-pts-btn:active{transform:scale(.96)}
+
+/* PASSCODE OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:900;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.passcode-box{background:linear-gradient(135deg,#1a1a2e,#12121e);border:2px solid var(--purple);border-radius:20px;padding:28px 24px;width:300px;text-align:center;box-shadow:0 0 60px rgba(204,68,255,.3)}
+.passcode-title{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:24px;color:var(--purple);letter-spacing:1px;margin-bottom:6px}
+.passcode-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.passcode-dots{display:flex;justify-content:center;gap:10px;margin-bottom:16px}
+.passcode-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid var(--border);transition:all .2s}
+.passcode-dot.filled{background:var(--purple);border-color:var(--purple);box-shadow:0 0 8px var(--purple)}
+.passcode-dot.error{background:var(--fire);border-color:var(--fire);box-shadow:0 0 8px var(--fire)}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.numpad-btn{background:rgba(255,255,255,.05);border:2px solid var(--border);border-radius:12px;color:var(--text);font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:22px;padding:14px;cursor:pointer;transition:all .15s}
+.numpad-btn:active{background:rgba(204,68,255,.2);border-color:var(--purple);transform:scale(.94)}
+.numpad-del{font-size:16px;color:var(--muted)}
+.passcode-cancel{margin-top:12px;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif;font-weight:700}
+
+/* BOOM */
+#boom{position:fixed;top:35%;left:50%;transform:translateX(-50%);font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:40px;letter-spacing:2px;color:var(--gold);text-shadow:3px 3px 0 var(--fire),0 0 30px var(--gold);pointer-events:none;z-index:999;animation:boomUp 1.2s ease-out forwards}
+@keyframes boomUp{0%{opacity:0;transform:translateX(-50%) scale(.4) rotate(-10deg)}20%{opacity:1;transform:translateX(-50%) scale(1.4) rotate(5deg)}60%{opacity:1;transform:translateX(-50%) scale(1.1) rotate(-2deg) translateY(-30px)}100%{opacity:0;transform:translateX(-50%) scale(.9) translateY(-90px)}}
+
+/* REWARD POPUP */
+#reward-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#1a0a30,#0a0a1e);border:3px solid var(--purple);border-radius:20px;padding:28px 36px;z-index:999;text-align:center;box-shadow:0 0 60px rgba(204,68,255,.5);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{0%{transform:translate(-50%,-50%) scale(.3) rotate(-5deg);opacity:0}100%{transform:translate(-50%,-50%) scale(1) rotate(0deg);opacity:1}}
+.popup-ico{font-size:48px}
+.popup-title{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:26px;color:var(--purple);letter-spacing:1px;margin:8px 0 4px;text-shadow:0 0 20px rgba(204,68,255,.6)}
+.popup-sub{font-size:13px;color:var(--muted)}
+
+.empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px;line-height:2}
+
+/* STORY */
+.story-chapter{margin-bottom:20px}
+.chapter-header{background:linear-gradient(135deg,rgba(255,77,0,.12),rgba(255,215,0,.06));border:2px solid rgba(255,215,0,.2);border-radius:12px;padding:12px 16px;margin-bottom:8px}
+.chapter-title{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:15px;color:var(--gold);letter-spacing:1px}
+.chapter-range{font-size:10px;color:var(--muted);margin-top:2px}
+.scene-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px}
+.scene-num{font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px}
+.scene-monster{text-align:center;margin:10px 0}
+.scene-monster img{width:120px;height:120px;object-fit:contain;border-radius:10px;background:rgba(255,255,255,.04)}
+.scene-monster-name{font-size:11px;color:var(--gold);margin-top:6px;font-weight:900}
+.scene-text{font-size:13px;line-height:1.9;color:#c8c8e8}
+.scene-locked{background:rgba(255,255,255,.02);border:2px dashed rgba(255,255,255,.08);border-radius:12px;padding:14px;margin-bottom:8px;text-align:center}
+.scene-locked-text{font-size:13px;color:var(--muted)}
+.scene-locked-pt{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:14px;color:rgba(255,215,0,.4);margin-top:4px}
+
+/* MONSTER BOOK */
+.monbook-section{margin-bottom:20px}
+.monbook-section-label{font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase}
+.monbook-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.monbook-card{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center}
+.monbook-card.unlocked{border-color:rgba(255,215,0,.2)}
+.monbook-card.boss-unlocked{border-color:rgba(255,77,0,.3)}
+.monbook-card.locked-card{opacity:.4}
+.monbook-img{width:72px;height:72px;object-fit:contain;border-radius:8px;background:rgba(255,255,255,.03);margin-bottom:6px}
+.monbook-placeholder{width:72px;height:72px;border-radius:8px;background:rgba(255,255,255,.04);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:28px;filter:grayscale(1) brightness(.4)}
+.monbook-name{font-size:11px;font-weight:900;color:var(--gold);margin-bottom:2px}
+.monbook-attr{font-size:9px;color:var(--muted)}
+.monbook-locked-name{font-size:11px;font-weight:900;color:var(--muted)}
+.monbook-unlock-pt{font-size:9px;color:rgba(255,215,0,.4);margin-top:2px}
+.monbook-count{font-size:12px;color:var(--muted);margin-bottom:10px}
+.monbook-count span{color:var(--gold);font-weight:900}
+
+/* GAME TIME */
+.game-time-box{background:linear-gradient(135deg,#1a1a2e,#12121e);border:2px solid var(--border);border-radius:16px;padding:14px 18px;margin-top:16px;text-align:center;position:relative;overflow:hidden}
+.game-time-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple))}
+.game-time-label{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.game-time-val{font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:32px;color:var(--blue);letter-spacing:1px;text-shadow:0 0 15px rgba(0,180,255,.4);line-height:1.2}
 /* ── battle (2D ATB / FF6風) ── */
 .btl-screen{position:relative;width:100%;aspect-ratio:16/11;border-radius:14px;overflow:hidden;border:2px solid var(--border);background:#000;}
 .btl-bg{position:absolute;inset:0;background:url('images/chapter2.png') center/cover;filter:brightness(.32) saturate(.9) blur(1.5px);transform:scale(1.04);}
@@ -68,7 +225,7 @@ body{background:var(--bg);color:var(--text);font-family:'Hiragino Maru Gothic Pr
 .hero-spr.active{border-color:var(--gold);box-shadow:0 0 16px rgba(255,209,102,.55);}
 .hero-spr.atk-fwd{transform:translateX(-30px) scale(1.08);}
 .hero-spr .em{font-size:32px;}
-.hero-spr .nm{font-size:10px;color:var(--sub);}
+.hero-spr .nm{font-size:10px;color:var(--muted);}
 .dmg{position:absolute;font-weight:bold;font-size:24px;text-shadow:0 2px 6px #000,0 0 10px rgba(0,0,0,.8);animation:dmgUp .9s forwards;pointer-events:none;z-index:5;}
 @keyframes dmgUp{0%{transform:translateY(0);opacity:1}75%{opacity:1}100%{transform:translateY(-48px);opacity:0}}
 .btl-screen.shake{animation:scrShake .4s;}
@@ -80,8 +237,8 @@ body{background:var(--bg);color:var(--text);font-family:'Hiragino Maru Gothic Pr
 .party-rows{display:grid;gap:6px;}
 .prow{display:grid;grid-template-columns:1fr 56px 44px 84px;align-items:center;gap:8px;font-size:13px;}
 .prow .pn{color:#fff;white-space:nowrap;overflow:hidden;}
-.prow.dead .pn{color:var(--hpBad);text-decoration:line-through;}
-.prow .hp{color:var(--hp);text-align:right;}
+.prow.dead .pn{color:#f87171;text-decoration:line-through;}
+.prow .hp{color:#4ade80;text-align:right;}
 .prow .mp{color:#9bb6ff;text-align:right;}
 .atb{height:11px;border:1px solid #44598c;border-radius:99px;overflow:hidden;background:#0a1126;}
 .atb i{display:block;height:100%;background:linear-gradient(90deg,#4cc9f0,#ffd166);}
@@ -91,267 +248,1126 @@ body{background:var(--bg);color:var(--text);font-family:'Hiragino Maru Gothic Pr
 .cmd:active{background:#233a6e;}
 .cmd.limit{flex-basis:100%;background:linear-gradient(135deg,#ff6b35,#ffd166);color:#231200;border:none;animation:limitPulse 1s infinite;}
 @keyframes limitPulse{0%,100%{box-shadow:0 0 6px rgba(255,107,53,.5)}50%{box-shadow:0 0 20px rgba(255,209,102,.95)}}
-#muteBtn{position:fixed;right:14px;top:14px;z-index:10;background:rgba(20,27,46,.85);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:16px;padding:6px 10px;cursor:pointer;}
+#muteBtn{background:var(--panel2);border:2px solid var(--border);border-radius:10px;color:var(--text);font-size:15px;padding:6px 10px;cursor:pointer;}
 .submenu{margin-top:8px;display:grid;gap:6px;}
 .subitem{display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid #44598c;border-radius:10px;background:#101a3a;color:#fff;font-size:13px;cursor:pointer;}
 .subitem.dis{opacity:.4;cursor:default;}
 #btlMsg{min-height:22px;margin-top:10px;font-size:13px;color:var(--text);line-height:1.7;}
 
-/* ── story ── */
-.scene{background:rgba(28,37,64,.9);border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:10px;font-size:14px;line-height:1.9;}
-.scene.locked{opacity:.45;}
-.scene .pt-tag{font-size:11px;color:var(--gold);margin-bottom:6px;}
-.scene .speaker-rai{color:var(--water);font-weight:bold;}
-.scene .speaker-nao{color:var(--gold);font-weight:bold;}
-
-/* ── tabs ── */
-#tabbar{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(10,14,26,.95);border-top:1px solid var(--border);backdrop-filter:blur(10px);}
-.tab{flex:1;border:none;background:none;color:var(--sub);font-size:12px;padding:10px 0 14px;cursor:pointer;font-family:inherit;}
-.tab.active{color:var(--gold);}
-.tab .ic{font-size:20px;display:block;margin-bottom:2px;}
-.view{display:none;}
-.view.active{display:block;}
 </style>
 </head>
 <body>
-<canvas id="bg3d"></canvas>
-<button id="muteBtn" onclick="toggleMute()">🔊</button>
-<div id="app">
-  <div class="hero-header">
-    <h1>直幸QUEST2</h1>
-    <div class="sub">〜南の新大陸と光の絆〜</div>
-    <div class="proto-badge">試作版 ver 0.1</div>
+<div class="wrap">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">直幸<span>QUEST2</span></div>
+    <div style="display:flex;gap:6px;align-items:center"><button id="muteBtn" onclick="toggleMute()">🔊</button><button class="parent-btn" id="parentBtn" onclick="requestParent()">👑 親モード</button></div>
   </div>
 
-  <!-- HOME -->
-  <div class="view active" id="view-home">
-    <div class="stats-row">
-      <div class="stat"><div class="v" id="stTotal">0</div><div class="l">累積ポイント</div></div>
-      <div class="stat"><div class="v" id="stToday">0</div><div class="l">今日のポイント</div></div>
-      <div class="stat"><div class="v" id="stStreak">0</div><div class="l">連続日数</div></div>
-    </div>
-    <div class="panel">
-      <h2>🤝 ナオ＆ライ 絆ゲージ</h2>
-      <div class="bond-wrap">
-        <div class="bond-label"><span>二人の絆</span><span id="bondPct">0%</span></div>
-        <div class="bond-bar"><div class="bond-fill" id="bondFill" style="width:0%"></div></div>
+  <!-- FIGHTER CARD -->
+  <div class="fighter-card">
+    <div class="fighter-top">
+      <div>
+        <div class="rank-label">STAGE</div>
+        <div class="rank-name" id="rankName">旅の始まり</div>
       </div>
-      <div style="font-size:12px;color:var(--sub);margin-top:8px;line-height:1.7;">
-        クエストをこなすたびに絆が深まる。絆ゲージが満タンになると、バトルで<b style="color:var(--gold)">合体必殺技「ダブル・ライト」</b>が使えるようになる！
+      <div class="pts-row">
+        <div class="pts-box">
+          <div class="pts-label">TOTAL</div>
+          <div class="pts-val gold" id="totalPts">0</div>
+          <div style="font-size:9px;color:var(--muted)">pt</div>
+        </div>
+        <div class="pts-box">
+          <div class="pts-label">交換可能</div>
+          <div class="pts-val purple" id="exchPts">0</div>
+          <div style="font-size:9px;color:var(--muted)">pt</div>
+        </div>
       </div>
     </div>
-    <div class="panel">
-      <h2>📋 今日のクエスト</h2>
-      <div id="taskList"></div>
+    <div>
+      <div class="xp-labels">
+        <span class="xp-label">EXP</span>
+        <span class="xp-next" id="xpNext"></span>
+      </div>
+      <div class="hp-bar-bg"><div class="hp-bar-fill" id="xpBar" style="width:0%"></div></div>
+      <div class="hp-pct" id="xpPct">0%</div>
     </div>
   </div>
 
-  <!-- BATTLE -->
-  <div class="view" id="view-battle">
-    <div class="panel">
-      <h2 id="btlTitle">⚔️ バトル</h2>
-      <div class="btl-screen" id="btlScreen">
-        <div class="btl-bg"></div>
-        <div class="btl-vignette"></div>
-        <div id="foeGlow"></div>
-        <img id="foeSpr" src="images/shadowwolf.PNG" alt="シャドウ・ウルフ">
-        <div id="heroSprs"></div>
-      </div>
-      <div class="ff-window">
-        <div class="party-rows" id="partyRows"></div>
-        <div id="cmdArea"></div>
-        <div id="btlMsg">ATBゲージが溜まったら行動できる！</div>
-      </div>
+  <!-- STAGE IMAGE -->
+  <div id="stageImageWrap" style="display:none;margin-bottom:10px;">
+    <img id="stageImg" src="" alt="ステージ画像" style="width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:12px;border:2px solid var(--border);">
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card fire"><div class="stat-icon">🔥</div><div class="stat-num fire" id="statStreak">0</div><div class="stat-desc">日連続</div></div>
+    <div class="stat-card green"><div class="stat-icon">⚔️</div><div class="stat-num green" id="statToday">0</div><div class="stat-desc">今日完了</div></div>
+    <div class="stat-card purple"><div class="stat-icon">🏆</div><div class="stat-num purple" id="statRewards">0</div><div class="stat-desc">交換済み</div></div>
+  </div>
+
+  <!-- ALL DONE -->
+  <div class="all-done" id="allDoneBanner" style="display:none">
+    <div style="font-size:28px">🏆⚡🏆</div>
+    <div class="all-done-text">今日のクエスト全クリア！最強！</div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" id="tabToday"   onclick="switchTab('today')">⚔️ TODAY</button>
+    <button class="tab"        id="tabBattle"  onclick="switchTab('battle')">🆚 バトル</button>
+    <button class="tab"        id="tabRewards" onclick="switchTab('rewards')">🎁 GET</button>
+    <button class="tab"        id="tabStory"   onclick="switchTab('story')">📖 STORY</button>
+    <button class="tab"        id="tabMonbook" onclick="switchTab('monbook')">📚 図鑑</button>
+    <button class="tab"        id="tabLog"     onclick="switchTab('log')">📋 LOG</button>
+  </div>
+
+  <!-- TODAY -->
+  <div id="panelToday" class="task-list"></div>
+
+  <!-- BATTLE (QUEST2: FF6風ATBバトル) -->
+  <div id="panelBattle" style="display:none">
+    <div class="section-title" id="btlTitle">🆚 バトル</div>
+    <div class="btl-screen" id="btlScreen">
+      <div class="btl-bg"></div>
+      <div class="btl-vignette"></div>
+      <div id="foeGlow"></div>
+      <img id="foeSpr" src="images/shadowwolf.PNG" alt="てき">
+      <div id="heroSprs"></div>
     </div>
+    <div class="ff-window">
+      <div class="party-rows" id="partyRows"></div>
+      <div id="cmdArea"></div>
+      <div id="btlMsg">ATBゲージが溜まったら行動できる！</div>
+    </div>
+  </div>
+
+  <!-- REWARDS -->
+  <div id="panelRewards" style="display:none">
+    <div class="reward-balance">交換できるポイント：<span id="exchPts2">0</span>pt</div>
+    <div class="reward-list" id="rewardList"></div>
   </div>
 
   <!-- STORY -->
-  <div class="view" id="view-story">
-    <div class="panel">
-      <h2>📖 第1章「二人の船出」</h2>
-      <div id="storyList"></div>
+  <div id="panelStory" style="display:none"></div>
+
+  <!-- MONSTER BOOK -->
+  <div id="panelMonbook" style="display:none"></div>
+
+  <!-- LOG -->
+  <div id="panelLog" style="display:none">
+    <div id="parentSection" style="display:none">
+      <div class="parent-badge">👑 親モード：設定・レポート・承認ができます</div>
+      <div class="section-title">🎮 ゲームタイトル</div>
+      <div class="settings-card" id="titleSettings"></div>
+      <div class="section-title">⚙️ タスク設定</div>
+      <div id="taskSettings"></div>
+      <div class="section-title">⚙️ ご褒美設定</div>
+      <div id="rewardSettings"></div>
+      <div class="section-title">↩ 今日の取り消し</div>
+      <div id="todayUndoList"></div>
+      <div class="section-title">📊 週間レポート</div>
+      <div class="report-card" id="weeklyReport"></div>
+      <div class="section-title">⚙️ ポイント設定</div>
+      <div class="settings-card" id="ptSettings"></div>
+      <div class="section-title">🔧 ポイント調整（動作確認用）</div>
+      <div id="pointAdjustSettings"></div>
+      <div class="section-title">⏱ ゲーム時間</div>
+      <div id="gameTimeSettings"></div>
+      <div id="pendingSection">
+        <div class="section-title">✅ 承認待ちの特典</div>
+        <div id="pendingList"></div>
+      </div>
+      <div class="section-title">🎁 交換ずみ特典</div>
+      <div id="rewardLogList"></div>
     </div>
+    <div class="section-title">📅 これまでの記録</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <!-- GAME TIME DISPLAY -->
+  <div id="gameTimeBox" class="game-time-box">
+    <div class="game-time-label">現在のゲーム時間</div>
+    <div class="game-time-val" id="gameTimeDisplay">0時間0分</div>
   </div>
 </div>
 
-<div id="tabbar">
-  <button class="tab active" data-v="home" onclick="go('home')"><span class="ic">🏠</span>ホーム</button>
-  <button class="tab" data-v="battle" onclick="go('battle')"><span class="ic">⚔️</span>バトル</button>
-  <button class="tab" data-v="story" onclick="go('story')"><span class="ic">📖</span>ストーリー</button>
+<!-- PASSCODE OVERLAY -->
+<div class="overlay" id="passcodeOverlay" style="display:none">
+  <div class="passcode-box">
+    <div class="passcode-title">🔒 親モード</div>
+    <div class="passcode-sub">パスコードを入力してね</div>
+    <div class="passcode-dots" id="passcodeDots">
+      <div class="passcode-dot" id="dot0"></div><div class="passcode-dot" id="dot1"></div>
+      <div class="passcode-dot" id="dot2"></div><div class="passcode-dot" id="dot3"></div>
+      <div class="passcode-dot" id="dot4"></div><div class="passcode-dot" id="dot5"></div>
+      <div class="passcode-dot" id="dot6"></div><div class="passcode-dot" id="dot7"></div>
+      <div class="passcode-dot" id="dot8"></div><div class="passcode-dot" id="dot9"></div>
+    </div>
+    <div class="numpad">
+      <button class="numpad-btn" onclick="numInput('1')">1</button>
+      <button class="numpad-btn" onclick="numInput('2')">2</button>
+      <button class="numpad-btn" onclick="numInput('3')">3</button>
+      <button class="numpad-btn" onclick="numInput('4')">4</button>
+      <button class="numpad-btn" onclick="numInput('5')">5</button>
+      <button class="numpad-btn" onclick="numInput('6')">6</button>
+      <button class="numpad-btn" onclick="numInput('7')">7</button>
+      <button class="numpad-btn" onclick="numInput('8')">8</button>
+      <button class="numpad-btn" onclick="numInput('9')">9</button>
+      <button class="numpad-btn" style="opacity:.3" disabled></button>
+      <button class="numpad-btn" onclick="numInput('0')">0</button>
+      <button class="numpad-btn numpad-del" onclick="numDel()">⌫</button>
+    </div>
+    <button class="passcode-cancel" onclick="closePasscode()">キャンセル</button>
+  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 <script>
-'use strict';
-/* =====================================================
-   直幸QUEST2 試作版
-   - localStorage key: naoyuki_quest2_proto（本編とは別キー）
-   - 3D: Three.js r160（CDN）
-   ===================================================== */
+// ── CONSTANTS ──
 
-// ── タスク（本編と同じ9つ） ──
-const TASKS = [
-  {id:'wake',   name:'朝６時までに起きる', pt:5},
-  {id:'mteeth', name:'朝のはみがき',       pt:5},
-  {id:'dish',   name:'食洗機の食器を片付ける', pt:5},
-  {id:'zkai',   name:'Z会',               pt:40},
-  {id:'hw',     name:'宿題',              pt:20},
-  {id:'piano',  name:'ピアノ',            pt:5},
-  {id:'bath',   name:'お風呂',            pt:5},
-  {id:'nteeth', name:'夜のはみがき',       pt:5},
-  {id:'duo',    name:'デュオリンゴ',       pt:10},
+const TASKS_DEFAULT = [
+  { id:'wake_up',     label:'朝６時までに起きる',    icon:'🌅', pts:5,  time:'朝' },
+  { id:'teeth_morning', label:'朝のはみがき',        icon:'🦷', pts:5,  time:'朝' },
+  { id:'dishes',      label:'食洗機の食器を片付ける', icon:'🍽️', pts:5,  time:'朝' },
+  { id:'z_kai',       label:'Z会',                  icon:'📚', pts:40, time:'朝' },
+  { id:'homework',    label:'宿題',                  icon:'✏️', pts:20, time:'帰宅後' },
+  { id:'piano',       label:'ピアノ練習',           icon:'🎹', pts:5,  time:'夕食後' },
+  { id:'bath',        label:'お風呂',                icon:'🛁', pts:5,  time:'夜' },
+  { id:'teeth',       label:'夜のはみがき',          icon:'🦷', pts:5,  time:'夜' },
+  { id:'duolingo',    label:'デュオリンゴ',         icon:'🦉', pts:10, time:'夜' },
 ];
 
-// ── シーズン2 第1章（試作：5シーン） ──
-const STORY = [
-  {pt:0, text:'ハジマリ村の港。大きな白い帆船の前に、ナオとライが並んで立っていた。<span class="speaker-rai">ライ</span>「本当に、俺も行っていいのか」<span class="speaker-nao">ナオ</span>「当たり前だろ。約束したじゃないか。一緒に、また始めようって」ライは新しいクエストの書を胸に抱えた。真っ白なページの一番上に、今日の日付と最初のクエストが書き込まれていた。百年ぶりの、一行目だった。'},
-  {pt:30, text:'船が南へ進む。ライは船べりで、慣れない手つきでクエストの書をつけていた。<span class="speaker-rai">ライ</span>「……たった一行書くだけなのに、手が震える」<span class="speaker-nao">ナオ</span>「最初はみんなそうだよ。でも明日も書けば、震えなくなる」ライは笑った。百年間忘れていた、続けることの怖さと、嬉しさを思い出しながら。'},
-  {pt:70, text:'三日目の朝、ライが誰よりも早く甲板に出ていた。朝日に向かって、剣の素振りをしている。<span class="speaker-nao">ナオ</span>「早いね」<span class="speaker-rai">ライ</span>「三日続いた。たった三日だ。でも、百年で一番誇らしい三日だ」その目には、かつてのヤミノ王の影はもうなかった。ナオは隣に並び、一緒に剣を振った。'},
-  {pt:120, text:'突然、海が割れた。巨大な水の巨人「荒波のガーディアン」が船の行く手を塞いだ。「新大陸に渡りたくば、二人の絆を見せてみよ」ナオが剣を抜き、ライが光の魔法を構えた。二人が背中合わせに立つ。<span class="speaker-nao">ナオ</span>「ライ、合わせられるか」<span class="speaker-rai">ライ</span>「ああ。お前となら」初めての、二人での戦いが始まった。'},
-  {pt:180, text:'ナオの剣撃とライの光魔法が重なった瞬間、二つの光が螺旋を描いて一つになった。合体技「ダブル・ライト」。荒波のガーディアンは光に貫かれ、静かに頭を垂れた。「見事な絆だ。通るがよい」海が開き、水平線の向こうに緑の大陸が見えた。<span class="speaker-rai">ライ</span>「あれが、南の新大陸……」二人の新しい冒険が、いま本当に始まる。第1章・完。'},
+const REWARDS_DEFAULT = [
+  { id:'r1', label:'ゲーム30分のびる',         icon:'🎮', cost:500  },
+  { id:'r2', label:'好きなおやつ',               icon:'🍩', cost:250  },
+  { id:'r3', label:'映画1本みられる',            icon:'🎬', cost:350  },
+  { id:'r4', label:'外食で何食べるか決めていい', icon:'🍣', cost:1000 },
 ];
 
-// ── 状態 ──
-const KEY='naoyuki_quest2_proto';
-function load(){try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
-function today(){const d=new Date(Date.now()+9*36e5);return d.toISOString().split('T')[0];}
-let state = load() || {total:0, history:{}, streak:0, lastDay:null};
+const STAGE_IMAGES = {}; // QUEST2のステージ画像ができたらここに追加（例 1:'images/q2chapter1.png'）
 
-// ── レンダリング ──
-function todayDone(){return state.history[today()]||[];}
-function todayPt(){return todayDone().reduce((a,id)=>{const t=TASKS.find(t=>t.id===id);return a+(t?t.pt:0);},0);}
-function bondPct(){return Math.min(100, Math.round(todayDone().length/TASKS.length*100));}
+const STAGES = [
+  { stage:1, name:'二人の船出',         min:0,    max:299,      color:'#94a3b8' },
+  { stage:2, name:'新大陸上陸',         min:300,  max:599,      color:'#22c55e' },
+  { stage:3, name:'光の森の探検',           min:600,  max:999,      color:'#06b6d4' },
+  { stage:4, name:'古代遺跡の謎',           min:1000, max:1499,     color:'#ffd700' },
+  { stage:5, name:'深き渓谷の試練',         min:1500, max:2099,     color:'#8b5cf6' },
+  { stage:6, name:'新たな伝説',       min:2100, max:2899,     color:'#f97316' },
+  { stage:7, name:'決戦のとき',         min:2900, max:3799,     color:'#ef4444' },
+  { stage:8, name:'絆のチャンピオン', min:3800, max:Infinity, color:'#cc44ff' },
+];
 
+const ALLY_MONSTERS = [
+  // QUEST2の仲間モンスター画像ができたらここに追加していく
+];
+
+const BOSS_MONSTERS = [
+  { id:'ph_wolf',     name:'シャドウ・ウルフの幻影',   attr:'🌫️ 修行', img:'images/shadowwolf.PNG',   unlockPt:0,    h:'2m',   w:'150kg', hp:32,  atk:35, def:25, spd:28, desc:'ライの幻影魔法が生み出した修行相手。第1部で戦った狼の記憶から作られている。本物より少しだけやさしい。' },
+  { id:'ph_guardian', name:'荒波のガーディアン',       attr:'🌊 第1章', img:'images/stormking.PNG',    unlockPt:120,  h:'不定', w:'不定',  hp:55,  atk:45, def:32, spd:30, desc:'南の海の関所を守る水の巨人。新大陸に渡る者の「絆」を試す。悪者ではなく、認めた相手には道を開く。' },
+  { id:'ph_giant',    name:'鎧の巨人の幻影',           attr:'🌫️ 修行', img:'images/darkguardian.PNG', unlockPt:500,  h:'2.8m', w:'350kg', hp:65,  atk:50, def:45, spd:14, desc:'ヤミノ山の番人の記憶から生まれた幻影。鉄壁の防御は健在。修行相手として最高の壁。' },
+  { id:'ph_inferl',   name:'炎の番人の幻影',           attr:'🌫️ 修行', img:'images/inferl.PNG',       unlockPt:1000, h:'1.9m', w:'78kg',  hp:60,  atk:62, def:30, spd:32, desc:'四天王インフェルの記憶から生まれた幻影。黒い炎の攻撃力は本物ゆずり。' },
+  { id:'ph_yami1',    name:'ヤミノ王の幻影',           attr:'🌫️ 修行', img:'images/yaminoou1.png',    unlockPt:2000, h:'1.7m', w:'70kg',  hp:80,  atk:65, def:58, spd:48, desc:'かつてのヤミノ王＝ライ自身の記憶から生まれた幻影。ライは自分の過去と向き合うためにこれを作った。' },
+  { id:'ph_yami2',    name:'ヤミノ王・最終形態の幻影', attr:'🌫️ 修行', img:'images/Yaminoou2.png',    unlockPt:3000, h:'3.5m', w:'500kg', hp:100, atk:82, def:72, spd:62, desc:'百年の闇の記憶が生んだ最強の幻影。これに勝てれば、新大陸のどんな敵にも立ち向かえる。' },
+];
+
+const STORY_DATA = [
+  {
+    chapter:1, title:'第1章「二人の船出」', stageMin:0, stageMax:299,
+    scenes:[
+      { pt:0,   monster:null, monsterImg:null, text:'ハジマリ村の港。大きな白い帆船の前に、ナオとライが並んで立っていた。「本当に、俺も行っていいのか」とライが小さな声で聞いた。「当たり前だろ。約束したじゃないか。一緒に、また始めようって」ライは新しいクエストの書を胸に抱えた。真っ白なページの一番上に、今日の日付と最初のクエストが書き込まれていた。百年ぶりの、一行目だった。' },
+      { pt:30,  monster:null, monsterImg:null, text:'船が南へ進む。ライは船べりで、慣れない手つきでクエストの書をつけていた。「……たった一行書くだけなのに、手が震える」「最初はみんなそうだよ。でも明日も書けば、震えなくなる」ナオの言葉に、ライは笑った。百年間忘れていた、続けることの怖さと、嬉しさを思い出しながら。' },
+      { pt:70,  monster:null, monsterImg:null, text:'三日目の朝、ライが誰よりも早く甲板に出ていた。朝日に向かって、剣の素振りをしている。「早いね」とナオが声をかけると、ライは振り返らずに答えた。「三日続いた。たった三日だ。でも、百年で一番誇らしい三日だ」その目には、かつてのヤミノ王の影はもうなかった。ナオは隣に並び、一緒に剣を振った。' },
+      { pt:120, monster:null, monsterImg:null, bossImg:'images/stormking.PNG', bossName:'荒波のガーディアン', text:'突然、海が割れた。巨大な水の巨人「荒波のガーディアン」が船の行く手を塞いだ。「新大陸に渡りたくば、二人の絆を見せてみよ」ナオが剣を抜き、ライが光の魔法を構えた。二人が背中合わせに立つ。「ライ、合わせられるか」「ああ。お前となら」初めての、二人での戦いが始まった。' },
+      { pt:180, monster:null, monsterImg:null, text:'ナオの剣撃とライの光魔法が重なった瞬間、二つの光が螺旋を描いて一つになった。合体技「ダブル・ライト」。荒波のガーディアンは光に貫かれ、静かに頭を垂れた。「見事な絆だ。通るがよい」海が開き、水平線の向こうに緑の大陸が見えた。「あれが、南の新大陸……」二人の新しい冒険が、いま本当に始まる。第1章・完。' },
+    ]
+  },
+];
+
+// ── STATE ──
+function today(){
+  const d=new Date();
+  const jst=new Date(d.getTime()+9*60*60*1000);
+  return jst.toISOString().split('T')[0];
+}
+function newId(){ return 'c'+Date.now()+Math.floor(Math.random()*1000); }
+function load(){
+  try{ const s=localStorage.getItem('naoyuki_quest2'); return s?JSON.parse(s):null; }catch(e){return null;}
+}
+function save(s){ try{localStorage.setItem('naoyuki_quest2',JSON.stringify(s));}catch(e){} }
+
+const DEFAULT_STATE = {
+  total:0, exch:0, history:{}, rewards:[], pendingRewards:[],
+  passcode: '9999',
+  heroName: 'ナオ',
+  tasks: TASKS_DEFAULT.map(t=>({...t})),
+  rewardList: REWARDS_DEFAULT.map(r=>({...r})),
+  gameTimeMinutes: 0,
+  gameTimeVisible: true,
+  gameTimeLog: [],
+};
+let state = load() || JSON.parse(JSON.stringify(DEFAULT_STATE));
+if(!state.tasks)          state.tasks          = TASKS_DEFAULT.map(t=>({...t}));
+if(!state.rewardList)     state.rewardList     = REWARDS_DEFAULT.map(r=>({...r}));
+if(!state.pendingRewards) state.pendingRewards = [];
+if(!state.passcode)       state.passcode       = '9999';
+if(!state.heroName)       state.heroName       = 'ナオ';
+if(state.gameTimeMinutes === undefined) state.gameTimeMinutes = 0;
+if(state.gameTimeVisible === undefined) state.gameTimeVisible = true;
+if(!state.gameTimeLog)    state.gameTimeLog    = [];
+
+// 新しいタスクを自動追加（古いlocalStorageでもポイントは残す）
+const existingTaskIds = state.tasks.map(t => t.id);
+const newTasksToAdd = TASKS_DEFAULT.filter(t => !existingTaskIds.includes(t.id));
+if(newTasksToAdd.length > 0) {
+  state.tasks = [...newTasksToAdd, ...state.tasks];
+  save(state); // 更新を保存
+}
+
+let parentMode = false;
+let currentTab = 'today';
+
+function getTasks()  { return state.tasks; }
+function getRewards(){ return state.rewardList; }
+
+// ── STAGE HELPERS ──
+function getStage(pts){ return STAGES.find(s=>pts>=s.min&&pts<=s.max)||STAGES[0]; }
+function getNextStage(pts){ const i=STAGES.findIndex(s=>pts>=s.min&&pts<=s.max); return STAGES[i+1]||null; }
+
+function calcStreak(){
+  let count=0;
+  const d=new Date();
+  const jst=new Date(d.getTime()+9*60*60*1000);
+  const tk=today();
+  for(let i=0;i<365;i++){
+    const x=new Date(jst);
+    x.setDate(jst.getDate()-i);
+    const key=x.toISOString().split('T')[0];
+    const done=state.history[key]||[];
+    if(done.length===0&&key!==tk) break;
+    if(done.length>0) count++;
+  }
+  return count;
+}
+
+// ── WEEKLY DATA ──
+function getWeekDates(){
+  const dates=[];
+  const d=new Date();
+  const jst=new Date(d.getTime()+9*60*60*1000);
+  for(let i=6;i>=0;i--){
+    const x=new Date(jst);
+    x.setDate(jst.getDate()-i);
+    dates.push(x.toISOString().split('T')[0]);
+  }
+  return dates;
+}
+function getWeekStats(){
+  const tasks=getTasks();
+  const dates=getWeekDates();
+  let totalPts=0, totalDone=0, totalPossible=0;
+  const dailyPts=[];
+  const taskCounts={};
+  tasks.forEach(t=>{ taskCounts[t.id]=0; });
+  dates.forEach(date=>{
+    const done=state.history[date]||[];
+    let dp=0;
+    tasks.forEach(t=>{
+      totalPossible+=t.pts;
+      if(done.includes(t.id)){ dp+=t.pts; totalDone++; taskCounts[t.id]=(taskCounts[t.id]||0)+1; }
+    });
+    totalPts+=dp;
+    dailyPts.push({date,pts:dp});
+  });
+  return {totalPts,totalDone,totalPossible,dailyPts,taskCounts,dates};
+}
+
+// ── RENDER ──
 function render(){
-  document.getElementById('stTotal').textContent=state.total;
-  document.getElementById('stToday').textContent=todayPt();
-  document.getElementById('stStreak').textContent=state.streak;
-  const pct=bondPct();
-  document.getElementById('bondFill').style.width=pct+'%';
-  document.getElementById('bondPct').textContent=pct+'%';
+  save(state);
+  const tasks=getTasks();
+  const tk=today();
+  const done=state.history[tk]||[];
+  const stage=getStage(state.total);
+  const next=getNextStage(state.total);
+  const pct=next?Math.round((state.total-stage.min)/(next.min-stage.min)*100):100;
 
-  const list=document.getElementById('taskList');
-  list.innerHTML='';
-  const done=todayDone();
-  TASKS.forEach(t=>{
-    const d=done.includes(t.id);
-    const el=document.createElement('div');
-    el.className='task'+(d?' done':'');
-    el.innerHTML=`<div class="check">${d?'✓':''}</div><div class="name">${t.name}</div><div class="pt">+${t.pt}P</div>`;
-    el.onclick=()=>toggle(t.id);
-    list.appendChild(el);
+  document.getElementById('rankName').textContent=stage.name;
+  document.getElementById('rankName').style.color=stage.color;
+  document.getElementById('rankName').style.textShadow=`2px 2px 0 rgba(0,0,0,.5),0 0 20px ${stage.color}`;
+  document.getElementById('totalPts').textContent=state.total.toLocaleString();
+  document.getElementById('exchPts').textContent=state.exch.toLocaleString();
+  document.getElementById('exchPts2').textContent=state.exch.toLocaleString();
+  document.getElementById('xpBar').style.width=pct+'%';
+  document.getElementById('xpPct').textContent=pct+'%';
+  document.getElementById('xpNext').textContent=next?`次のステージまで ${next.min-state.total}pt`:'最強ステージ！';
+
+  document.getElementById('statStreak').textContent=calcStreak();
+  document.getElementById('statToday').textContent=done.length;
+  document.getElementById('statRewards').textContent=state.rewards.length;
+
+  document.getElementById('allDoneBanner').style.display=tasks.every(t=>done.includes(t.id))?'block':'none';
+
+  // STAGE IMAGE
+  const stageImgWrap=document.getElementById('stageImageWrap');
+  const stageImgEl=document.getElementById('stageImg');
+  if(STAGE_IMAGES[stage.stage]){
+    stageImgEl.src=STAGE_IMAGES[stage.stage];
+    stageImgWrap.style.display='block';
+  } else {
+    stageImgWrap.style.display='none';
+  }
+
+  // TODAY
+  const todayPanel=document.getElementById('panelToday');
+  todayPanel.innerHTML='';
+  tasks.forEach(task=>{
+    const isDone=done.includes(task.id);
+    const btn=document.createElement('button');
+    btn.className='task-btn'+(isDone?' done':'');
+    btn.innerHTML=`
+      <div class="task-icon">${task.icon}</div>
+      <div class="task-info">
+        <div class="task-name${isDone?' done':''}">${task.label}</div>
+        <div class="task-time">${task.time}</div>
+      </div>
+      ${isDone?'<div class="task-check">✅</div>':`<div class="task-pts">+${task.pts}pt</div>`}`;
+    if(!isDone) btn.onclick=()=>completeTask(task);
+    todayPanel.appendChild(btn);
   });
 
-  const sl=document.getElementById('storyList');
-  sl.innerHTML='';
-  STORY.forEach(sc=>{
-    const open=state.total>=sc.pt;
-    const el=document.createElement('div');
-    el.className='scene'+(open?'':' locked');
-    el.innerHTML=`<div class="pt-tag">${sc.pt}P で解放</div>${open?sc.text:'🔒 クエストを続けると読めるようになる'}`;
-    sl.appendChild(el);
+  // REWARDS
+  const rewardList=document.getElementById('rewardList');
+  rewardList.innerHTML='';
+  getRewards().forEach(r=>{
+    const canAfford=state.exch>=r.cost;
+    const pending=state.pendingRewards.filter(p=>p.rewardId===r.id&&!p.confirmed).length;
+    const card=document.createElement('div');
+    card.className='reward-card'+(canAfford?' clickable':' cant');
+    card.innerHTML=`
+      <div class="reward-icon">${r.icon}</div>
+      <div class="reward-info">
+        <div class="reward-name">${r.label}</div>
+        <div class="reward-cost">${r.cost}pt</div>
+      </div>
+      ${pending?`<div class="reward-pending">⏳ 承認待ち</div>`:canAfford?'<div class="reward-get">GET!</div>':''}`;
+    if(canAfford) card.onclick=()=>redeemReward(r);
+    rewardList.appendChild(card);
+  });
+
+  document.getElementById('parentSection').style.display=parentMode?'block':'none';
+  if(parentMode){ renderTitleSettings(); renderTaskSettings(); renderRewardSettings(); renderTodayUndo(); renderWeeklyReport(); renderPtSettings(); renderPointAdjust(); renderGameTimeSettings(); renderPending(); renderRewardLog(); }
+  updateGameTimeDisplay();
+
+  // History
+  const histList=document.getElementById('historyList');
+  histList.innerHTML='';
+  const dates=Object.keys(state.history).sort((a,b)=>b.localeCompare(a)).slice(0,14);
+  if(dates.length===0){
+    histList.innerHTML='<div class="empty">まだ記録がないよ！<br>クエストをクリアして<br>記録を作ろう⚔️</div>';
+  } else {
+    dates.forEach(date=>{
+      const dl=state.history[date]||[];
+      const earned=tasks.filter(t=>dl.includes(t.id)).reduce((s,t)=>s+t.pts,0);
+      const card=document.createElement('div');
+      card.className='history-card';
+      const icons=tasks.map(t=>`<span class="history-ico${dl.includes(t.id)?'':' off'}">${t.icon}</span>`).join('');
+      card.innerHTML=`<div class="history-top"><div class="history-date">${date===tk?'🟢 今日':date}</div><div class="history-pts">+${earned}pt</div></div><div class="history-icons">${icons}</div>`;
+      histList.appendChild(card);
+    });
+  }
+}
+
+function renderStory(){
+  const panel=document.getElementById('panelStory');
+  if(STORY_DATA.length===0){ panel.innerHTML='<div class="empty">ストーリーデータを読み込み中...</div>'; return; }
+  let html='';
+  STORY_DATA.forEach(ch=>{
+    html+=`<div class="story-chapter">
+      <div class="chapter-header">
+        <div class="chapter-title">📖 ${ch.title}</div>
+        <div class="chapter-range">Stage ${ch.stageMin}〜${ch.stageMax===Infinity?'':ch.stageMax}pt</div>
+      </div>`;
+    ch.scenes.forEach((sc,idx)=>{
+      const num=`${ch.chapter}-${idx+1}`;
+      const unlocked=state.total>=sc.pt;
+      if(unlocked){
+        html+=`<div class="scene-card">
+          <div class="scene-num">第${num}節 ／ ${sc.pt}pt解放</div>
+          ${sc.monsterImg?`<div class="scene-monster"><img src="${sc.monsterImg}" alt="${sc.monster}"><div class="scene-monster-name">✨ ${sc.monster} が仲間に！</div></div>`:''}
+          ${sc.bossImg?`<div class="scene-monster" style="border-color:rgba(255,77,0,.4);background:rgba(255,77,0,.05)"><img src="${sc.bossImg}" alt="${sc.bossName}" style="filter:drop-shadow(0 0 8px rgba(255,77,0,.6))"><div class="scene-monster-name" style="color:var(--fire)">⚔️ ${sc.bossName} が立ちはだかる！</div></div>`:''}
+          <div class="scene-text">${sc.text.replace(/ナオ/g, state.heroName||'ナオ')}</div>
+        </div>`;
+      } else {
+        html+=`<div class="scene-locked">
+          <div class="scene-locked-text">🔒 ?????</div>
+          <div class="scene-locked-pt">${sc.pt}pt で解放</div>
+        </div>`;
+      }
+    });
+    html+='</div>';
+  });
+  panel.innerHTML=html;
+}
+
+function renderMonbook(){
+  const panel=document.getElementById('panelMonbook');
+  const allyUnlocked=ALLY_MONSTERS.filter(m=>state.total>=m.unlockPt).length;
+  const bossUnlocked=BOSS_MONSTERS.filter(m=>state.total>=m.unlockPt).length;
+
+  let html=`<div class="monbook-section">
+    <div class="monbook-section-label">⚔️ 仲間モンスター</div>
+    <div class="monbook-count">解放済み <span>${allyUnlocked}</span> / ${ALLY_MONSTERS.length}体</div>
+    <div class="monbook-grid">`;
+
+  ALLY_MONSTERS.forEach(m=>{
+    const unlocked=state.total>=m.unlockPt;
+    if(unlocked){
+      html+=`<div class="monbook-card unlocked" onclick="showMonDetail('${m.id}','ally')">
+        <img class="monbook-img" src="${m.img}" alt="${m.name}">
+        <div class="monbook-name">${m.name}</div>
+        <div class="monbook-attr">${m.attr}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:2px">${m.h} / ${m.w}</div>
+      </div>`;
+    } else {
+      html+=`<div class="monbook-card locked-card">
+        <div class="monbook-placeholder">？</div>
+        <div class="monbook-locked-name">？？？</div>
+        <div class="monbook-unlock-pt">${m.unlockPt}ptで解放</div>
+      </div>`;
+    }
+  });
+
+  html+=`</div></div>
+  <div class="monbook-section">
+    <div class="monbook-section-label">💀 敵モンスター</div>
+    <div class="monbook-count">遭遇済み <span>${bossUnlocked}</span> / ${BOSS_MONSTERS.length}体</div>
+    <div class="monbook-grid">`;
+
+  BOSS_MONSTERS.forEach(m=>{
+    const unlocked=state.total>=m.unlockPt;
+    if(unlocked){
+      html+=`<div class="monbook-card boss-unlocked" onclick="showMonDetail('${m.id}','boss')">
+        <img class="monbook-img" src="${m.img}" alt="${m.name}">
+        <div class="monbook-name" style="color:var(--fire)">${m.name}</div>
+        <div class="monbook-attr">${m.attr}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:2px">${m.h} / ${m.w}</div>
+      </div>`;
+    } else {
+      html+=`<div class="monbook-card locked-card">
+        <div class="monbook-placeholder">？</div>
+        <div class="monbook-locked-name">？？？</div>
+        <div class="monbook-unlock-pt">${m.unlockPt}ptで解放</div>
+      </div>`;
+    }
+  });
+
+  html+='</div></div>';
+  panel.innerHTML=html;
+}
+function showMonDetail(id, type){
+  const mons = type==='ally' ? ALLY_MONSTERS : BOSS_MONSTERS;
+  const m = mons.find(x=>x.id===id);
+  if(!m) return;
+  const modal = document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:999;display:flex;align-items:center;justify-content:center';
+  modal.onclick=(e)=>{if(e.target===modal) modal.remove()};
+  const box = document.createElement('div');
+  box.style.cssText='background:linear-gradient(135deg,#1a1a2e,#12121e);border:2px solid var(--border);border-radius:16px;padding:24px;width:90%;max-width:380px;max-height:80vh;overflow-y:auto';
+  box.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px">
+      <div>
+        <div style="font-size:11px;color:var(--muted);letter-spacing:1px">${m.attr}</div>
+        <div style="font-family:'Bangers','M PLUS Rounded 1c';font-size:24px;color:${type==='boss'?'var(--fire)':'var(--gold)'};font-weight:900">${m.name}</div>
+      </div>
+      <button onclick="this.closest('div').parentElement.parentElement.remove()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <img src="${m.img}" style="width:100%;max-width:200px;height:200px;object-fit:contain;background:rgba(255,255,255,.05);border-radius:12px;margin-bottom:16px">
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:12px;margin-bottom:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+        <div><span style="color:var(--muted)">身長</span><div style="color:var(--gold);font-weight:900">${m.h}</div></div>
+        <div><span style="color:var(--muted)">体重</span><div style="color:var(--gold);font-weight:900">${m.w}</div></div>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">⚔️ ステータス</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+        <div style="text-align:center"><span style="color:var(--muted)">HP</span><div style="color:var(--fire);font-weight:900;font-size:18px">${m.hp}</div></div>
+        <div style="text-align:center"><span style="color:var(--muted)">ATK</span><div style="color:var(--fire);font-weight:900;font-size:18px">${m.atk}</div></div>
+        <div style="text-align:center"><span style="color:var(--muted)">DEF</span><div style="color:var(--gold);font-weight:900;font-size:18px">${m.def}</div></div>
+        <div style="text-align:center"><span style="color:var(--muted)">SPD</span><div style="color:var(--green);font-weight:900;font-size:18px">${m.spd}</div></div>
+      </div>
+    </div>
+    <div style="font-size:13px;line-height:1.8;color:#c8c8e8;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase">📖 紹介文</div>
+      ${m.desc}
+    </div>
+    <button onclick="this.closest('div').parentElement.remove()" style="width:100%;background:var(--panel2);border:2px solid var(--border);color:var(--text);border-radius:8px;padding:8px;cursor:pointer;font-weight:700;font-family:'M PLUS Rounded 1c'">閉じる</button>
+  `;
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+}
+
+function renderTitleSettings(){
+  const panel=document.getElementById('titleSettings');
+  panel.innerHTML=`
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">ゲーム名</div>
+      <input type="text" id="gameTitle" style="background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--gold);font-family:'Bangers','M PLUS Rounded 1c';font-size:16px;font-weight:900;padding:8px 10px;outline:none;width:100%;box-sizing:border-box" value="${state.gameTitle||'直幸QUEST'}">
+      <div style="font-size:10px;color:var(--muted);margin-top:6px">※ ホーム画面のタイトルに反映されます</div>
+    </div>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">主人公の名前</div>
+      <input type="text" id="heroNameInput" style="background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--green);font-family:'M PLUS Rounded 1c';font-size:16px;font-weight:900;padding:8px 10px;outline:none;width:100%;box-sizing:border-box" value="${state.heroName||'ナオ'}">
+      <div style="font-size:10px;color:var(--muted);margin-top:6px">※ ストーリーの主人公名に反映されます</div>
+    </div>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">🔒 親モードのパスワード変更</div>
+      <input type="tel" id="newPasscode" maxlength="10" placeholder="新しいパスワード（数字）" style="background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--purple);font-family:'M PLUS Rounded 1c';font-size:16px;font-weight:900;padding:8px 10px;outline:none;width:100%;box-sizing:border-box;letter-spacing:4px">
+      <input type="tel" id="newPasscodeConfirm" maxlength="10" placeholder="もう一度入力" style="background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--purple);font-family:'M PLUS Rounded 1c';font-size:16px;font-weight:900;padding:8px 10px;outline:none;width:100%;box-sizing:border-box;letter-spacing:4px;margin-top:6px">
+      <div id="passcodeMsg" style="font-size:11px;margin-top:6px;color:var(--muted)">現在：${state.passcode.length}桁のパスワードが設定されています</div>
+    </div>
+    <button onclick="saveTitleSettings()" style="width:100%;background:var(--purple);border:none;color:#0a0a0f;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;font-family:'M PLUS Rounded 1c'">すべて保存</button>
+  `;
+}
+
+function saveTitleSettings(){
+  // ゲーム名
+  const titleInput=document.getElementById('gameTitle');
+  if(titleInput) state.gameTitle=titleInput.value.trim()||'直幸QUEST';
+  // 主人公名
+  const heroInput=document.getElementById('heroNameInput');
+  if(heroInput && heroInput.value.trim()) state.heroName=heroInput.value.trim();
+  // パスワード変更
+  const np=document.getElementById('newPasscode');
+  const nc=document.getElementById('newPasscodeConfirm');
+  const msg=document.getElementById('passcodeMsg');
+  if(np && np.value){
+    if(!/^\d+$/.test(np.value)){ if(msg) msg.style.color='var(--fire)'; if(msg) msg.textContent='❌ 数字のみ入力してください'; save(state); return; }
+    if(np.value.length<4){ if(msg) msg.style.color='var(--fire)'; if(msg) msg.textContent='❌ 4桁以上で設定してください'; save(state); return; }
+    if(np.value!==nc.value){ if(msg) msg.style.color='var(--fire)'; if(msg) msg.textContent='❌ パスワードが一致しません'; save(state); return; }
+    state.passcode=np.value;
+    if(np) np.value=''; if(nc) nc.value='';
+  }
+  save(state);
+  document.querySelector('.logo').innerHTML=`${state.gameTitle.split('QUEST')[0]}<span>QUEST</span>`;
+  renderTitleSettings();
+  showBoom('✓ 保存完了');
+}
+
+function saveGameTitle(){
+  saveTitleSettings();
+}
+
+function renderTaskSettings(){
+  const tasks=getTasks();
+  let html='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">☝️ 上下ボタンで順番を変更できます</div>';
+  tasks.forEach((t,i)=>{
+    const isFirst=i===0, isLast=i===tasks.length-1;
+    html+=`<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="flex:1;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">${t.icon}</span>
+        <div>
+          <div style="font-weight:900;color:var(--text)">${t.label}</div>
+          <div style="font-size:10px;color:var(--muted)">${t.pts}pt / ${t.time}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button onclick="moveTask(${i},-1)" style="background:${isFirst?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isFirst?'default':'pointer'};font-size:12px" ${isFirst?'disabled':''}>▲</button>
+        <button onclick="moveTask(${i},1)" style="background:${isLast?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isLast?'default':'pointer'};font-size:12px" ${isLast?'disabled':''}>▼</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('taskSettings').innerHTML=html;
+}
+
+function renderRewardSettings(){
+  const rewards=getRewards();
+  let html='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">☝️ 上下ボタンで順番を変更できます</div>';
+  rewards.forEach((r,i)=>{
+    const isFirst=i===0, isLast=i===rewards.length-1;
+    html+=`<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="flex:1;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">${r.icon}</span>
+        <div>
+          <div style="font-weight:900;color:var(--text)">${r.label}</div>
+          <div style="font-size:10px;color:var(--muted)">${r.cost}pt で交換</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button onclick="moveReward(${i},-1)" style="background:${isFirst?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isFirst?'default':'pointer'};font-size:12px" ${isFirst?'disabled':''}>▲</button>
+        <button onclick="moveReward(${i},1)" style="background:${isLast?'rgba(255,255,255,.05)':'var(--panel2)'};border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:6px;padding:4px 8px;cursor:${isLast?'default':'pointer'};font-size:12px" ${isLast?'disabled':''}>▼</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('rewardSettings').innerHTML=html;
+}
+
+function moveTask(idx,dir){
+  const tasks=state.tasks;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=tasks.length) return;
+  [tasks[idx],tasks[newIdx]]=[tasks[newIdx],tasks[idx]];
+  save(state);
+  render();
+  renderTaskSettings();
+}
+
+function moveReward(idx,dir){
+  const rewards=state.rewardList;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=rewards.length) return;
+  [rewards[idx],rewards[newIdx]]=[rewards[newIdx],rewards[idx]];
+  save(state);
+  render();
+  renderRewardSettings();
+}
+
+function renderWeeklyReport(){
+  const tasks=getTasks();
+  const ws=getWeekStats();
+  const maxPts=Math.max(...ws.dailyPts.map(d=>d.pts),1);
+  const DAY=['日','月','火','水','木','金','土'];
+  const bars=ws.dailyPts.map(d=>{
+    const h=Math.max(Math.round((d.pts/maxPts)*52),2);
+    const dayName=DAY[new Date(d.date+'T12:00:00').getDay()];
+    return `<div class="week-bar-col"><div class="week-bar-pt">${d.pts>0?d.pts:''}</div><div class="week-bar-inner" style="height:${h}px"></div><div class="week-bar-day">${dayName}</div></div>`;
+  }).join('');
+  const taskRows=tasks.map(t=>{
+    const cnt=ws.taskCounts[t.id]||0;
+    const pct=Math.round(cnt/7*100);
+    return `<div class="task-complete-row"><span>${t.icon} ${t.label}</span><div style="display:flex;align-items:center;gap:8px"><div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${pct}%"></div></div><span style="font-size:11px;color:var(--gold);width:28px;text-align:right">${cnt}/7</span></div></div>`;
+  }).join('');
+  document.getElementById('weeklyReport').innerHTML=`
+    <div class="report-title">📊 今週（7日間）</div>
+    <div class="report-row"><span>獲得ポイント合計</span><span class="report-val">${ws.totalPts}pt</span></div>
+    <div class="report-row"><span>クリアしたクエスト</span><span class="report-val">${ws.totalDone}回</span></div>
+    <div class="report-row"><span>達成率</span><span class="report-val">${ws.totalPossible>0?Math.round(ws.totalPts/ws.totalPossible*100):0}%</span></div>
+    <div class="week-bar-wrap"><div class="week-bar-label">日別ポイント</div><div class="week-bars">${bars}</div></div>
+    <div style="margin-top:12px"><div class="week-bar-label" style="margin-bottom:6px">タスク別 達成状況</div>${taskRows}</div>`;
+}
+
+function renderPtSettings(){
+  const tasks=getTasks();
+  const rewards=getRewards();
+  let th='<div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:10px">⚔️ タスク</div>';
+  tasks.forEach((t,i)=>{
+    th+=`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <input style="${inputSt()};width:46px;text-align:center;font-size:22px" id="ticon_${i}" value="${t.icon}">
+        <input style="${inputSt()};flex:1;font-size:14px;font-weight:700" id="tlabel_${i}" value="${t.label}">
+        <input style="${inputSt()};width:58px;text-align:center;font-size:14px" id="ttime_${i}" value="${t.time}">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--muted)">ポイント</span>
+        <input class="pts-input" style="width:60px" id="tpts_${i}" type="number" min="1" max="999" value="${t.pts}">
+        <span style="font-size:11px;color:var(--muted)">pt</span>
+        <div style="flex:1"></div>
+        <button onclick="deleteTask(${i})" style="background:rgba(255,77,0,.15);border:1px solid rgba(255,77,0,.3);color:#ff6644;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:700">🗑 削除</button>
+      </div></div>`;
+  });
+  th+=`<button onclick="addTask()" style="width:100%;background:rgba(0,230,118,.08);border:1px dashed rgba(0,230,118,.3);color:var(--green);border-radius:10px;padding:10px;cursor:pointer;font-size:13px;font-weight:700;margin-bottom:6px">＋ タスクを追加する</button>`;
+  let rh='<div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin:14px 0 10px">🎁 ご褒美</div>';
+  rewards.forEach((r,i)=>{
+    rh+=`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px;margin-bottom:8px">
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <input style="${inputSt()};width:46px;text-align:center;font-size:22px" id="ricon_${i}" value="${r.icon}">
+        <input style="${inputSt()};flex:1;font-size:14px;font-weight:700" id="rlabel_${i}" value="${r.label}">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--muted)">交換ポイント</span>
+        <input class="pts-input" style="width:70px;color:var(--purple)" id="rcost_${i}" type="number" min="1" max="9999" value="${r.cost}">
+        <span style="font-size:11px;color:var(--muted)">pt</span>
+        <div style="flex:1"></div>
+        <button onclick="deleteReward(${i})" style="background:rgba(255,77,0,.15);border:1px solid rgba(255,77,0,.3);color:#ff6644;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:700">🗑 削除</button>
+      </div></div>`;
+  });
+  rh+=`<button onclick="addReward()" style="width:100%;background:rgba(204,68,255,.08);border:1px dashed rgba(204,68,255,.3);color:var(--purple);border-radius:10px;padding:10px;cursor:pointer;font-size:13px;font-weight:700;margin-bottom:6px">＋ ご褒美を追加する</button>`;
+  document.getElementById('ptSettings').innerHTML=th+rh+`<div style="text-align:right;margin-top:12px"><button class="save-pts-btn" onclick="saveSettings()">💾 保存する</button></div>`;
+}
+
+function inputSt(){
+  return "background:#0a0a1a;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'M PLUS Rounded 1c',sans-serif;padding:6px 8px;outline:none";
+}
+
+function addTask(){ saveSettings(true); state.tasks.push({id:newId(),label:'新しいタスク',icon:'⭐',pts:10,time:'いつでも'}); save(state); render(); renderPtSettings(); }
+function deleteTask(i){ if(state.tasks.length<=1){showBoom('タスクは1つ必要！');return;} saveSettings(true); state.tasks.splice(i,1); save(state); render(); renderPtSettings(); }
+function addReward(){ saveSettings(true); state.rewardList.push({id:newId(),label:'新しいご褒美',icon:'🎁',cost:100}); save(state); render(); renderPtSettings(); }
+function deleteReward(i){ if(state.rewardList.length<=1){showBoom('ご褒美は1つ必要！');return;} saveSettings(true); state.rewardList.splice(i,1); save(state); render(); renderPtSettings(); }
+
+function saveSettings(silent){
+  state.tasks.forEach((t,i)=>{
+    const icon=document.getElementById('ticon_'+i), label=document.getElementById('tlabel_'+i);
+    const time=document.getElementById('ttime_'+i), pts=document.getElementById('tpts_'+i);
+    if(icon) t.icon=icon.value.trim()||t.icon;
+    if(label) t.label=label.value.trim()||t.label;
+    if(time) t.time=time.value.trim()||t.time;
+    if(pts){const v=parseInt(pts.value);if(!isNaN(v)&&v>0)t.pts=v;}
+  });
+  state.rewardList.forEach((r,i)=>{
+    const icon=document.getElementById('ricon_'+i), label=document.getElementById('rlabel_'+i);
+    const cost=document.getElementById('rcost_'+i);
+    if(icon) r.icon=icon.value.trim()||r.icon;
+    if(label) r.label=label.value.trim()||r.label;
+    if(cost){const v=parseInt(cost.value);if(!isNaN(v)&&v>0)r.cost=v;}
+  });
+  save(state);
+  if(!silent){showBoom('保存完了！✓');render();}
+}
+function savePtSettings(){ saveSettings(false); }
+
+function renderPointAdjust(){
+  const el=document.getElementById('pointAdjustSettings');
+  if(!el) return;
+  el.innerHTML=`
+    <div style="background:rgba(255,77,0,.05);border:1px solid rgba(255,77,0,.25);border-radius:12px;padding:12px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--fire);margin-bottom:10px">⚠️ ステージ画像などの確認用です。通常プレイには使わないでください。</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--muted);min-width:90px">累積ポイント</span>
+        <input type="number" id="adjustTotal" min="0" max="99999" value="${state.total}" style="${inputSt()};width:90px;text-align:right;color:var(--gold);font-weight:900;font-size:16px">
+        <span style="font-size:11px;color:var(--muted)">pt</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:12px;color:var(--muted);min-width:90px">交換可能ポイント</span>
+        <input type="number" id="adjustExch" min="0" max="99999" value="${state.exch}" style="${inputSt()};width:90px;text-align:right;color:var(--purple);font-weight:900;font-size:16px">
+        <span style="font-size:11px;color:var(--muted)">pt</span>
+      </div>
+      <button onclick="applyPointAdjust()" style="width:100%;background:rgba(255,77,0,.2);border:1px solid rgba(255,77,0,.4);color:var(--fire);border-radius:8px;padding:8px;font-weight:700;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif">適用してステージを確認</button>
+    </div>`;
+}
+
+function applyPointAdjust(){
+  const tEl=document.getElementById('adjustTotal');
+  const eEl=document.getElementById('adjustExch');
+  if(tEl){const v=parseInt(tEl.value);if(!isNaN(v)&&v>=0)state.total=v;}
+  if(eEl){const v=parseInt(eEl.value);if(!isNaN(v)&&v>=0)state.exch=v;}
+  save(state);
+  render();
+  showBoom('ポイント変更 ✓');
+}
+
+function renderTodayUndo(){
+  const tk=today();
+  const done=state.history[tk]||[];
+  const tasks=getTasks();
+  const completed=tasks.filter(t=>done.includes(t.id));
+  const list=document.getElementById('todayUndoList');
+  if(completed.length===0){
+    list.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0">今日完了したタスクはありません</div>';
+    return;
+  }
+  list.innerHTML='';
+  completed.forEach(t=>{
+    const item=document.createElement('div');
+    item.className='reward-log-item';
+    item.innerHTML=`
+      <span>${t.icon} ${t.label}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:'Bangers','M PLUS Rounded 1c',sans-serif;color:var(--gold)">${t.pts}pt</span>
+        <button onclick="undoTask('${t.id}')" style="background:rgba(255,77,0,.15);border:1px solid rgba(255,77,0,.3);color:#ff6644;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:700">↩ 取り消す</button>
+      </div>`;
+    list.appendChild(item);
   });
 }
 
-function toggle(id){
-  const d=today();
-  if(!state.history[d]) state.history[d]=[];
-  const arr=state.history[d];
-  const t=TASKS.find(t=>t.id===id);
-  const i=arr.indexOf(id);
-  if(i>=0){arr.splice(i,1); state.total-=t.pt;}
-  else{
-    arr.push(id); state.total+=t.pt;
-    if(state.lastDay!==d){
-      const y=new Date(Date.now()+9*36e5-864e5).toISOString().split('T')[0];
-      state.streak=(state.lastDay===y)?state.streak+1:1;
-      state.lastDay=d;
+function undoTask(taskId){
+  const tk=today();
+  const done=state.history[tk]||[];
+  if(!done.includes(taskId)) return;
+  const task=state.tasks.find(t=>t.id===taskId);
+  if(!task) return;
+  state.history[tk]=done.filter(id=>id!==taskId);
+  state.total=Math.max(0, state.total-task.pts);
+  state.exch=Math.max(0, state.exch-task.pts);
+  showBoom('↩ '+task.label+'を取り消し');
+  render();
+}
+
+function renderPending(){
+  const pending=state.pendingRewards.filter(p=>!p.confirmed);
+  const list=document.getElementById('pendingList');
+  if(pending.length===0){ list.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0">承認待ちの特典はありません</div>'; return; }
+  list.innerHTML='';
+  pending.forEach((p)=>{
+    const item=document.createElement('div'); item.className='reward-log-item';
+    item.innerHTML=`<span>${p.icon} ${p.label}</span><div style="display:flex;align-items:center;gap:8px"><span class="reward-log-date">${p.date}</span><button class="confirm-btn" onclick="confirmReward(${state.pendingRewards.indexOf(p)})">あげた✓</button></div>`;
+    list.appendChild(item);
+  });
+}
+
+function renderRewardLog(){
+  const confirmed=state.pendingRewards.filter(p=>p.confirmed);
+  const list=document.getElementById('rewardLogList');
+  if(confirmed.length===0){ list.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0">まだありません</div>'; return; }
+  list.innerHTML='';
+  [...confirmed].reverse().forEach(r=>{
+    const item=document.createElement('div'); item.className='reward-log-item';
+    item.innerHTML=`<span>${r.icon} ${r.label}</span><div style="display:flex;align-items:center;gap:8px"><span class="reward-log-date">${r.date}</span><span class="confirmed-badge">あげた✓</span></div>`;
+    list.appendChild(item);
+  });
+}
+
+// ── ACTIONS ──
+function completeTask(task){
+  const tk=today();
+  const done=state.history[tk]||[];
+  if(done.includes(task.id)) return;
+  state.history[tk]=[...done,task.id];
+  state.total+=task.pts;
+  state.exch+=task.pts;
+  showBoom('+'+task.pts+'pt ⚡');
+  render();
+}
+
+function redeemReward(r){
+  if(state.exch<r.cost) return;
+  state.exch-=r.cost;
+  state.rewards.push({...r,date:today()});
+  state.pendingRewards.push({...r,rewardId:r.id,date:today(),confirmed:false});
+  showRewardPopup(r);
+  render();
+}
+
+function confirmReward(idx){
+  if(state.pendingRewards[idx]) state.pendingRewards[idx].confirmed=true;
+  render();
+}
+
+function showBoom(text){
+  const old=document.getElementById('boom'); if(old) old.remove();
+  const el=document.createElement('div'); el.id='boom'; el.textContent=text;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1200);
+}
+
+function showRewardPopup(r){
+  const old=document.getElementById('reward-popup'); if(old) old.remove();
+  const el=document.createElement('div'); el.id='reward-popup';
+  el.innerHTML=`<div class="popup-ico">${r.icon}</div><div class="popup-title">交換完了！</div><div style="font-size:16px;font-weight:900;margin:6px 0">${r.label}</div><div class="popup-sub">親に見せてね🎉</div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2200);
+}
+
+function switchTab(tab){
+  currentTab=tab;
+  const panels={today:'panelToday',battle:'panelBattle',rewards:'panelRewards',story:'panelStory',monbook:'panelMonbook',log:'panelLog'};
+  const tabs={today:'tabToday',battle:'tabBattle',rewards:'tabRewards',story:'tabStory',monbook:'tabMonbook',log:'tabLog'};
+  Object.keys(panels).forEach(t=>{
+    document.getElementById(panels[t]).style.display=t===tab?'block':'none';
+    document.getElementById(tabs[t]).className='tab'+(t===tab?' active':'');
+  });
+  if(tab==='today') document.getElementById('panelToday').style.cssText='display:flex;flex-direction:column;gap:8px';
+  if(tab==='story') renderStory();
+  if(tab==='monbook') renderMonbook();
+  if(tab==='battle') initBattle();
+  if(typeof playBgm==='function'&&AU.ctx&&!state.muted){
+    const w=(tab==='battle')?'battle':'home';
+    if(AU.bgmName!==w) playBgm(w);
+  }
+}
+
+// ── PASSCODE ──
+let passcodeInput='';
+function requestParent(){
+  if(parentMode){ exitParent(); return; }
+  passcodeInput=''; updateDots();
+  document.getElementById('passcodeOverlay').style.display='flex';
+}
+function closePasscode(){ document.getElementById('passcodeOverlay').style.display='none'; passcodeInput=''; }
+function numInput(n){
+  const code=state.passcode||'9999';
+  if(passcodeInput.length>=code.length) return;
+  passcodeInput+=n; updateDots();
+  if(passcodeInput.length===code.length){
+    setTimeout(()=>{
+      if(passcodeInput===code){
+        closePasscode(); parentMode=true;
+        const btn=document.getElementById('parentBtn');
+        btn.textContent='👤 直幸モード'; btn.className='parent-btn active';
+        switchTab('log'); render();
+      } else {
+        const code2=state.passcode||'9999';
+        for(let i=0;i<code2.length;i++) document.getElementById('dot'+i).className='passcode-dot error';
+        setTimeout(()=>{ passcodeInput=''; updateDots(); },700);
+      }
+    },100);
+  }
+}
+function numDel(){ if(passcodeInput.length>0){passcodeInput=passcodeInput.slice(0,-1);updateDots();} }
+function updateDots(){
+  const code=state.passcode||'9999';
+  for(let i=0;i<10;i++){
+    const dot=document.getElementById('dot'+i);
+    if(!dot) continue;
+    if(i<code.length){
+      dot.style.display='';
+      dot.className='passcode-dot'+(i<passcodeInput.length?' filled':'');
+    } else {
+      dot.style.display='none';
     }
   }
-  save(); render();
+}
+function exitParent(){
+  parentMode=false;
+  const btn=document.getElementById('parentBtn');
+  btn.textContent='👑 親モード'; btn.className='parent-btn';
+  render();
 }
 
-function go(v){
-  currentView=v;
-  if(AU.ctx&&!state.muted){
-    const want=(v==='battle'&&B&&!B.over)||v==='battle'?'battle':'home';
-    if(AU.bgmName!==want) playBgm(want);
-  }
-  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
-  document.getElementById('view-'+v).classList.add('active');
-  document.querySelector(`.tab[data-v="${v}"]`).classList.add('active');
-  if(v==='battle') initBattle();
+// ── GAME TIME ──
+function updateGameTimeDisplay(){
+  const box=document.getElementById('gameTimeBox');
+  if(!box) return;
+  box.style.display=(state.gameTimeVisible===false)?'none':'block';
+  const mins=state.gameTimeMinutes||0;
+  const absH=Math.floor(Math.abs(mins)/60);
+  const absM=Math.abs(mins)%60;
+  const sign=mins<0?'−':'';
+  const el=document.getElementById('gameTimeDisplay');
+  if(el) el.textContent=sign+absH+'時間'+absM+'分';
 }
+
+function adjustGameTime(delta){
+  const cur=state.gameTimeMinutes||0;
+  const next=cur+delta;
+  if(next<-600||next>600) return;
+  state.gameTimeMinutes=next;
+  save(state);
+  updateGameTimeDisplay();
+  renderGameTimeSettings();
+}
+
+function addGameTimeRecord(){
+  const labelEl=document.getElementById('gtLabel');
+  const signEl=document.getElementById('gtSign');
+  const hEl=document.getElementById('gtH');
+  const mEl=document.getElementById('gtM');
+  if(!labelEl||!labelEl.value.trim()){showBoom('内容を入力してね');return;}
+  const hours=parseInt(hEl?hEl.value:0)||0;
+  const mins=parseInt(mEl?mEl.value:0)||0;
+  const delta=(hours*60+mins)*(parseInt(signEl?signEl.value:1)||1);
+  if(delta===0){showBoom('時間を入力してね');return;}
+  const next=(state.gameTimeMinutes||0)+delta;
+  if(next<-600||next>600){showBoom('範囲外です（±10時間まで）');return;}
+  const d=new Date();
+  const jst=new Date(d.getTime()+9*60*60*1000);
+  const dateStr=(jst.getMonth()+1)+'/'+(jst.getDate());
+  state.gameTimeLog.push({date:dateStr,label:labelEl.value.trim(),delta});
+  state.gameTimeMinutes=next;
+  save(state);
+  updateGameTimeDisplay();
+  renderGameTimeSettings();
+  showBoom('記録しました ✓');
+}
+
+function deleteGameTimeRecord(idx){
+  if(!state.gameTimeLog) return;
+  state.gameTimeLog.splice(idx,1);
+  save(state);
+  renderGameTimeSettings();
+}
+
+function toggleGameTimeVisible(){
+  state.gameTimeVisible=(state.gameTimeVisible===false)?true:false;
+  save(state);
+  updateGameTimeDisplay();
+  renderGameTimeSettings();
+}
+
+function gameTimeBtnSt(type){
+  if(type==='minus') return "background:rgba(255,77,0,.15);border:1px solid rgba(255,77,0,.35);color:var(--fire);border-radius:8px;padding:9px 0;cursor:pointer;font-size:13px;font-weight:700;font-family:'M PLUS Rounded 1c',sans-serif;flex:1";
+  return "background:rgba(0,180,255,.12);border:1px solid rgba(0,180,255,.35);color:var(--blue);border-radius:8px;padding:9px 0;cursor:pointer;font-size:13px;font-weight:700;font-family:'M PLUS Rounded 1c',sans-serif;flex:1";
+}
+
+function gameTimeDeltaStr(delta){
+  const dH=Math.floor(Math.abs(delta)/60);
+  const dM=Math.abs(delta)%60;
+  let s=delta>=0?'＋':'−';
+  if(dH>0&&dM>0) s+=dH+'時間'+dM+'分';
+  else if(dH>0)  s+=dH+'時間';
+  else           s+=dM+'分';
+  return s;
+}
+
+function renderGameTimeSettings(){
+  const el=document.getElementById('gameTimeSettings');
+  if(!el) return;
+  const mins=state.gameTimeMinutes||0;
+  const absH=Math.floor(Math.abs(mins)/60);
+  const absM=Math.abs(mins)%60;
+  const sign=mins<0?'−':'';
+  const dispStr=sign+absH+'時間'+absM+'分';
+  const visLabel=(state.gameTimeVisible===false)?'👁 ゲーム時間を表示する':'🙈 ゲーム時間を非表示にする';
+
+  const log=state.gameTimeLog||[];
+  let logHtml='';
+  if(log.length===0){
+    logHtml='<div style="font-size:13px;color:var(--muted);padding:6px 0">まだ記録がありません</div>';
+  } else {
+    [...log].reverse().forEach((entry,ri)=>{
+      const idx=log.length-1-ri;
+      const ds=gameTimeDeltaStr(entry.delta);
+      const col=entry.delta>=0?'var(--blue)':'var(--fire)';
+      logHtml+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:4px;font-size:13px">
+        <div>
+          <span style="color:var(--muted);font-size:11px;margin-right:8px">${entry.date}</span>
+          <span style="font-weight:700">${entry.label}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:16px;color:${col}">${ds}</span>
+          <button onclick="deleteGameTimeRecord(${idx})" style="background:rgba(255,77,0,.1);border:1px solid rgba(255,77,0,.25);color:#ff6644;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;font-weight:700">✕</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  el.innerHTML=`
+    <div style="background:rgba(0,180,255,.05);border:1px solid rgba(0,180,255,.2);border-radius:12px;padding:12px;margin-bottom:8px">
+      <div style="text-align:center;font-family:'Bangers','M PLUS Rounded 1c',sans-serif;font-size:26px;color:var(--blue);margin-bottom:12px;text-shadow:0 0 12px rgba(0,180,255,.4)">${dispStr}</div>
+      <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:8px">−10時間〜＋10時間（分刻みで変更）</div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <button onclick="adjustGameTime(-60)" style="${gameTimeBtnSt('minus')}">−1時間</button>
+        <button onclick="adjustGameTime(-1)"  style="${gameTimeBtnSt('minus')}">−1分</button>
+        <button onclick="adjustGameTime(1)"   style="${gameTimeBtnSt('plus')}">＋1分</button>
+        <button onclick="adjustGameTime(60)"  style="${gameTimeBtnSt('plus')}">＋1時間</button>
+      </div>
+      <button onclick="toggleGameTimeVisible()" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:8px;padding:9px;font-weight:700;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif;margin-top:4px">${visLabel}</button>
+    </div>
+    <div style="background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.15);border-radius:12px;padding:12px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:10px;font-weight:700">📝 変更を記録する</div>
+      <input type="text" id="gtLabel" placeholder="内容（例：ポイント交換・こたくんの家）" style="${inputSt()};width:100%;font-size:13px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <select id="gtSign" style="${inputSt()};width:56px;font-size:16px;font-weight:900;text-align:center">
+          <option value="1">＋</option>
+          <option value="-1">−</option>
+        </select>
+        <input type="number" id="gtH" min="0" max="10" value="0" style="${inputSt()};width:52px;text-align:center;font-size:16px;font-weight:900;color:var(--blue)">
+        <span style="font-size:12px;color:var(--muted)">時間</span>
+        <input type="number" id="gtM" min="0" max="59" value="0" style="${inputSt()};width:52px;text-align:center;font-size:16px;font-weight:900;color:var(--blue)">
+        <span style="font-size:12px;color:var(--muted)">分</span>
+      </div>
+      <button onclick="addGameTimeRecord()" style="width:100%;background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.35);color:var(--gold);border-radius:8px;padding:9px;font-weight:700;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif">📝 記録して適用</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">📋 変更履歴</div>
+    ${logHtml}`;
+}
+
+// ── INIT ──
+render();
 
 /* =====================================================
-   3D 背景（タイトル：海と新大陸の島）
+   ここからQUEST2追加分（2D ATBバトル＋サウンド）
    ===================================================== */
-let bgRenderer, bgScene, bgCam, island, ocean, stars=[];
-function initBg3D(){
-  const cv=document.getElementById('bg3d');
-  bgRenderer=new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:false});
-  bgRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  bgScene=new THREE.Scene();
-  bgScene.fog=new THREE.Fog(0x0a0e1a, 18, 60);
-  bgScene.background=new THREE.Color(0x0a0e1a);
-  bgCam=new THREE.PerspectiveCamera(55, innerWidth/innerHeight, .1, 100);
-  bgCam.position.set(0, 3.5, 13);
-  bgCam.lookAt(0, 1, 0);
+if(!state.inv)     state.inv={};
+if(!state.granted) state.granted={};
+if(state.muted===undefined) state.muted=false;
 
-  bgScene.add(new THREE.AmbientLight(0x334466, 1.2));
-  const moon=new THREE.DirectionalLight(0xaac8ff, 1.4);
-  moon.position.set(-6, 10, 4); bgScene.add(moon);
-  const warm=new THREE.PointLight(0xffd166, 2.5, 30);
-  warm.position.set(2, 4, 2); bgScene.add(warm);
-
-  // 海（揺れる平面）
-  const og=new THREE.PlaneGeometry(80, 80, 48, 48);
-  ocean=new THREE.Mesh(og, new THREE.MeshStandardMaterial({color:0x12305a, metalness:.6, roughness:.4, flatShading:true}));
-  ocean.rotation.x=-Math.PI/2; bgScene.add(ocean);
-
-  // 新大陸の島（ローポリ円錐群）
-  island=new THREE.Group();
-  const mk=(geo,col,x,y,z,s)=>{const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:col,flatShading:true}));m.position.set(x,y,z);m.scale.setScalar(s);island.add(m);return m;};
-  mk(new THREE.ConeGeometry(2.2,3,7), 0x2d6a4f, 0, 1.4, 0, 1);          // 山
-  mk(new THREE.ConeGeometry(1.4,2,6), 0x40916c, -2.1, .9, .8, 1);       // 丘
-  mk(new THREE.ConeGeometry(1.1,1.6,6), 0x40916c, 1.9, .7, -.6, 1);     // 丘
-  mk(new THREE.ConeGeometry(.55,1.5,5), 0xffd166, 0, 3.6, 0, 1);        // 光の山頂
-  mk(new THREE.CylinderGeometry(3.2,3.6,.8,9), 0xc2a86b, 0, .1, 0, 1);  // 砂浜
-  island.position.set(0, .2, -4);
-  bgScene.add(island);
-
-  // 星
-  const sg=new THREE.SphereGeometry(.05,4,4);
-  const sm=new THREE.MeshBasicMaterial({color:0xffffff});
-  for(let i=0;i<120;i++){
-    const st=new THREE.Mesh(sg,sm);
-    st.position.set((Math.random()-.5)*70, 6+Math.random()*22, -10-Math.random()*40);
-    stars.push(st); bgScene.add(st);
-  }
-  resizeBg(); animateBg();
+// 今日のクエスト達成率＝ナオとライの絆（100%で合体技ダブル・ライト解放）
+function bondPct(){
+  const ts=getTasks(); if(!ts.length) return 0;
+  const done=state.history[today()]||[];
+  const n=done.filter(id=>ts.some(t=>t.id===id)).length;
+  return Math.min(100, Math.round(n/ts.length*100));
 }
-function resizeBg(){
-  bgRenderer.setSize(innerWidth, innerHeight);
-  bgCam.aspect=innerWidth/innerHeight; bgCam.updateProjectionMatrix();
-}
-let bgT=0;
-function animateBg(){
-  requestAnimationFrame(animateBg);
-  bgT+=.012;
-  // 波
-  const pos=ocean.geometry.attributes.position;
-  for(let i=0;i<pos.count;i++){
-    const x=pos.getX(i), y=pos.getY(i);
-    pos.setZ(i, Math.sin(x*.5+bgT)*.25 + Math.cos(y*.4+bgT*.8)*.2);
-  }
-  pos.needsUpdate=true;
-  island.rotation.y+=.0015;
-  island.position.y=.2+Math.sin(bgT*.5)*.08;
-  bgRenderer.render(bgScene, bgCam);
-}
-addEventListener('resize', resizeBg);
 
 /* =====================================================
    2D ATBバトル（FF6風）
@@ -394,7 +1410,7 @@ function grantItems(){
       state.granted[d.id]=due;
     }
   });
-  if(got.length) save();
+  if(got.length) save(state);
   return got;
 }
 
@@ -403,7 +1419,6 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
 /* =====================================================
    サウンド（Web Audio：ファイル不要のチップチューン）
    ===================================================== */
-let currentView='home';
 const AU={ctx:null, bgmName:null, bgmTimer:null, step:0};
 function aReady(){ return AU.ctx && !state.muted; }
 function aInit(){
@@ -411,7 +1426,7 @@ function aInit(){
     try{ AU.ctx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
   }
   if(AU.ctx.state==='suspended') AU.ctx.resume();
-  if(!AU.bgmName) playBgm(currentView==='battle'?'battle':'home');
+  if(!AU.bgmName) playBgm(currentTab==='battle'?'battle':'home');
 }
 document.addEventListener('pointerdown', aInit);
 
@@ -484,10 +1499,10 @@ function playBgm(name){
   }, stepDur*1000);
 }
 function toggleMute(){
-  state.muted=!state.muted; save();
+  state.muted=!state.muted; save(state);
   document.getElementById('muteBtn').textContent=state.muted?'🔇':'🔊';
   if(state.muted) playBgm(null);
-  else { aInit(); playBgm(currentView==='battle'?'battle':'home'); }
+  else { aInit(); playBgm(currentTab==='battle'?'battle':'home'); }
 }
 
 /* =====================================================
@@ -523,7 +1538,7 @@ function initBattle(){
   B={
     over:false, menuOpen:false, acting:false, turnHero:null, duoUsed:false,
     heroes:[
-      mk('nao','ナオ','🗡️', 80+lv*12, 20+lv*2, 10+lv*3, 6+lv*2, 30),
+      mk('nao',state.heroName||'ナオ','🗡️', 80+lv*12, 20+lv*2, 10+lv*3, 6+lv*2, 30),
       mk('rai','ライ','✨',  70+lv*10, 30+lv*4, 7+lv*2, 10+lv*3, 27),
       null, null, // なかまモンスター枠（ストーリーが進むと仲間が増える）
     ],
@@ -711,7 +1726,7 @@ function fxCutin(text,color){
   if(color) c.style.color=color;
   scr.appendChild(c); setTimeout(()=>c.remove(),1100);
 }
-function critChance(){ return Math.min(.25,(state.streak||0)*.02); }
+function critChance(){ return Math.min(.25,calcStreak()*.02); }
 
 // ── プレイヤーの行動 ──
 function dealToFoe(base,label){
@@ -722,7 +1737,7 @@ function dealToFoe(base,label){
   SFX.attack();
   fxFlashFoe(); fxShake();
   popDmg('foeSpr',dmg,(crit?'#ffd166':'#fff'));
-  bmsg(`${label} ${B.foe.name}に <b style="color:#ffd166">${dmg}</b> ダメージ！${crit?` <b style="color:#ffd166">クリティカル！（れんぞく${state.streak}日ボーナス）</b>`:''}`);
+  bmsg(`${label} ${B.foe.name}に <b style="color:#ffd166">${dmg}</b> ダメージ！${crit?` <b style="color:#ffd166">クリティカル！（れんぞく${calcStreak()}日ボーナス）</b>`:''}`);
 }
 async function doAttack(){
   const h=B.turnHero, idx=B.heroes.indexOf(h);
@@ -766,7 +1781,7 @@ async function useSkill(id){
 }
 async function useItem(id){
   B.menuOpen=false; B.acting=true; closeCmd();
-  state.inv[id]--; save();
+  state.inv[id]--; save(state);
   SFX.item();
   if(id==='potion'){
     const t=B.heroes.filter(x=>x&&x.alive).sort((a,b)=>a.hp/a.mhp-b.hp/b.mhp)[0];
@@ -831,7 +1846,7 @@ function checkEnd(){
     document.getElementById('foeSpr').style.opacity=0;
     fxCutin('🎉 WIN！','#ffd166');
     let drop='';
-    if(Math.random()<.4){ state.inv.potion=(state.inv.potion||0)+1; save(); drop=' ポーションを落とした！'; }
+    if(Math.random()<.4){ state.inv.potion=(state.inv.potion||0)+1; save(state); drop=' ポーションを落とした！'; }
     bmsg(`🎉 <b style="color:#a7f3d0">勝利！</b> 闇の霧が晴れていく…。${drop}`);
     document.getElementById('cmdArea').innerHTML='<div class="cmds"><button class="cmd" onclick="B=null;initBattle()">🔁 もう一度たたかう</button></div>';
     return;
@@ -844,10 +1859,10 @@ function checkEnd(){
   }
 }
 
-// ── 起動 ──
-initBg3D();
-render();
-document.getElementById('muteBtn').textContent=state.muted?'🔇':'🔊';
+
+// ミュートボタンの初期表示
+document.getElementById('muteBtn').textContent = state.muted ? '🔇' : '🔊';
+
 </script>
 </body>
 </html>
