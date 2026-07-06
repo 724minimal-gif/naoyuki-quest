@@ -219,6 +219,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 @keyframes foeIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 #foeSpr.foe-fwd{animation:none;transform:translateX(46px) scale(1.06);}
 #foeSpr.flash{animation:foeFlash .3s;}
+#foeEmoji{position:absolute;left:6%;top:20%;width:38%;max-width:250px;aspect-ratio:1;display:none;align-items:center;justify-content:center;font-size:min(20vw,110px);filter:drop-shadow(0 10px 16px rgba(0,0,0,.6));animation:foeIdle 3s ease-in-out infinite;transition:opacity .8s,transform .25s;}
+#foeEmoji.foe-fwd{animation:none;transform:translateX(46px) scale(1.06);}
+#foeEmoji.flash{animation:foeFlash .3s;}
 @keyframes foeFlash{0%,100%{filter:drop-shadow(0 14px 20px rgba(0,0,0,.7))}50%{filter:brightness(2.4) saturate(.3) drop-shadow(0 0 18px #fff)}}
 .hero-spr{position:absolute;width:16%;max-width:92px;aspect-ratio:4/5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:linear-gradient(160deg,rgba(40,50,82,.92),rgba(16,22,42,.92));border:2px solid var(--border);border-radius:12px;transition:transform .2s,border-color .2s,box-shadow .2s;}
 .hero-spr.empty{opacity:.45;border-style:dashed;}
@@ -254,6 +257,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .subitem.dis{opacity:.4;cursor:default;}
 #btlMsg{min-height:22px;margin-top:10px;font-size:13px;color:var(--text);line-height:1.7;}
 
+
+.scene-monster-emoji{width:120px;height:120px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:56px;background:rgba(255,255,255,.04);border-radius:10px;}
+.monbook-emoji{width:72px;height:72px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:36px;background:rgba(255,255,255,.03);border-radius:8px;}
+.modal-emoji{width:100%;max-width:200px;height:200px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:88px;background:rgba(255,255,255,.05);border-radius:12px;}
 </style>
 </head>
 <body>
@@ -333,6 +340,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       <div class="btl-vignette"></div>
       <div id="foeGlow"></div>
       <img id="foeSpr" src="images/shadowwolf.PNG" alt="てき">
+      <div id="foeEmoji"></div>
       <div id="heroSprs"></div>
     </div>
     <div class="ff-window">
@@ -447,38 +455,167 @@ const REWARDS_DEFAULT = [
 const STAGE_IMAGES = {}; // QUEST2のステージ画像ができたらここに追加（例 1:'images/q2chapter1.png'）
 
 const STAGES = [
-  { stage:1, name:'二人の船出',         min:0,    max:299,      color:'#94a3b8' },
-  { stage:2, name:'新大陸上陸',         min:300,  max:599,      color:'#22c55e' },
-  { stage:3, name:'光の森の探検',           min:600,  max:999,      color:'#06b6d4' },
-  { stage:4, name:'古代遺跡の謎',           min:1000, max:1499,     color:'#ffd700' },
-  { stage:5, name:'深き渓谷の試練',         min:1500, max:2099,     color:'#8b5cf6' },
-  { stage:6, name:'新たな伝説',       min:2100, max:2899,     color:'#f97316' },
-  { stage:7, name:'決戦のとき',         min:2900, max:3799,     color:'#ef4444' },
-  { stage:8, name:'絆のチャンピオン', min:3800, max:Infinity, color:'#cc44ff' },
+  { stage:1, name:'ツギの島',     min:0,    max:399,      color:'#94a3b8' },
+  { stage:2, name:'クラベ町',     min:400,  max:899,      color:'#22c55e' },
+  { stage:3, name:'ダルマ海',     min:900,  max:1499,     color:'#06b6d4' },
+  { stage:4, name:'古傷山',       min:1500, max:2199,     color:'#8b5cf6' },
+  { stage:5, name:'教えの塔',     min:2200, max:2999,     color:'#ffd700' },
+  { stage:6, name:'仲間の危機',   min:3000, max:3899,     color:'#f97316' },
+  { stage:7, name:'真実の大陸',   min:3900, max:4899,     color:'#06b6d4' },
+  { stage:8, name:'最終決戦',     min:4900, max:Infinity, color:'#cc44ff' },
 ];
 
 const ALLY_MONSTERS = [
-  // QUEST2の仲間モンスター画像ができたらここに追加していく
+  { id:'kagami',     name:'カガミ',       attr:'🪞 鏡',   emoji:'🪞', unlockPt:160,  h:'1.5m(鏡面)', w:'—',     hp:20, atk:18, def:22, spd:16, desc:'古い鏡に宿る精霊。相手をありのままに映し出す力を持つ。驕りや迷いがあると、鏡面が曇って見える。' },
+  { id:'konoha',     name:'コノハ',       attr:'🦉 見抜き', emoji:'🦉', unlockPt:240,  h:'30cm', w:'0.6kg', hp:18, atk:20, def:14, spd:30, desc:'木の上から全てを見ているフクロウ。小さなズレや違和感を誰よりも早く見抜く。物静かだが観察眼は鋭い。' },
+  { id:'nijika',     name:'ニジカ',       attr:'🌈 彩',   emoji:'🌈', unlockPt:580,  h:'40cm', w:'1.2kg', hp:26, atk:24, def:18, spd:26, desc:'虹の中から現れたトカゲ型の生き物。誰とも同じ色を持たない。比べる心が強い場所ほど、その色は輝きを増す。' },
+  { id:'hakarina',   name:'ハカリナ',     attr:'⚖️ 均衡', emoji:'⚖️', unlockPt:680,  h:'45cm', w:'3kg',   hp:28, atk:16, def:30, spd:20, desc:'古びた天秤を背負う小さな獣。物事を正しく測ることを何より大切にする。力みのない一撃を好む。' },
+  { id:'rizumu',     name:'リズム',       attr:'🥁 律動', emoji:'🥁', unlockPt:1120, h:'不定(音の存在)', w:'—', hp:32, atk:26, def:20, spd:34, desc:'陽気な太鼓のリズムそのもの。単調な繰り返しに、ほんの少しの変化を足すのが得意。' },
+  { id:'awao',       name:'アワオ',       attr:'🫧 泡',   emoji:'🫧', unlockPt:1250, h:'20cm', w:'0.1kg', hp:30, atk:18, def:26, spd:24, desc:'海の泡をまとった丸い生き物。同じに見える波も、ひとつひとつ違うことを知っている。' },
+  { id:'tokio',      name:'トキオ',       attr:'⏳ 時',   emoji:'⏳', unlockPt:1780, h:'35cm', w:'1kg',   hp:36, atk:22, def:28, spd:22, desc:'コチコチと時を刻む砂時計の精霊。時を戻すことはできないが、過去を見つめ直す力を貸してくれる。' },
+  { id:'kizuna',     name:'キズナ',       attr:'🩹 絆創', emoji:'🩹', unlockPt:1940, h:'32cm', w:'1.5kg', hp:38, atk:20, def:32, spd:18, desc:'体中に絆創膏を貼った小さな生き物。傷をなかったことにはしないが、ちゃんと手当てしてくれる。' },
+  { id:'suzuna',     name:'スズナ',       attr:'🔔 清音', emoji:'🔔', unlockPt:2510, h:'18cm', w:'0.3kg', hp:40, atk:28, def:24, spd:30, desc:'澄んだ音を鳴らす鈴の精霊。大切な音だけを響かせ、余計な言葉のノイズを整理してくれる。' },
+  { id:'kotono',     name:'コトノ',       attr:'📖 言葉', emoji:'📖', unlockPt:2690, h:'28cm', w:'0.7kg', hp:42, atk:30, def:26, spd:26, desc:'本のページのような姿をした生き物。丁寧に選んだ言葉は、ちゃんと相手に届くことを教えてくれる。' },
+  { id:'tsukimi',    name:'ツキミ',       attr:'🌙 月',   emoji:'🌙', unlockPt:3380, h:'50cm', w:'2kg',   hp:46, atk:26, def:34, spd:24, desc:'満月の光をまとう精霊。輝き続けることだけが月の役目ではないと知っている。満ちて欠けて、また満ちる。' },
+  { id:'rinne',      name:'リンネ',       attr:'🎐 風鈴', emoji:'🎐', unlockPt:3580, h:'22cm', w:'0.4kg', hp:44, atk:24, def:28, spd:36, desc:'澄んだ音を鳴らす風鈴のような生き物。無理をしすぎた仲間がいると、そっと鳴って知らせてくれる。' },
+  { id:'shinju',     name:'シンジュ',     attr:'🦪 真珠', emoji:'🦪', unlockPt:4340, h:'1.6m', w:'45kg',  hp:52, atk:32, def:38, spd:28, desc:'深い海の底で真実を見守ってきた人魚のような存在。淡く光る真珠を抱き、最後まで確かめることの大切さを知る。' },
+  { id:'hikaryuu',   name:'ヒカリュウ',   attr:'🐉 光龍', emoji:'🐉', unlockPt:4580, h:'6m',   w:'300kg', hp:58, atk:48, def:36, spd:40, desc:'闇の中でも光の筋を見失わない小さな龍。真実の大陸の最奥で、長きにわたり静かに眠っていた。' },
+  { id:'kokoron',    name:'ココロン',     attr:'💗 想い', emoji:'💗', unlockPt:5500, h:'25cm', w:'0.5kg', hp:56, atk:38, def:40, spd:34, desc:'想いそのものを力に変える心臓の形の精霊。みんなの心が一つに繋がっている時、一番輝く。' },
+  { id:'kizunaryuu', name:'キズナリュウ', attr:'🐲 絆龍', emoji:'🐲', unlockPt:5900, h:'9m',   w:'500kg', hp:70, atk:56, def:48, spd:46, desc:'これまで出会った仲間全員の色をまとった龍。一人一人の力が結ばれた証として、最後に姿を現す。' },
 ];
 
 const BOSS_MONSTERS = [
-  { id:'ph_wolf',     name:'シャドウ・ウルフの幻影',   attr:'🌫️ 修行', img:'images/shadowwolf.PNG',   unlockPt:0,    h:'2m',   w:'150kg', hp:32,  atk:35, def:25, spd:28, desc:'ライの幻影魔法が生み出した修行相手。第1部で戦った狼の記憶から作られている。本物より少しだけやさしい。' },
-  { id:'ph_guardian', name:'荒波のガーディアン',       attr:'🌊 第1章', img:'images/stormking.PNG',    unlockPt:120,  h:'不定', w:'不定',  hp:55,  atk:45, def:32, spd:30, desc:'南の海の関所を守る水の巨人。新大陸に渡る者の「絆」を試す。悪者ではなく、認めた相手には道を開く。' },
-  { id:'ph_giant',    name:'鎧の巨人の幻影',           attr:'🌫️ 修行', img:'images/darkguardian.PNG', unlockPt:500,  h:'2.8m', w:'350kg', hp:65,  atk:50, def:45, spd:14, desc:'ヤミノ山の番人の記憶から生まれた幻影。鉄壁の防御は健在。修行相手として最高の壁。' },
-  { id:'ph_inferl',   name:'炎の番人の幻影',           attr:'🌫️ 修行', img:'images/inferl.PNG',       unlockPt:1000, h:'1.9m', w:'78kg',  hp:60,  atk:62, def:30, spd:32, desc:'四天王インフェルの記憶から生まれた幻影。黒い炎の攻撃力は本物ゆずり。' },
-  { id:'ph_yami1',    name:'ヤミノ王の幻影',           attr:'🌫️ 修行', img:'images/yaminoou1.png',    unlockPt:2000, h:'1.7m', w:'70kg',  hp:80,  atk:65, def:58, spd:48, desc:'かつてのヤミノ王＝ライ自身の記憶から生まれた幻影。ライは自分の過去と向き合うためにこれを作った。' },
-  { id:'ph_yami2',    name:'ヤミノ王・最終形態の幻影', attr:'🌫️ 修行', img:'images/Yaminoou2.png',    unlockPt:3000, h:'3.5m', w:'500kg', hp:100, atk:82, def:72, spd:62, desc:'百年の闇の記憶が生んだ最強の幻影。これに勝てれば、新大陸のどんな敵にも立ち向かえる。' },
+  { id:'ogorinokage', name:'驕りの影',           attr:'🫥 第1章',   emoji:'🫥', unlockPt:280,  h:'不定', w:'不定',  hp:45,  atk:40, def:28, spd:26, desc:'村の像の影から生まれた人型の闇。「誇りこそが努力を止める」と嘯く。ツギの島の異変の始まり。' },
+  { id:'mikurabemushi', name:'見比べ蟲',         attr:'🐛 第2章',   emoji:'🐛', unlockPt:740,  h:'1.6m', w:'40kg',  hp:55,  atk:44, def:34, spd:30, desc:'クラベ町の順位表の数字が渦を巻いて生まれた蟲。相手の姿を他人と重ね合わせ、幻影で心を乱す。' },
+  { id:'kentaikraken', name:'倦怠クラーケン',    attr:'🐙 第3章',   emoji:'🐙', unlockPt:1320, h:'8m',   w:'600kg', hp:62,  atk:46, def:38, spd:24, desc:'ダルマ海の渦の中心に潜む巨大な触手の主。終わりのない繰り返しで、挑む者の心をすり減らす。' },
+  { id:'kokizugolem', name:'古傷ゴーレム',       attr:'🗿 第4章',   emoji:'🗿', unlockPt:2020, h:'3m',   w:'800kg', hp:75,  atk:50, def:55, spd:16, desc:'古傷山の亀裂から生まれた岩の巨人。かつてライが封じられていた場所を、今も守り続けている。' },
+  { id:'hayakuchiogre', name:'早口オーガ',       attr:'👹 第5章',   emoji:'👹', unlockPt:2780, h:'2.5m', w:'220kg', hp:68,  atk:58, def:40, spd:34, desc:'教えの塔の頂で待つ大きな口のオーガ。まくし立てるように言葉を連射し、最後まで聞かぬ者を惑わす。' },
+  { id:'hainofushichou', name:'灰の不死鳥',      attr:'🔥 第6章',   emoji:'🔥', unlockPt:3690, h:'2m(翼開帳4m)', w:'不明', hp:72, atk:60, def:38, spd:44, desc:'頑張りすぎたヒメラの灰が形を成した不死鳥。「燃え尽きるまで頑張ることこそ正義」と、彼女自身の声で叫ぶ。' },
+  { id:'zureshougun', name:'ズレ将軍',           attr:'🎭 四天王長', emoji:'🎭', unlockPt:4700, h:'2m',   w:'110kg', hp:88,  atk:70, def:60, spd:50, desc:'真実の大陸の最深部を守る将軍。無数の歪んだ幻影の剣で、挑む者の剣筋そのものを狂わせる。' },
+  { id:'mannerio1',   name:'マンネリ王 第1形態', attr:'👑 第8章',   emoji:'👑', unlockPt:6150, h:'1.8m', w:'75kg',  hp:95,  atk:75, def:65, spd:52, desc:'漆黒の要塞の王座に座る黒い鎧の王。「続けることに慣れた者は心を失う」と、静かに世界の色を奪っていく。' },
+  { id:'mannerio2',   name:'マンネリ王 最終形態', attr:'💀 最終形態', emoji:'💀', unlockPt:6400, h:'4m',   w:'不明',  hp:120, atk:92, def:78, spd:66, desc:'全ての色を失った巨大な影。マンネリ王の本当の姿。倒すべきは敵ではなく「繰り返しに慣れてしまう心」そのもの。' },
 ];
 
 const STORY_DATA = [
   {
-    chapter:1, title:'第1章「二人の船出」', stageMin:0, stageMax:299,
+    chapter:1, title:'第1章「ツギの島 ―兆しの章―」', stageMin:0, stageMax:399,
     scenes:[
-      { pt:0,   monster:null, monsterImg:null, text:'ハジマリ村の港。大きな白い帆船の前に、ナオとライが並んで立っていた。「本当に、俺も行っていいのか」とライが小さな声で聞いた。「当たり前だろ。約束したじゃないか。一緒に、また始めようって」ライは新しいクエストの書を胸に抱えた。真っ白なページの一番上に、今日の日付と最初のクエストが書き込まれていた。百年ぶりの、一行目だった。' },
-      { pt:30,  monster:null, monsterImg:null, text:'船が南へ進む。ライは船べりで、慣れない手つきでクエストの書をつけていた。「……たった一行書くだけなのに、手が震える」「最初はみんなそうだよ。でも明日も書けば、震えなくなる」ナオの言葉に、ライは笑った。百年間忘れていた、続けることの怖さと、嬉しさを思い出しながら。' },
-      { pt:70,  monster:null, monsterImg:null, text:'三日目の朝、ライが誰よりも早く甲板に出ていた。朝日に向かって、剣の素振りをしている。「早いね」とナオが声をかけると、ライは振り返らずに答えた。「三日続いた。たった三日だ。でも、百年で一番誇らしい三日だ」その目には、かつてのヤミノ王の影はもうなかった。ナオは隣に並び、一緒に剣を振った。' },
-      { pt:120, monster:null, monsterImg:null, bossImg:'images/stormking.PNG', bossName:'荒波のガーディアン', text:'突然、海が割れた。巨大な水の巨人「荒波のガーディアン」が船の行く手を塞いだ。「新大陸に渡りたくば、二人の絆を見せてみよ」ナオが剣を抜き、ライが光の魔法を構えた。二人が背中合わせに立つ。「ライ、合わせられるか」「ああ。お前となら」初めての、二人での戦いが始まった。' },
-      { pt:180, monster:null, monsterImg:null, text:'ナオの剣撃とライの光魔法が重なった瞬間、二つの光が螺旋を描いて一つになった。合体技「ダブル・ライト」。荒波のガーディアンは光に貫かれ、静かに頭を垂れた。「見事な絆だ。通るがよい」海が開き、水平線の向こうに緑の大陸が見えた。「あれが、南の新大陸……」二人の新しい冒険が、いま本当に始まる。第1章・完。' },
+      { pt:0, monster:null, monsterImg:null, text:'祝祭の熱気が残るハジマリ村を発ったナオとライ。「いつもの渡し船で十分だろう」とライが笑う。だが慣れた旅路への油断からか、船着き場の手続きにわずかな書き間違いがあった。船はいつもの航路を外れ、深い霧の中へと流されていった。' },
+      { pt:40, monster:null, monsterImg:null, text:'目を覚ますと、見知らぬ浜辺に倒れていた。新大陸・ツギの島だ。村に足を踏み入れると、誰もが穏やかな顔で「もう十分頑張ったから、今日はいいさ」と口にする。優しい言葉のはずなのに、ライの胸はなぜかざわついた。' },
+      { pt:80, monster:null, monsterImg:null, text:'突然、足元の霧がうごめき、小さな影が次々と浮かび上がる。「モヤットか……！」ナオが剣を構えた瞬間、霧の塊が牙を剥いて襲いかかった。「来るぞ、ライ！」声と同時に、最初の一撃が振り下ろされる。' },
+      { pt:120, monster:null, monsterImg:null, text:'ナオの剣がモヤットを斬るも、霧はすぐに形を取り直す。「実体がないのか……！」ライが詠唱し、第1シーズンで覚えた炎の矢を放つ。炎が霧を内側から焼き払い、モヤットたちはようやく霧散した。' },
+      { pt:160, monster:'カガミ', monsterEmoji:'🪞', text:'霧の晴れた地に、古い鏡が一枚落ちていた。覗き込むと鏡面が揺らぎ、人の形をした影が現れる。「我は鏡のカガミ。汝らをありのままに映す者」カガミはナオを見つめ、「驕りは、己を正しく映せぬ者から生まれる」と告げ、共に旅をすると約束した。' },
+      { pt:200, monster:null, monsterImg:null, text:'村の奥へ進むと、今度は素早い小さな影――ウカリンが次々と現れた。「ちょこまかと……！」ライの新たな詠唱がわずかに的を外すが、ナオの連続斬りが的確にウカリンたちを討ち倒す。「数で来るタイプは厄介だな」ナオが息をついた。' },
+      { pt:240, monster:'コノハ', monsterEmoji:'🦉', text:'戦いの音に、木の上から一羽のフクロウが舞い降りた。「私はコノハ。小さな違いを見抜く者」コノハはライの先ほどの魔法のズレを指摘する。「この島の異変も、小さなズレの積み重ねかもしれません」そう言って、二人の仲間となった。' },
+      { pt:280, bossName:'驕りの影', bossEmoji:'🫥', text:'村の中心、巨大な像のある広場に着くと、像の影がぐにゃりと歪み、人型の闇が浮かび上がった。「我が名は驕りの影。誇りこそが、お前たちを止めぬ証……」影は哄笑し、巨大な姿へと変貌する。「来るぞ、構えろ！」ナオが叫んだ。' },
+      { pt:320, monster:null, monsterImg:null, text:'驕りの影は嘲るように攻撃を仕掛ける。「お前もすぐに、努力など忘れる」言葉が剣の重さを増すように、ナオの一撃が浅くなる。「カガミ、力を貸してくれ！」鏡の光がナオの姿を映し出した瞬間、迷いが晴れ、剣先に力が戻った。' },
+      { pt:370, monster:null, monsterImg:null, text:'「俺は、俺のままで前に進む！」ナオの剣が初めての煌めきを纏い、新技「鏡心斬」が影を真っ二つに切り裂いた。崩れゆく影が霧となって消えると、村に静かな光が戻る。村長から託された守護バッジを手に、二人と新たな仲間たちは次の地へ歩み出した。' },
+    ]
+  },
+  {
+    chapter:2, title:'第2章「クラベ町 ―比較の章―」', stageMin:400, stageMax:899,
+    scenes:[
+      { pt:400, monster:null, monsterImg:null, text:'ツギの島を抜け、ナオたちは賑やかなクラベ町に到着した。広場には大きな掲示板があり、住人たちの「努力値」やら「成果ランキング」がびっしりと張られている。「すごい仕組みだな」とナオが感心する一方、ライはどこか落ち着かない様子だった。' },
+      { pt:440, monster:null, monsterImg:null, text:'町の人々は誰もが他人の順位を気にし、笑顔の裏に焦りを滲ませていた。「あの人より上にならなくちゃ」とすれ違う少女がつぶやく。コノハが目を細める。「比べる心が強すぎると……ズレが生まれやすくなりますね」その言葉通り、足元の霧が不穏に揺れ始めた。' },
+      { pt:480, monster:null, monsterImg:null, text:'霧の中から、青く染まったモヤットの群れ――比べモヤットが現れた。相手の強さを写し取り、瞬時に膨れ上がる厄介な敵だ。「数で押すぞ、ライ！」ナオが斬りかかると、比べモヤットはナオの剣筋をそっくり真似て反撃してきた。' },
+      { pt:530, monster:null, monsterImg:null, text:'「自分の動きを写されると気持ち悪いな……！」ナオは型を崩し、わざと不揃いな連撃を放つ。予測できない動きに比べモヤットは対応できず、次々と霧散していく。「型に頼らない強さもあるってことか」ナオは小さな手応えを感じた。' },
+      { pt:580, monster:'ニジカ', monsterEmoji:'🌈', text:'戦いの後、空に虹がかかり、その中から色鮮やかなトカゲのような生き物が舞い降りた。「私は虹のニジカ。誰とも同じ色を持たない者」ニジカはナオたちを見渡し、「比べるほど色は濁る。お前たちの色は、お前たちだけのものだ」と告げ、仲間になった。' },
+      { pt:630, monster:null, monsterImg:null, text:'町の奥、成果ランキングの掲示板の裏で、小さなウカリンの群れが順位表を奪い合っていた。「ウカリンまで比べっこか……」ライが苦笑しながら詠唱する。今度は狙いがしっかりと定まり、光の弾がウカリンたちを一掃した。「いける、ちゃんと当たった！」' },
+      { pt:680, monster:'ハカリナ', monsterEmoji:'⚖️', text:'騒ぎを聞いて、古びた天秤を背負った小さな獣が現れた。「私は天秤のハカリナ。正しく測る者」ハカリナはライの放った光を見て頷く。「先ほどの一撃、力みなく釣り合っていました」そう言って、静かに仲間に加わった。' },
+      { pt:740, bossName:'見比べ蟲', bossEmoji:'🐛', text:'町の中心、巨大な順位表のそびえる塔の前に着くと、無数の数字が渦を巻き、一匹の巨大な虫の姿を形作った。「我が名は見比べ蟲。お前たちもまた、誰かと並べられ、削られていく……」ミクラベムシは無数の触角を逆立て、襲いかかってきた。' },
+      { pt:800, monster:null, monsterImg:null, text:'ミクラベムシは触角でナオとライの姿を次々と他人と重ね合わせ、幻影を見せつける。「お前より強い者はいくらでもいる」幻に気を取られたナオの剣が鈍る。「ナオ、自分の色を見て！」ニジカの虹光が幻影を切り裂き、ハカリナの天秤がライの心を静かに釣り合わせた。' },
+      { pt:860, monster:null, monsterImg:null, text:'迷いが晴れた瞬間、ナオの剣に七色の光が宿る。「俺の色は、俺が決める！」新技「虹色乱舞」が幾重もの斬撃でミクラベムシを切り散らした。同時にライの新魔法「彩光弾」が仕上げの一撃を放つ。光の粒となって消える蟲を見送り、二人は二つ目の守護バッジを手にした。' },
+    ]
+  },
+  {
+    chapter:3, title:'第3章「ダルマ海 ―倦怠の章―」', stageMin:900, stageMax:1499,
+    scenes:[
+      { pt:900, monster:null, monsterImg:null, text:'クラベ町を出た一行は、穏やかなダルマ海に到着した。船に乗り込むと、船員たちは皆あくびをしながら同じ動きで櫂を漕いでいる。「毎日同じことの繰り返しでさ」と船員がぼやく。海面はやけに静かで、波さえも単調なリズムを繰り返していた。' },
+      { pt:950, monster:null, monsterImg:null, text:'船が進むにつれ、海の色がどんどん灰色がかっていく。「楽しくないと、海まで色を失うんですね」コノハがつぶやく。ふと、海面が大きく波立ち、何かが船底を揺らした。「来るな、構えろ！」ナオが剣を抜いた瞬間、霧をまとった水の影が浮かび上がった。' },
+      { pt:1000, monster:null, monsterImg:null, text:'灰色の霧をまとったモヤットの群れが、単調な動きで船を取り囲む。「同じ動きしかしてこないな」ナオが見切り、一定の間合いで斬り倒していく。だが繰り返しに合わせすぎたせいで、ナオの動きもどこか機械的になっていった。' },
+      { pt:1060, monster:null, monsterImg:null, text:'「まずい、これじゃ倦怠モヤットと同じだ……！」ライが叫び、わざと不規則なタイミングで魔法を放つ。リズムを崩された霧の塊が混乱し、次々と霧散した。「変化があるからこそ、続けられるんだな」ナオはその言葉を胸に刻んだ。' },
+      { pt:1120, monster:'リズム', monsterEmoji:'🥁', text:'戦いの余韻の中、軽快な太鼓のリズムが海上に響いた。波間から、音符のような模様を持つ小さな生き物が飛び出す。「俺は音のリズム。単調さを破る者さ」リズムは陽気に笑い、「同じ毎日に、ちょっとの違いを足すだけでいいんだ」と仲間に加わった。' },
+      { pt:1180, monster:null, monsterImg:null, text:'船が島影に近づくと、泡立つ波の中からウカリンの群れが飛び出し、甲板を引っ掻き回した。ライが新魔法「変奏の風」を未完成のまま放つと、風が不規則に渦巻き、ウカリンたちを海へ吹き飛ばす。「形になってきたな、その魔法」ナオが笑いかけた。' },
+      { pt:1250, monster:'アワオ', monsterEmoji:'🫧', text:'波間から、丸い泡をまとった愛らしい生き物が現れた。「僕は泡のアワオ。同じ波には見えても、ひとつひとつ違うんだよ」アワオはぷかぷかと浮かびながら、戦いの様子をずっと見ていたと言い、嬉しそうに仲間になった。' },
+      { pt:1320, bossName:'倦怠クラーケン', bossEmoji:'🐙', text:'海の最も深い場所、渦の中心で、巨大な触手を持つ影が目を覚ました。「我は倦怠クラーケン。終わりのない繰り返しこそ、お前たちを飲み込む海……」クラーケンが海面を割って現れ、巨大な渦を作り出し、船を引き寄せていく。' },
+      { pt:1400, monster:null, monsterImg:null, text:'クラーケンの攻撃は単調で読みやすいが、繰り返されるうちにナオたちの集中力が削られていく。「同じ攻撃ばかりだと、逆に怖いもんだな……」気が緩んだ瞬間、触手が船を打つ。「ナオ、リズムを変えて！」リズムの拍に合わせ、ナオは攻撃の間合いをあえてずらした。' },
+      { pt:1470, monster:null, monsterImg:null, text:'不規則な間合いの一撃が、初めてクラーケンの守りを崩す。「俺たちは、止まらないために変わり続ける！」新技「律動斬り」が幾度も拍を変えて触手を斬り裂き、ライの「変奏の風」が渦を散らした。海に静かな波が戻り、三つ目のバッジが二人の手に渡った。' },
+    ]
+  },
+  {
+    chapter:4, title:'第4章「古傷山 ―再来の章―」', stageMin:1500, stageMax:2199,
+    scenes:[
+      { pt:1500, monster:null, monsterImg:null, text:'ダルマ海を越え、一行は険しい古傷山に足を踏み入れた。山肌には、まるで古い傷のような亀裂が幾筋も走っている。「この山、なんだか息苦しいな」ナオがつぶやくと、ライの表情がふと曇った。ここはかつて、ライが封じられていた場所に近いのだという。' },
+      { pt:1560, monster:null, monsterImg:null, text:'山を登るにつれ、ライの足取りが重くなっていく。「百年前の俺が、何をしてきたか……忘れたわけじゃない」ライが小さく呟いた。山の霧が、まるでその後悔を吸い込むように濃くなっていく。コノハが静かに寄り添った。' },
+      { pt:1630, monster:null, monsterImg:null, text:'亀裂から、傷跡のような紋様を持つモヤットの群れが滲み出てきた。古傷モヤットは攻撃を受けるほど力を増す、厄介な性質を持っていた。「攻めれば強くなるのか……！」ナオが思わず手を止めた隙に、霧の牙が肩をかすめる。' },
+      { pt:1700, monster:null, monsterImg:null, text:'「下がって、ナオ！」ライが叫び、傷を癒すように優しい光の魔法を放つ。攻撃ではなく癒しの光に触れた古傷モヤットは、増幅する力を失い、静かに霧散した。「傷は、力じゃなくて優しさで解ける時もあるんだな」ナオが息をついた。' },
+      { pt:1780, monster:'トキオ', monsterEmoji:'⏳', text:'亀裂の奥から、コチコチと音を立てて砂時計の精霊が現れた。「私はトキオ。時を巻き戻すことはできないが、見つめ直す手助けはできる」トキオはライをじっと見つめ、「過去は消えない。だが、今を変える力にはなる」と告げ、仲間になった。' },
+      { pt:1860, monster:null, monsterImg:null, text:'さらに山を登ると、傷跡から滲み出た小さなウカリンの群れが、岩肌をかすめながら飛び回っていた。ライの新魔法「想起の光」がまだ不完全な形で放たれ、わずかに狙いが逸れる。だがナオの援護で、ウカリンたちは難なく退けられた。' },
+      { pt:1940, monster:'キズナ', monsterEmoji:'🩹', text:'戦いの最中、傷だらけの体に絆創膏を貼った小さな生き物が岩陰から姿を見せた。「僕はキズナ。傷を、なかったことにはしないけど、ちゃんと手当てするよ」キズナはライの表情をじっと見て、「あなたの傷も、もう一人じゃないよ」と微笑み、仲間になった。' },
+      { pt:2020, bossName:'古傷ゴーレム', bossEmoji:'🗿', text:'山の最奥、かつてライが封じられていた洞窟に着くと、亀裂の奥から土と岩でできた巨大なゴーレムが起き上がった。「我は古傷ゴーレム。お前の罪は、いつまでも我が腕の中だ……」ゴーレムはライを取り込もうと、巨大な拳を振り上げた。' },
+      { pt:2110, monster:null, monsterImg:null, text:'「お前は、あの時の俺そのものだ……！」ライの声が震える。ゴーレムの拳がライを捉えそうになった瞬間、トキオの砂時計が時の光を放ち、ライの心の中に、あの夜から今日までの道のりが映し出された。「俺は、もう一人じゃない」キズナとコノハの光が、ライの肩を支える。' },
+      { pt:2190, monster:null, monsterImg:null, text:'震えが止まったライの手に、初めての光が灯る。「過去は消えなくても、今の俺を縛るものじゃない！」新魔法「想起の光」がゴーレムの拳を打ち砕き、ナオの新技「想い斬り」が亀裂そのものを断ち切った。崩れ落ちるゴーレムを見届け、二人は四つ目のバッジを手にした。' },
+    ]
+  },
+  {
+    chapter:5, title:'第5章「教えの塔 ―継承の章―」', stageMin:2200, stageMax:2999,
+    scenes:[
+      { pt:2200, monster:null, monsterImg:null, text:'古傷山を越えた先に、空に向かって伸びる白い塔――教えの塔があった。塔の前で、ナオたちと同じくらいの少年が剣を構え、独りで木の人形相手に汗を流していた。「お前、もしかして勇者のナオか……！」少年は目を輝かせ、シンと名乗った。' },
+      { pt:2270, monster:null, monsterImg:null, text:'シンは「俺もいつか勇者になりたいんだ」と意気込み、ナオに稽古をつけてほしいと頼み込む。教えることに慣れていないナオは戸惑うが、ライが「教えることも、また積み重ねだろう」と背中を押した。塔の中へ、四人で足を踏み入れる。' },
+      { pt:2350, monster:null, monsterImg:null, text:'塔の階段を上るうちに、説明不足な言葉から生まれたような曖昧な姿のモヤットが現れた。早口モヤットは攻撃の合間に意味の取れない言葉を吐き、聞き手を混乱させる。「何を言っているか、わからない……！」シンが戸惑い、剣が止まる。' },
+      { pt:2430, monster:null, monsterImg:null, text:'「焦らなくていい、よく見ろ！」ナオが落ち着いた声で動きを示すと、シンの剣もようやく的を捉えた。ライの魔法も、丁寧に詠唱を重ねたことで早口モヤットの言葉に飲まれずに命中する。「ゆっくりでも、ちゃんと伝わるんだな」シンが安堵の息をついた。' },
+      { pt:2510, monster:'スズナ', monsterEmoji:'🔔', text:'階段の途中、小さな鈴を鳴らす精霊が舞い降りた。「私はスズナ。大切な音だけを響かせる者」スズナはシンの戸惑いを聞き、「焦って全部を一度に伝えようとすると、肝心な音が消えてしまうの」と教え、仲間に加わった。' },
+      { pt:2600, monster:null, monsterImg:null, text:'さらに上の階で、書きかけの手紙のようなウカリンの群れが文字を散らかしながら暴れていた。シンが慌てて斬りかかるも空振りし、ナオが「落ち着いて、一文字ずつでいい」と声をかける。シンの剣がようやく的確にウカリンを討ち倒した。' },
+      { pt:2690, monster:'コトノ', monsterEmoji:'📖', text:'塔の最上階近く、本のページのような姿をした小さな生き物が現れた。「僕はコトノ。言葉を、正しい形に整える者」コトノはシンとライの両方を見て、「丁寧に選んだ言葉は、ちゃんと相手に届くよ」と微笑み、仲間になった。' },
+      { pt:2780, bossName:'早口オーガ', bossEmoji:'👹', text:'塔の頂、巨大な書物の前で、口だけが異様に大きいオーガが待ち構えていた。「我は早口オーガ。最後まで聞かぬ者にこそ、わかりやすく教えてやろう」オーガはまくし立てるように言葉を連射し、その勢いのまま拳を振るってきた。' },
+      { pt:2880, monster:null, monsterImg:null, text:'オーガの早口に気を取られたシンが、危うく直撃を受けそうになる。「シン、目を見て聞け、耳だけじゃない！」ナオが間に入り、剣で拳を受け止める。スズナの澄んだ音がオーガの言葉を一つずつ整理し、コトノの光がその意味を正しく映し出した。' },
+      { pt:2980, monster:null, monsterImg:null, text:'「焦らず、一つずつ確かめれば、ちゃんと届く！」ナオの新技「伝心の一撃」がオーガの拳を斬り払い、ライの新魔法「言霊の盾」が皆を守り抜く。崩れ落ちるオーガを見て、シンも初めて己の力で一矢を放った。塔に静けさが戻り、五つ目のバッジが二人の手に渡った。' },
+    ]
+  },
+  {
+    chapter:6, title:'第6章「仲間の危機 ―燃え尽きの章―」', stageMin:3000, stageMax:3899,
+    scenes:[
+      { pt:3000, monster:null, monsterImg:null, text:'塔を出た一行のもとに、息を切らした炎の精霊・ヒメラが駆け込んできた。「ナオ、ライ……ごめん、私、ずっと頑張りすぎてて……」ヒメラの体の炎が、いつもより不安定に揺らいでいる。様子を見たコノハが、わずかに目を細めた。' },
+      { pt:3090, monster:null, monsterImg:null, text:'ヒメラは「もっと強くならなきゃって、休む暇もなく鍛え続けてた」と弱々しく笑う。よく見ると、その炎には灰のような黒い筋が混じっていた。「無理を重ねた分だけ、灰が積もっているんですね」コノハの言葉に、ナオたちの顔が曇った。' },
+      { pt:3180, monster:null, monsterImg:null, text:'ヒメラを休ませようとした矢先、彼女の周囲に灰色のモヤットが渦を巻いて現れた。「これは……ヒメラの疲れが、形になったのか」灰モヤットは攻撃を受けるたび、ヒメラの炎をさらに吸い取っていく。「離れろ、ヒメラに触らせるな！」' },
+      { pt:3280, monster:null, monsterImg:null, text:'ナオが剣を振るい、ライが詠唱を急ぐ。「攻撃するだけじゃ、ヒメラの灰は晴れない……！」気づいたライが、攻撃の手を止め、静かな光をヒメラに向けて放つ。灰モヤットたちはヒメラから離れ、力を失って霧散していった。' },
+      { pt:3380, monster:'ツキミ', monsterEmoji:'🌙', text:'夜空に浮かぶ満月から、ふわりと月の光をまとった生き物が降りてきた。「私はツキミ。輝き続けるだけが、月の役目じゃないわ」ツキミはヒメラに優しく寄り添い、「満ちて、欠けて、また満ちる。休むことも巡りの一部よ」と告げ、仲間になった。' },
+      { pt:3480, monster:null, monsterImg:null, text:'ヒメラを休ませる間、灰色のウカリンの群れが彼女の炎の燃え殻を狙って近づいてきた。「休んでる仲間に手を出すな！」ナオの新たな構えがウカリンたちを一歩も近づけさせず、ライの静かな魔法がそっと退けていく。' },
+      { pt:3580, monster:'リンネ', monsterEmoji:'🎐', text:'風に乗って、小さな風鈴のような音を響かせる生き物が現れた。「私はリンネ。立ち止まる合図を鳴らす者」リンネはヒメラの肩にそっと止まり、「無理をしすぎた時、ちゃんと鳴ってあげるから」と優しく告げ、仲間に加わった。' },
+      { pt:3690, bossName:'灰の不死鳥', bossEmoji:'🔥', text:'やがてヒメラの中に積もった灰が一つに集まり、巨大な不死鳥の姿となって空へ舞い上がった。「我は灰の不死鳥。燃え尽きるまで頑張ることこそ、正義だ……！」灰の不死鳥はヒメラ自身の声を借りて叫び、燃える羽を撒き散らした。' },
+      { pt:3800, monster:null, monsterImg:null, text:'「それは、本当のヒメラの声じゃない！」ナオが叫び、燃える羽の雨をかいくぐる。ライの剣が届かぬ位置から、ツキミの月光が不死鳥の炎を静かに鎮めていく。「私は、もう一人で頑張らなくていいんだ……」ヒメラ自身の声が、灰の中からかすかに響いた。' },
+      { pt:3890, monster:null, monsterImg:null, text:'リンネの風鈴が澄んだ音を鳴らした瞬間、不死鳥の灰がさらりと崩れ落ちる。「休むことも、続けるための力だ！」ナオの新技「静心の構え」が衝撃を受け止め、ライの新魔法「静寂の癒し」がヒメラと不死鳥の灰をともに鎮めた。静かになった夜空の下、六つ目のバッジが手に渡った。' },
+    ]
+  },
+  {
+    chapter:7, title:'第7章「真実の大陸 ―露見の章―」', stageMin:3900, stageMax:4899,
+    scenes:[
+      { pt:3900, monster:null, monsterImg:null, text:'仲間たちと共に進んだ先、海の底深くに、これまで誰も辿り着けなかった真実の大陸が沈んでいた。コノハが鋭く目を光らせる。「ここに、私たちが旅してきた島々の正体が眠っています」ナオとライは息を呑み、深海への道を進んだ。' },
+      { pt:4010, monster:null, monsterImg:null, text:'大陸の中心には、巨大な記録の石碑が立っていた。そこには「ツギの島は、ズレの呪いが生み出した偽りの大地である」と刻まれている。「俺たちが旅した場所、全部が……」ナオの声が震える。仲間たちもまた、静かにその事実を受け止めていた。' },
+      { pt:4120, monster:null, monsterImg:null, text:'石碑の周りに、これまで出会った霧の色をすべて混ぜたようなモヤットの群れが現れた。「ズレの源そのものか……！」ナオが斬りかかるも、霧は複雑に絡み合い、簡単には崩れない。仲間たちの力を借りねば突破できない強さだった。' },
+      { pt:4230, monster:null, monsterImg:null, text:'ニジカの虹光、リズムの拍動、トキオの時の光――これまでの仲間たちの力が次々と重なり、複雑に絡んだ霧をひとつひとつ解きほぐしていく。「みんなの積み重ねが、ここで繋がるんだな」ナオは剣を振るいながら、確かな手応えを感じた。' },
+      { pt:4340, monster:'シンジュ', monsterEmoji:'🦪', text:'霧が晴れた海底の祠から、淡く光る真珠を抱いた人魚のような姿が現れた。「私はシンジュ。深い場所からこそ、真実は見える」シンジュはこれまでの旅を静かに見守っていたと語り、「最後まで、ちゃんと確かめてほしい」と告げ、仲間になった。' },
+      { pt:4460, monster:null, monsterImg:null, text:'大陸の奥へ進むと、記録を食い荒らすウカリンの群れが石碑を傷つけていた。「歴史までかすめ取るなんて、許さない！」ライの新魔法「真実の光」がまだ不完全ながらも輝き、ウカリンたちを石碑から引き離す。ナオの一撃が確実に仕留めた。' },
+      { pt:4580, monster:'ヒカリュウ', monsterEmoji:'🐉', text:'最奥の光の柱から、長い体をうねらせる小さな龍が舞い降りた。「我はヒカリュウ。闇の中でも、光の筋を見失わぬ者」ヒカリュウはシンジュと並び、「四天王の長が、この先で待っている」と告げ、共に進むことを誓った。' },
+      { pt:4700, bossName:'ズレ将軍', bossEmoji:'🎭', text:'大陸最深部、揺らぐズレの渦の中心に、鎧をまとった将軍の姿が浮かび上がった。「我はズレ将軍、四天王の長。お前たちの旅も、いずれ僅かに狂う……それが真理だ」将軍は無数の歪んだ剣を構え、ナオたちに突き出した。' },
+      { pt:4820, monster:null, monsterImg:null, text:'将軍の剣は、ナオとライの動きをわずかにずらして見せる幻影の剣だった。「己の剣筋すら信じられなくなる……！」動揺するナオに、シンジュの真珠が静かな光を放つ。「あなたの積み重ねは、幻には負けません」光に照らされ、ナオの剣筋が再びまっすぐに戻った。' },
+      { pt:4890, monster:null, monsterImg:null, text:'「ズレに気づき、確かめ続けることこそ、俺たちの強さだ！」ナオの新技「真珠裂破斬」が幻影をまとめて切り裂き、ライの新魔法「真実の光」がヒカリュウの輝きと重なって将軍を打ち倒す。崩れ去る将軍を見届け、二人は七つ目のバッジを、そして最終決戦への扉を手にした。' },
+    ]
+  },
+  {
+    chapter:8, title:'第8章「最終決戦 ―再点火の章―」', stageMin:4900, stageMax:Infinity,
+    scenes:[
+      { pt:4900, monster:null, monsterImg:null, text:'七つの守護バッジを手に、ナオとライは最後の地、漆黒の要塞へと辿り着いた。空からは色が失われ、世界全体がモノクロームに沈んでいる。「ここに、マンネリ王がいるんだな」ナオの声に、これまでの仲間たち全員が静かに頷いた。' },
+      { pt:5050, monster:null, monsterImg:null, text:'要塞の入り口には、百年前にライが封じられていた牢の跡が残っていた。「あの時の俺と、今の俺の続きが、ここで終わるんだ」ライが拳を握る。コノハが囁く。「終わるんじゃありません。確かめに行くんです」' },
+      { pt:5200, monster:null, monsterImg:null, text:'要塞内部、色のない霧が渦を巻き、これまで出会った全ての色を失った最強のモヤットが現れた。「色のないモヤットか……手強いぞ」ナオが構える。霧は形を変え続け、ニジカの色さえ通用しないほど強固だった。' },
+      { pt:5350, monster:null, monsterImg:null, text:'「色じゃなく、想いで斬る！」ナオが叫び、これまでの仲間たちへの感謝を込めて剣を振るう。色を失ったモヤットが、その想いの重みに耐えきれず崩れていく。ライの魔法も、同じ想いを込めて最後の一押しを放った。' },
+      { pt:5500, monster:'ココロン', monsterEmoji:'💗', text:'崩れた霧の中心に、淡く光る心臓の形をした小さな精霊が浮かんでいた。「私はココロン。想いそのものを力にする者」ココロンはナオとライ、これまでの仲間たち全員を見渡し、「みんなの心が、一つに繋がっていますね」と微笑み、仲間になった。' },
+      { pt:5700, monster:null, monsterImg:null, text:'さらに奥へ進むと、色を失った無数のウカリンが要塞の壁を埋め尽くしていた。「最後まで気を抜くな！」ナオとシンの剣、リズムの拍、ハカリナの天秤――これまでの仲間たちの力が次々と重なり、ウカリンの群れを一掃する。' },
+      { pt:5900, monster:'キズナリュウ', monsterEmoji:'🐲', text:'最奥の光の祭壇から、これまでの全ての仲間の色をまとった龍が舞い降りた。「我はキズナリュウ。一人一人の力が結ばれた、最後の証」キズナリュウは静かに告げ、「ここからは、みんなで進もう」と、最後の仲間になった。' },
+      { pt:6150, bossName:'マンネリ王 第1形態', bossEmoji:'👑', text:'祭壇の最奥、王座に座る黒い鎧の王が、ゆっくりと顔を上げた。「我が名はマンネリ王。続けることに慣れた者は、いずれ心を失う……それが世界の真理だ」王が立ち上がると、世界全体の色がさらに失われていく。' },
+      { pt:6400, bossName:'マンネリ王 最終形態', bossEmoji:'💀', text:'「同じことを繰り返すだけなら、続ける意味などない！」マンネリ王の一撃が、仲間たち全員の動きを呑み込むようにすべてを無効化する。崩れ落ちたかと思った王の体が、色のない巨大な影へと膨れ上がった。「これが、本当の姿だ……お前たちも、いずれ色を失う」第二形態への変貌だった。' },
+      { pt:6700, monster:null, monsterImg:null, text:'「俺たちは、確かめながら、心を込めて続けてきた。それはただの繰り返しじゃない！」ナオの剣とライの魔法が、これまでの旅と仲間たち全員の想いを束ね、新たな合体技「絆の剣」と「絆の光」となって解き放たれる。巨大な影が光の粒となって消えると、色褪せた世界に、ゆっくりと光と緑が戻っていった。' },
+      { pt:7000, monster:null, monsterImg:null, text:'色を取り戻した世界に、再び日差しが満ちる。シンは初めての守護バッジを胸に、自分の旅を始める決意を固めた。ヒメラは灰を払い、いつもより少しだけ落ち着いた炎を纏っていた。ナオとライ、そして十六の新たな仲間たちは、ハジマリ村に戻り、静かな祝杯を上げる。「次はどんな旅になるかな」とナオが呟くと、空の彼方にまた新しい大陸の影が浮かび上がった。確かめながら、心を込めて。今日もまた、続きの旅が始まる。' },
     ]
   },
 ];
@@ -693,8 +830,10 @@ function renderStory(){
       if(unlocked){
         html+=`<div class="scene-card">
           <div class="scene-num">第${num}節 ／ ${sc.pt}pt解放</div>
-          ${sc.monsterImg?`<div class="scene-monster"><img src="${sc.monsterImg}" alt="${sc.monster}"><div class="scene-monster-name">✨ ${sc.monster} が仲間に！</div></div>`:''}
-          ${sc.bossImg?`<div class="scene-monster" style="border-color:rgba(255,77,0,.4);background:rgba(255,77,0,.05)"><img src="${sc.bossImg}" alt="${sc.bossName}" style="filter:drop-shadow(0 0 8px rgba(255,77,0,.6))"><div class="scene-monster-name" style="color:var(--fire)">⚔️ ${sc.bossName} が立ちはだかる！</div></div>`:''}
+          ${sc.monsterImg?`<div class="scene-monster"><img src="${sc.monsterImg}" alt="${sc.monster}"><div class="scene-monster-name">✨ ${sc.monster} が仲間に！</div></div>`
+            :sc.monster?`<div class="scene-monster"><div class="scene-monster-emoji">${sc.monsterEmoji||'❓'}</div><div class="scene-monster-name">✨ ${sc.monster} が仲間に！</div></div>`:''}
+          ${sc.bossImg?`<div class="scene-monster" style="border-color:rgba(255,77,0,.4);background:rgba(255,77,0,.05)"><img src="${sc.bossImg}" alt="${sc.bossName}" style="filter:drop-shadow(0 0 8px rgba(255,77,0,.6))"><div class="scene-monster-name" style="color:var(--fire)">⚔️ ${sc.bossName} が立ちはだかる！</div></div>`
+            :sc.bossName?`<div class="scene-monster" style="border-color:rgba(255,77,0,.4);background:rgba(255,77,0,.05)"><div class="scene-monster-emoji">${sc.bossEmoji||'❓'}</div><div class="scene-monster-name" style="color:var(--fire)">⚔️ ${sc.bossName} が立ちはだかる！</div></div>`:''}
           <div class="scene-text">${sc.text.replace(/ナオ/g, state.heroName||'ナオ')}</div>
         </div>`;
       } else {
@@ -723,7 +862,7 @@ function renderMonbook(){
     const unlocked=state.total>=m.unlockPt;
     if(unlocked){
       html+=`<div class="monbook-card unlocked" onclick="showMonDetail('${m.id}','ally')">
-        <img class="monbook-img" src="${m.img}" alt="${m.name}">
+        ${m.img?`<img class="monbook-img" src="${m.img}" alt="${m.name}">`:`<div class="monbook-emoji">${m.emoji||'❓'}</div>`}
         <div class="monbook-name">${m.name}</div>
         <div class="monbook-attr">${m.attr}</div>
         <div style="font-size:9px;color:var(--muted);margin-top:2px">${m.h} / ${m.w}</div>
@@ -747,7 +886,7 @@ function renderMonbook(){
     const unlocked=state.total>=m.unlockPt;
     if(unlocked){
       html+=`<div class="monbook-card boss-unlocked" onclick="showMonDetail('${m.id}','boss')">
-        <img class="monbook-img" src="${m.img}" alt="${m.name}">
+        ${m.img?`<img class="monbook-img" src="${m.img}" alt="${m.name}">`:`<div class="monbook-emoji">${m.emoji||'❓'}</div>`}
         <div class="monbook-name" style="color:var(--fire)">${m.name}</div>
         <div class="monbook-attr">${m.attr}</div>
         <div style="font-size:9px;color:var(--muted);margin-top:2px">${m.h} / ${m.w}</div>
@@ -781,7 +920,7 @@ function showMonDetail(id, type){
       </div>
       <button onclick="this.closest('div').parentElement.parentElement.remove()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
     </div>
-    <img src="${m.img}" style="width:100%;max-width:200px;height:200px;object-fit:contain;background:rgba(255,255,255,.05);border-radius:12px;margin-bottom:16px">
+    ${m.img?`<img src="${m.img}" style="width:100%;max-width:200px;height:200px;object-fit:contain;background:rgba(255,255,255,.05);border-radius:12px;margin-bottom:16px">`:`<div class="modal-emoji">${m.emoji||'❓'}</div>`}
     <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:12px;margin-bottom:12px">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
         <div><span style="color:var(--muted)">身長</span><div style="color:var(--gold);font-weight:900">${m.h}</div></div>
@@ -1507,17 +1646,21 @@ function toggleMute(){
 
 /* =====================================================
    節ごとの出現モンスター＆章ごとの戦闘背景
-   ※QUEST2用の敵画像が揃うまでは「ライの幻影魔法で
-     過去の強敵を再現して修行する」という設定で
-     本編の画像を流用。画像が揃ったらここを差し替えるだけ。
+   ※QUEST2オリジナルの敵画像ができるまでは絵文字(emoji)で
+     代用表示。imgフィールドを追加すればそちらが優先される。
+     bgも同様：画像がなければ章カラー(color)のグラデーションを表示。
    ===================================================== */
 const ENCOUNTERS=[
-  {minPt:0,    name:'シャドウ・ウルフの幻影',     img:'images/shadowwolf.PNG',   bg:'images/chapter2.png', mul:1.0},
-  {minPt:120,  name:'荒波のガーディアン',         img:'images/stormking.PNG',    bg:'images/chapter3.png', mul:1.15},
-  {minPt:500,  name:'鎧の巨人の幻影',             img:'images/darkguardian.PNG', bg:'images/chapter5.png', mul:1.3},
-  {minPt:1000, name:'炎の番人の幻影',             img:'images/inferl.PNG',       bg:'images/chapter7.png', mul:1.45},
-  {minPt:2000, name:'ヤミノ王の幻影',             img:'images/yaminoou1.png',    bg:'images/chapter7.png', mul:1.6},
-  {minPt:3000, name:'ヤミノ王・最終形態の幻影',   img:'images/Yaminoou2.png',    bg:'images/chapter8.png', mul:1.8},
+  {minPt:0,    name:'モヤット',           emoji:'☁️', color:'#94a3b8', mul:1.0},
+  {minPt:280,  name:'驕りの影',           emoji:'🫥', color:'#94a3b8', mul:1.1},
+  {minPt:740,  name:'見比べ蟲',           emoji:'🐛', color:'#22c55e', mul:1.25},
+  {minPt:1320, name:'倦怠クラーケン',     emoji:'🐙', color:'#06b6d4', mul:1.4},
+  {minPt:2020, name:'古傷ゴーレム',       emoji:'🗿', color:'#8b5cf6', mul:1.55},
+  {minPt:2780, name:'早口オーガ',         emoji:'👹', color:'#ffd700', mul:1.7},
+  {minPt:3690, name:'灰の不死鳥',         emoji:'🔥', color:'#f97316', mul:1.85},
+  {minPt:4700, name:'ズレ将軍',           emoji:'🎭', color:'#06b6d4', mul:2.0},
+  {minPt:6150, name:'マンネリ王 第1形態', emoji:'👑', color:'#cc44ff', mul:2.2},
+  {minPt:6400, name:'マンネリ王 最終形態', emoji:'💀', color:'#cc44ff', mul:2.4},
 ];
 function currentEncounter(){ return [...ENCOUNTERS].reverse().find(e=>state.total>=e.minPt); }
 
@@ -1545,13 +1688,20 @@ function initBattle(){
     foe:{name:enc.name, hp:fhp, mhp:fhp, atk:Math.round((9+lv*2)*enc.mul), spd:24, atb:20, alive:true},
   };
   B.heroes[0].atb=40;
-  // 章に合わせて敵画像と戦闘背景を切り替え
-  document.getElementById('foeSpr').src=enc.img;
-  document.querySelector('.btl-bg').style.backgroundImage=`url('${enc.bg}')`;
+  // 章に合わせて敵の見た目（画像 or 絵文字）と戦闘背景を切り替え
+  const foeSprEl=document.getElementById('foeSpr'), foeEmojiEl=document.getElementById('foeEmoji');
+  if(enc.img){
+    foeSprEl.src=enc.img; foeSprEl.style.display='block'; foeEmojiEl.style.display='none';
+  }else{
+    foeSprEl.style.display='none'; foeEmojiEl.textContent=enc.emoji||'❓'; foeEmojiEl.style.display='flex';
+  }
+  const bgEl=document.querySelector('.btl-bg');
+  if(enc.bg){ bgEl.style.backgroundImage=`url('${enc.bg}')`; }
+  else { bgEl.style.backgroundImage='none'; bgEl.style.background=`radial-gradient(ellipse at 50% 35%, ${enc.color||'#333'}55, #060a16 72%)`; }
   document.getElementById('btlTitle').textContent=`⚔️ バトル：${enc.name}`;
   const got=grantItems();
   renderBattleAll();
-  bmsg(got.length?`📦 クエスト達成のごほうび：${got.join('、')} を手に入れた！`:`${enc.name} があらわれた！（ライの幻影魔法による修行バトル）`);
+  bmsg(got.length?`📦 クエスト達成のごほうび：${got.join('、')} を手に入れた！`:`${enc.name} が行く手を阻んできた！`);
   if(AU.ctx&&!state.muted&&AU.bgmName!=='battle') playBgm('battle');
   if(!atbTimer){
     let last=performance.now();
@@ -1588,7 +1738,7 @@ function renderBattleAll(){
                   :`<div class="em" style="opacity:.35">❔</div><div class="nm">なかま募集中</div>`;
     wrap.appendChild(el);
   });
-  document.getElementById('foeSpr').style.opacity=B.foe.alive?1:0;
+  document.getElementById('foeSpr').style.opacity=B.foe.alive?1:0; document.getElementById('foeEmoji').style.opacity=B.foe.alive?1:0;
   renderRows(); closeCmd();
 }
 function renderRows(){
@@ -1706,7 +1856,8 @@ function endTurn(){
 // ── 演出ヘルパー ──
 function popDmg(targetId, text, color){
   const scr=document.getElementById('btlScreen');
-  const t=document.getElementById(targetId);
+  let t=document.getElementById(targetId);
+  if(targetId==='foeSpr'&&t&&t.style.display==='none') t=document.getElementById('foeEmoji');
   if(!t) return;
   const d=document.createElement('div');
   d.className='dmg'; d.textContent=text; d.style.color=color||'#fff';
@@ -1717,7 +1868,9 @@ function popDmg(targetId, text, color){
   setTimeout(()=>d.remove(),950);
 }
 function fxShake(){const s=document.getElementById('btlScreen');s.classList.remove('shake');void s.offsetWidth;s.classList.add('shake');}
-function fxFlashFoe(){const f=document.getElementById('foeSpr');f.classList.remove('flash');void f.offsetWidth;f.classList.add('flash');}
+function fxFlashFoe(){
+  ['foeSpr','foeEmoji'].forEach(id=>{const f=document.getElementById(id);f.classList.remove('flash');void f.offsetWidth;f.classList.add('flash');});
+}
 function fxLunge(idx){const e=document.getElementById('hero'+idx);if(!e)return;e.classList.add('atk-fwd');setTimeout(()=>e.classList.remove('atk-fwd'),300);}
 function fxCutin(text,color){
   const scr=document.getElementById('btlScreen');
@@ -1820,8 +1973,8 @@ async function foeAct(){
   if(!targets.length){ B.acting=false; return; }
   const t=targets[Math.floor(Math.random()*targets.length)];
   const idx=B.heroes.indexOf(t);
-  const f=document.getElementById('foeSpr');
-  f.classList.add('foe-fwd');
+  const f=document.getElementById('foeSpr'), fe=document.getElementById('foeEmoji');
+  f.classList.add('foe-fwd'); fe.classList.add('foe-fwd');
   await wait(280);
   let dmg=Math.round(B.foe.atk*2*(0.9+Math.random()*.2));
   if(t.defend){ dmg=Math.round(dmg/2); t.defend=false; }
@@ -1831,7 +1984,7 @@ async function foeAct(){
   fxShake();
   popDmg('hero'+idx,dmg,'#f87171');
   bmsg(`👿 ${B.foe.name}の攻撃！ ${t.name}に ${dmg} ダメージ${t.alive?'！':'…！ '+t.name+'は倒れた！'}`);
-  f.classList.remove('foe-fwd');
+  f.classList.remove('foe-fwd'); fe.classList.remove('foe-fwd');
   await wait(550);
   B.acting=false;
   renderRows(); checkEnd();
@@ -1843,7 +1996,7 @@ function checkEnd(){
   if(B.foe.hp<=0){
     B.over=true; B.foe.alive=false;
     playBgm(null); SFX.win();
-    document.getElementById('foeSpr').style.opacity=0;
+    document.getElementById('foeSpr').style.opacity=0; document.getElementById('foeEmoji').style.opacity=0;
     fxCutin('🎉 WIN！','#ffd166');
     let drop='';
     if(Math.random()<.4){ state.inv.potion=(state.inv.potion||0)+1; save(state); drop=' ポーションを落とした！'; }
