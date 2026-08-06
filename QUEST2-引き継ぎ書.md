@@ -116,6 +116,18 @@ STAGE_IMAGES は空。QUEST2の章画像ができたら追加する。
   （本編で何度もこれが原因の表示バグが起きた）
 - macOSは大文字小文字を区別しないので、git addで混乱しやすい。注意
 - ホスティング：GitHub Pages（リポジトリ 724minimal-gif/naoyuki-quest）
+- **デプロイ方式（2026-08-06変更）**：GitHub Actions（`.github/workflows/deploy-pages.yml`）。
+  従来のJekyll方式（legacy）が「Page build failed」で繰り返し失敗し、
+  push しても公開サイトに反映されない状態が続いたため切り替えた。
+  push すると自動でデプロイされる。状況確認は `gh run list`。
+  もし「更新したのに反映されない」と言われたら、まず `gh run list` で
+  ワークフローの成否を確認すること（Pagesのビルド状態APIではなく）。
+- **画像は圧縮済み（2026-08-06）**：章の扉絵・バトル背景は長辺1100px、
+  モンスター画像は長辺700px。合計130MB→31MB。新しい画像を追加するときも
+  同程度に抑えること（`sips -Z 700 file.png --out file.png`）。
+  巨大なまま入れるとiPadでの読み込みが重くなる。
+- リポジトリは Public。オーナーがリスクを承知の上で選択済み（2026-08-06）。
+  毎回警告し直さないこと。
 - iPadのSafariブックマークで起動する運用（PWA・Service Workerは使わない。
   本編でキャッシュ問題が起きたため撤去した経緯あり）
 
