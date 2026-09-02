@@ -446,7 +446,7 @@ const TASKS_DEFAULT = [
 ];
 
 const REWARDS_DEFAULT = [
-  { id:'r1', label:'ゲーム30分のびる',         icon:'🎮', cost:500  },
+  { id:'r1', label:'ゲーム60分のびる',         icon:'🎮', cost:500, gameMin:60 },
   { id:'r2', label:'好きなおやつ',               icon:'🍩', cost:250  },
   { id:'r3', label:'映画1本みられる',            icon:'🎬', cost:350  },
   { id:'r4', label:'外食で何食べるか決めていい', icon:'🍣', cost:1000 },
@@ -660,6 +660,17 @@ if(!state.heroName)       state.heroName       = 'ナオ';
 if(state.gameTimeMinutes === undefined) state.gameTimeMinutes = 0;
 if(state.gameTimeVisible === undefined) state.gameTimeVisible = true;
 if(!state.gameTimeLog)    state.gameTimeLog    = [];
+
+// ゲーム時間のごほうびを30分→60分に更新（既に遊んでいる場合の保存データも自動で直す）
+(function migrateGameReward(){
+  const def = REWARDS_DEFAULT.find(r=>r.gameMin);
+  const cur = state.rewardList.find(r=>r.id===def.id);
+  if(cur && cur.gameMin === undefined){
+    cur.label = def.label;
+    cur.gameMin = def.gameMin;
+    save(state);
+  }
+})();
 
 // 新しいタスクを自動追加（古いlocalStorageでもポイントは残す）
 const existingTaskIds = state.tasks.map(t => t.id);
@@ -1268,10 +1279,25 @@ function completeTask(task){
 
 function redeemReward(r){
   if(state.exch<r.cost) return;
+
+  // ゲーム時間のごほうびは、親モードの認証なしでその場で時間を追加する
+  if(r.gameMin){
+    const next=(state.gameTimeMinutes||0)+r.gameMin;
+    if(next>600){ showBoom('ゲーム時間の上限（10時間）です'); return; }
+    state.gameTimeMinutes=next;
+    const jst=new Date(Date.now()+9*60*60*1000);
+    state.gameTimeLog.push({
+      date:(jst.getMonth()+1)+'/'+jst.getDate(),
+      label:'ごほうび交換：'+r.label,
+      delta:r.gameMin,
+    });
+  }
+
   state.exch-=r.cost;
   state.rewards.push({...r,date:today()});
   state.pendingRewards.push({...r,rewardId:r.id,date:today(),confirmed:false});
   showRewardPopup(r);
+  if(r.gameMin) updateGameTimeDisplay();
   render();
 }
 
